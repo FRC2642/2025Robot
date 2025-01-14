@@ -162,8 +162,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             e.printStackTrace();
         }
 
-        // Configure AutoBuilder last
-        // Seperated parts of pathplanner b/c "last" implied its initialization after everything else.
+        // PathPlanner; Configure AutoBuilder
         AutoBuilder.configure(
                 this::getPose, // Robot pose supplier
                 this::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
