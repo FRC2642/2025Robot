@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
@@ -15,7 +16,13 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -121,7 +128,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
      * @param drivetrainConstants   Drivetrain-wide constants for the swerve drive
      * @param modules               Constants for each specific module
      */
-    public CommandSwerveDrivetrain(
+    
+    
+     
+     public CommandSwerveDrivetrain(
         SwerveDrivetrainConstants drivetrainConstants,
         SwerveModuleConstants<?, ?, ?>... modules
     ) {
@@ -129,6 +139,23 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         if (Utils.isSimulation()) {
             startSimThread();
         }
+    }
+
+    // initialize pigeon
+    private Pigeon2 pigeon;
+    private SwerveDriveOdometry odometry;
+    private SwerveDriveKinematics kinematics;
+    
+    public void updateOdometry() {
+        SwerveModuleState[] states = new SwerveModuleState[4];
+        // Update states with encoder readings and gyro angle
+        for (int i = 0; i < 4; i++) {
+            states[i] = new SwerveModuleState(
+                encoderPositions[i],
+                new Rotation2d(pigeon.getYaw())
+            );
+        }
+        odometry.update(Rotation2d.fromDegrees(pigeon.getYaw()), states);
     }
 
     /**
@@ -153,6 +180,30 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         if (Utils.isSimulation()) {
             startSimThread();
         }
+
+        pigeon = new Pigeon2(18); // Create the pigeon
+        
+        Translation2d[] modulePositions = new Translation2d[] {
+            new Translation2d(10.75, 10.75),
+            new Translation2d(10.75, -10.75),
+            new Translation2d(-10.75, 10.75),
+            new Translation2d(-10.75, -10.75)
+        };
+        
+        // Initialize Kinematics with module positions
+        kinematics = new SwerveDriveKinematics(modulePositions);
+
+        odometry = new SwerveDriveOdometry(
+            kinematics,
+            Rotation2d.fromDegrees(pigeon.getYaw()),
+            new Pose2d(0, 0, new Rotation2d(0)),
+            new SwerveModulePosition[] {
+                new SwerveModulePosition(0, new Rotation2d(0)),
+                new SwerveModulePosition(0, new Rotation2d(0)),
+                new SwerveModulePosition(0, new Rotation2d(0)),
+                new SwerveModulePosition(0, new Rotation2d(0))
+            }
+        );
 
         RobotConfig config;
         try{
