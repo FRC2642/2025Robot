@@ -37,6 +37,8 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
+    private final SendableChooser<Command> autoChooser; // Auto chooser for Path Planner; suppossedly allows for the selection of paths?
+
     public RobotContainer() {
         configureBindings();
 
@@ -49,7 +51,7 @@ public class RobotContainer {
         // Build an auto chooser. This will use Commands.none() as the default option.
         autoChooser = AutoBuilder.buildAutoChooser();
 
-        // Another option that allows you to specify the default auto by its name
+        // Another option that allows you to specify the default auto by its name:
         // autoChooser = AutoBuilder.buildAutoChooser("My Default Auto");
 
         SmartDashboard.putData("Auto Chooser", autoChooser);
@@ -85,7 +87,7 @@ public class RobotContainer {
         drivetrain.registerTelemetry(logger::telemeterize);
     }
 
-    private final SendableChooser<Command> autoChooser;
+    
 
     public Command getAutonomousCommand() {
         return autoChooser.getSelected();
