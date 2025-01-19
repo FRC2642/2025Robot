@@ -155,12 +155,47 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
      *                                CAN FD, and 100 Hz on CAN 2.0.
      * @param modules                 Constants for each specific module
      */
+
+    /*
+     * Notes for PathPlanner:
+     * 
+     * SwerveDriveState is inaccessible since it is a nested class within the 
+     * SwerveDrivetrain general class. There is no instance of it in this file and it
+     * is unclear whether I can create a new object of the class using data provided
+     * in this file.
+     * 
+     * As a result, I've had to pull certain values (such as Pose2D) from existing
+     * data within the general SwerveDrivetrain class.
+     * 
+     * resetPose() works because it was referenced within the general SwerveDrivetrain class.
+     * 
+     * samplePoseAt(double timestampSeconds) was also referenced within the general
+     * SwerveDrivetrain class (as was getRotation3d()). I have named the function for
+     * this as getPoseFromSD (with SD standing for SwerveDrivetrain) to clear
+     * ambiguity.
+     * 
+     * RobotConfig previously sent errors for an importing problem that we were not able to
+     * alleviate. The 2025 non-beta didn't repeat the problem so we didn't peer further into it.
+     * 
+     * 
+     * 
+     * 
+     * People who worked on the PathPlanner scripting (a-z organized): Aaditya K, Aditya M, Ian, Matias, Miles
+     * (I pretty much included anyone that made a contribution except Ewan because he made the damn paths)
+     * 
+     * (courtesy of Aditya M)
+     */
     
-    Pose2d getPoseFromSD() { // Get pose for PathPlanner because I wasn't able to get it another way; no references to pigeon nor 
-        Translation2d translation = ;
+     // Get pose for PathPlanner because I wasn't able to get it another way; no references to pigeon nor otherwise
+    /*Pose2d getPoseFromSD() { 
+        Translation2d translation = ; // Couldn't find translation; found them in accordance to the modules but not with the robot as a whole
         Rotation3d rotation3d = getRotation3d();
         Rotation2d rotation2d = rotation3d.toRotation2d();
         return new Pose2d(translation.getX(), translation.getY(), rotation2d);
+    }*/
+
+    Pose2d getPoseFromSD() { // We're just crossing fingers that this works because I have my doubts
+        return samplePoseAt(System.currentTimeMillis() * 1000).orElse(new Pose2d());
     }
 
     public CommandSwerveDrivetrain(
@@ -187,7 +222,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         AutoBuilder.configure(
                 this::getPoseFromSD, // Robot pose supplier
                 this::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
-                this::getRobotRelativeSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+                this::getCurrentSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
                 (speeds, feedforwards) -> driveRobotRelative(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
                 new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
                     new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
