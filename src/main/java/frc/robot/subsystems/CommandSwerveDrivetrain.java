@@ -20,7 +20,6 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -157,14 +156,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
      * @param modules                 Constants for each specific module
      */
 
-    Pose2d getPoseFromSD() {
+     Pose2d getPoseFromSD() {
         return getState().Pose;
-    }
+     }
 
     ChassisSpeeds getCurrentSpeedsFromSD() {
         return getState().Speeds;
     }
-
+    
     public CommandSwerveDrivetrain(
         SwerveDrivetrainConstants drivetrainConstants,
         double odometryUpdateFrequency,
@@ -174,7 +173,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         if (Utils.isSimulation()) {
             startSimThread();
         }
-        
+
         RobotConfig config;
         try{
             config = RobotConfig.fromGUISettings();
@@ -182,8 +181,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             // Handle exception as needed
             e.printStackTrace();
         }
-        
-        
 
         // PathPlanner; Configure AutoBuilder
         AutoBuilder.configure(
@@ -210,7 +207,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 this // Reference to this subsystem to set requirements
         );
     }
-
+    
     /**
      * Constructs a CTRE SwerveDrivetrain using the specified constants.
      * <p>
