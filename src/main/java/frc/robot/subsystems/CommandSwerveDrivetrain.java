@@ -157,6 +157,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
      * @param modules                 Constants for each specific module
      */
 
+    /*
+     * Functions defined below to reduce ambiguity.
+     * 
+     * getPoseFromSD() and getCurrentSpeedsFromSD() use getState() to get the Pose
+     * and Chassis Speeds correspondingly
+     * 
+     */
+
     Pose2d getPoseFromSD() {
         return getState().Pose;
     }
@@ -182,8 +190,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             // Handle exception as needed
             e.printStackTrace();
         }
-        
-        
 
         // PathPlanner; Configure AutoBuilder
         AutoBuilder.configure(
