@@ -37,6 +37,8 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
+    private final SendableChooser<Command> autoChooser;
+
     public RobotContainer() {
         configureBindings();
 
@@ -85,7 +87,6 @@ public class RobotContainer {
         drivetrain.registerTelemetry(logger::telemeterize);
     }
 
-    private final SendableChooser<Command> autoChooser;
 
     public Command getAutonomousCommand() {
         return autoChooser.getSelected();
