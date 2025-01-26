@@ -167,8 +167,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         if (Utils.isSimulation()) {
             startSimThread();
         }
-        
-        ConfigurePPAutoBuilder();
     }
 
     private void ConfigurePPAutoBuilder() {
@@ -239,6 +237,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         if (Utils.isSimulation()) {
             startSimThread();
         }
+        
+        ConfigurePPAutoBuilder();
     }
 
     /**
