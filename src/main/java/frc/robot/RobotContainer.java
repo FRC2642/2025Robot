@@ -6,11 +6,16 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
+import java.util.List;
+
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.path.PathPlannerPath;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -37,22 +42,18 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
-    private final SendableChooser<Command> autoChooser; // Auto chooser for Path Planner; suppossedly allows for the selection of paths?
+    private final SendableChooser<Command> autoChooser; // Auto chooser for Path Planner; allows for the selection of paths
 
     public RobotContainer() {
         configureBindings();
 
         /* More PP */
-        // There was another option that could load all Paths but this will filter out those with "comp" appended to the front so we can test seperately.
-
-        // For convenience a programmer could change this when going to competition.
-        boolean isCompetition = true;
 
         // Build an auto chooser. This will use Commands.none() as the default option.
         autoChooser = AutoBuilder.buildAutoChooser();
 
         // Another option that allows you to specify the default auto by its name:
-        // autoChooser = AutoBuilder.buildAutoChooser("My Default Auto");
+        // autoChooser = AutoBuilder.buildAutoChooser("forwardBack");
 
         SmartDashboard.putData("Auto Chooser", autoChooser);
     }
