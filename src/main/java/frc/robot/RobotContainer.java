@@ -10,6 +10,7 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.path.PathPlannerPath;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -47,17 +48,17 @@ public class RobotContainer {
         // There was another option that could load all Paths but this will filter out those with "comp" appended to the front so we can test seperately.
 
         // For convenience a programmer could change this when going to competition.
-        //boolean isCompetition = true;
+        boolean isCompetition = true;
 
         // Build an auto chooser. This will use Commands.none() as the default option.
-        autoChooser = AutoBuilder.buildAutoChooser();
+        //autoChooser = AutoBuilder.buildAutoChooser();
 
         // Another option that allows you to specify the default auto by its name
-        // autoChooser = AutoBuilder.buildAutoChooser("My Default Auto");
+        autoChooser = AutoBuilder.buildAutoChooser("forwardBack");
 
         SmartDashboard.putData("Auto Chooser", autoChooser);
-        
-        autoChooser.addOption("forwardBack", new PathPlannerAuto("forwardBack"));
+
+        autoChooser.addOption("forwardBack", AutoBuilder.buildAuto("forwardBack"));
     }
 
     private void configureBindings() {
@@ -92,6 +93,6 @@ public class RobotContainer {
 
 
     public Command getAutonomousCommand() {
-        return autoChooser.getSelected();
+        return new PathPlannerAuto(autoChooser.getSelected());
     }
 }
