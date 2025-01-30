@@ -58,7 +58,7 @@ public class RobotContainer {
 
         SmartDashboard.putData("Auto Chooser", autoChooser);
 
-        autoChooser.addOption("forwardBack", AutoBuilder.buildAuto("forwardBack"));
+        autoChooser.addOption("forwardBack", AutoBuilder.buildAuto("forwardBack.auto"));
     }
 
     private void configureBindings() {
