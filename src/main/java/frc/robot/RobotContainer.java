@@ -93,7 +93,8 @@ public class RobotContainer {
     
 
     public Command getAutonomousCommand() {
-        try{
+        return autoChooser.getSelected();
+        /*try{
             // Load the path you want to follow using its name in the GUI
             PathPlannerPath path = PathPlannerPath.fromPathFile("Example Path");
 
@@ -102,6 +103,6 @@ public class RobotContainer {
         } catch (Exception e) {
             DriverStation.reportError("Big oops: " + e.getMessage(), e.getStackTrace());
             return Commands.none();
-        }
+        }*/
     }
 }
