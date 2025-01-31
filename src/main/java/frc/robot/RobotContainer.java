@@ -13,9 +13,11 @@ import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathPlannerPath;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 
@@ -51,16 +53,15 @@ public class RobotContainer {
         boolean isCompetition = true;
 
         // Build an auto chooser. This will use Commands.none() as the default option.
-        //autoChooser = AutoBuilder.buildAutoChooser();
+        autoChooser = AutoBuilder.buildAutoChooser();
 
         // Another option that allows you to specify the default auto by its name
-        autoChooser = AutoBuilder.buildAutoChooser("forwardBack");
+        //autoChooser = AutoBuilder.buildAutoChooser("forwardBack");
 
         SmartDashboard.putData("Auto Chooser", autoChooser);
 
-        autoChooser.addOption("forwardBack", AutoBuilder.buildAuto("forwardBack.auto"));
+        addPPOption("forwardBack", autoChooser);
     }
-
     private void configureBindings() {
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
@@ -93,6 +94,32 @@ public class RobotContainer {
 
 
     public Command getAutonomousCommand() {
-        return new PathPlannerAuto(autoChooser.getSelected());
+        //return autoChooser.getSelected();
+        try {
+            // Load the path
+            PathPlannerPath path = PathPlannerPath.fromPathFile("forwardback");
+
+            // Create the path
+            Command pathCommand = AutoBuilder.followPath(path);
+            return pathCommand;
+        } catch (Exception e) {
+            DriverStation.reportError("Big oops: " + e.getMessage(), e.getStackTrace());
+            return Commands.none();
+        }
+    }
+
+    private void addPPOption(String pathName, SendableChooser<Command> chooser) {
+        try {
+            // Load the path
+            PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
+
+            // Create the path
+            Command pathCommand = AutoBuilder.followPath(path);
+
+            // Add to the selector
+            chooser.addOption(pathName, pathCommand);
+        } catch (Exception e) {
+            DriverStation.reportError("Big oops: " + e.getMessage(), e.getStackTrace());
+        }
     }
 }
