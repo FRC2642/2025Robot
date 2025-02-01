@@ -128,18 +128,44 @@ public class RobotContainer {
     private double getTurnRate() {
         // Convert controller left stick x and y to degrees (0 - 360)
         double angle = Math.atan2(joystick.getRightY(), joystick.getRightX());
+        /* Right is 0 degrees */
         angle *= 180/Math.PI;
-        if (i >= 10) {System.out.print("Angle data: "); System.out.print(-angle);}
+        if (i >= 10) {
+            System.out.print("Angle data: " + -angle); // Negative because it's flipped beforehand
+        }
+
+        /* Make up 0 degrees */
         angle += 90;
         if (angle > 180) {
           angle -= 360;
         }
         i++; // Iterator to prevent spam-logging
         if (i >= 10) {
-          System.out.print("  ");
-          System.out.println(angle); // Prints the angle to the console for debugging
-          i = 0;
+          System.out.print("  " + angle);// Prints the angle to the console for debugging
         }
-        return 0;
+
+        double currentAngle = drivetrain.getState().Pose.getRotation().getDegrees();
+        if (i >= 10) {
+            System.out.println(" " + currentAngle);
+        }
+
+        if (angle - currentAngle > 180) {
+            if (angle < 0) {
+                angle += 360;
+            } else if (angle > 0) {
+                angle -= 360;
+            }
+        }
+
+        double outputPower = (angle - currentAngle) / 180;
+
+        i = (i >= 10) ? 0 : i;
+
+        double joystickMag = Math.sqrt(Math.pow(joystick.getRightX(), 2) + Math.pow(joystick.getRightY(), 2));
+        if (joystickMag >= 0.1) {
+            return outputPower;
+        } else {
+            return 0;
+        }
     }
 }
