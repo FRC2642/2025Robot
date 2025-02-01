@@ -46,6 +46,8 @@ public class RobotContainer {
 
     private final SendableChooser<Command> autoChooser; // Auto chooser for Path Planner; allows for the selection of paths
 
+    int i = 0;
+
     public RobotContainer() {
         configureBindings();
 
@@ -70,7 +72,7 @@ public class RobotContainer {
             drivetrain.applyRequest(() ->
                 drive.withVelocityX(joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
                     .withVelocityY(joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-                    .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
+                    .withRotationalRate(-getTurnRate() * MaxAngularRate) // Drive counterclockwise with negative X (left)
             )
         );
 
@@ -121,5 +123,23 @@ public class RobotContainer {
         } catch (Exception e) {
             DriverStation.reportError("Big oops: " + e.getMessage(), e.getStackTrace());
         }
+    }
+
+    private double getTurnRate() {
+        // Convert controller left stick x and y to degrees (0 - 360)
+        double angle = Math.atan2(joystick.getRightY(), joystick.getRightX());
+        angle *= 180/Math.PI;
+        if (i >= 10) {System.out.print("Angle data: "); System.out.print(-angle);}
+        angle += 90;
+        if (angle > 180) {
+          angle -= 360;
+        }
+        i++; // Iterator to prevent spam-logging
+        if (i >= 10) {
+          System.out.print("  ");
+          System.out.println(angle); // Prints the angle to the console for debugging
+          i = 0;
+        }
+        return 0;
     }
 }
