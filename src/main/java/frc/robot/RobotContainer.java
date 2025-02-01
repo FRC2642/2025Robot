@@ -25,7 +25,7 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 public class RobotContainer {
-    private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond)/4; // kSpeedAt12Volts desired top speed
+    private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
     /* Setting up bindings for necessary control of the swerve drive platform */
@@ -61,6 +61,9 @@ public class RobotContainer {
         SmartDashboard.putData("Auto Chooser", autoChooser);
 
         addPPOption("forwardBack", autoChooser);
+        addPPOption("rotationtest", autoChooser);
+        addPPOption("simpletest", autoChooser);
+        addPPOption("swervetest", autoChooser);
     }
     private void configureBindings() {
         // Note that X is defined as forward according to WPILib convention,
@@ -94,8 +97,8 @@ public class RobotContainer {
 
 
     public Command getAutonomousCommand() {
-        //return autoChooser.getSelected();
-        try {
+        return autoChooser.getSelected();
+        /*try {
             // Load the path
             PathPlannerPath path = PathPlannerPath.fromPathFile("forwardback");
 
@@ -105,7 +108,7 @@ public class RobotContainer {
         } catch (Exception e) {
             DriverStation.reportError("Big oops: " + e.getMessage(), e.getStackTrace());
             return Commands.none();
-        }
+        }*/
     }
 
     private void addPPOption(String pathName, SendableChooser<Command> chooser) {
