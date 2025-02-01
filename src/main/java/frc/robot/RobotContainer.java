@@ -58,6 +58,8 @@ public class RobotContainer {
         // autoChooser = AutoBuilder.buildAutoChooser("forwardBack");
 
         SmartDashboard.putData("Auto Chooser", autoChooser);
+
+        addPPOption("Example Path", autoChooser);
     }
 
     private void configureBindings() {
@@ -93,16 +95,28 @@ public class RobotContainer {
     
 
     public Command getAutonomousCommand() {
-        //return autoChooser.getSelected();
-        try{
-            // Load the path you want to follow using its name in the GUI
-            PathPlannerPath path = PathPlannerPath.fromPathFile("Example Path");
+        return autoChooser.getSelected();
+    }
 
-            // Create a path following command using AutoBuilder. This will also trigger event markers.
-            return AutoBuilder.followPath(path);
+    /**
+     * Adds a PathPlanner path to the AutoChooser.
+     * 
+     * @param pathName The name of the path as a string. The path must be in src/main/deploy/pathplanner.
+     * @param chooser The SendableChooser that you want the path to appear in.
+     */
+
+    private void addPPOption(String pathName, SendableChooser<Command> chooser) {
+        try {
+            // Load the path
+            PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
+
+            // Create the path
+            Command pathCommand = AutoBuilder.followPath(path);
+
+            // Add the path to the selector
+            chooser.addOption(pathName, pathCommand);
         } catch (Exception e) {
             DriverStation.reportError("Big oops: " + e.getMessage(), e.getStackTrace());
-            return Commands.none();
         }
     }
 }
