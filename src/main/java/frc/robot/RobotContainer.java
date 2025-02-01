@@ -99,10 +99,13 @@ public class RobotContainer {
     }
 
     /**
-     * Adds a PathPlanner path to the AutoChooser.
+     * Adds a PathPlanner path to a SendableChooser.<br>
+     * <br>
+     * If the function cannot find the path, it will be reported in the rioLog.<br>
      * 
-     * @param pathName The name of the path as a string. The path must be in src/main/deploy/pathplanner.
-     * @param chooser The SendableChooser that you want the path to appear in.
+     * @param pathName The name of the path as a string. The path must be in src/main/deploy/pathplanner (it can be in a subfolder within this directory).
+     * @param chooser The SendableChooser that you want the path to appear in. To make this appear in your SmartDashboard, use .addData(name, chooser).
+     * @return Nothing! To get the path in getAutonomousCommand, use .getSelected() on your SendableChooser.
      */
 
     private void addPPOption(String pathName, SendableChooser<Command> chooser) {
