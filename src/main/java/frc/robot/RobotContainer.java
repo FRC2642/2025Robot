@@ -6,21 +6,16 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
-import java.util.List;
-
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathPlannerPath;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 
@@ -46,7 +41,7 @@ public class RobotContainer {
 
     private final SendableChooser<Command> autoChooser; // Auto chooser for Path Planner; allows for the selection of paths
 
-    int i = 0;
+    int i = 0; // For iterative, testing purposes
 
     public RobotContainer() {
         configureBindings();
@@ -61,7 +56,7 @@ public class RobotContainer {
 
         SmartDashboard.putData("Auto Chooser", autoChooser);
 
-        addPPOption("Example Path", autoChooser);
+        addppPathOption("Example Path", autoChooser); // Function to make adding paths easier
     }
 
     private void configureBindings() {
@@ -70,9 +65,9 @@ public class RobotContainer {
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->
-                drive.withVelocityX(joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
+                drive.withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward) -- vertical axis on controller is flipped
                     .withVelocityY(joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-                    .withRotationalRate(-getTurnRate() * MaxAngularRate) // Drive counterclockwise with negative X (left)
+                    .withRotationalRate(-recieveTurnRate() * MaxAngularRate) // Drive counterclockwise with negative X (left)
             )
         );
 
@@ -110,7 +105,7 @@ public class RobotContainer {
      * @return Nothing! To get the path in getAutonomousCommand, use .getSelected() on your SendableChooser.
      */
 
-    private void addPPOption(String pathName, SendableChooser<Command> chooser) {
+    private void addppPathOption(String pathName, SendableChooser<Command> chooser) {
         try {
             // Load the path
             PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
@@ -125,7 +120,19 @@ public class RobotContainer {
         }
     }
 
-    private double getTurnRate() {
+    private void addppAutoOption(String autoName, SendableChooser<Command> chooser) {
+        try {
+            // Build the auto
+           Command autoCommand =  AutoBuilder.buildAuto(autoName);
+
+           // Add the auto to the selector
+           chooser.addOption(autoName, autoCommand);
+        } catch (Exception e) {
+            DriverStation.reportError("Big oops: " + e.getMessage(), e.getStackTrace());
+        }
+    }
+
+    private double recieveTurnRate() {
         // Convert controller left stick x and y to degrees (0 - 360)
         double angle = Math.atan2(joystick.getRightY(), joystick.getRightX());
         /* Right is 0 degrees */
