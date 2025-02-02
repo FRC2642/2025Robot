@@ -131,5 +131,17 @@ public class RobotContainer {
         } catch (Exception e) {
             DriverStation.reportError("Big oops: " + e.getMessage(), e.getStackTrace());
         }
+        
+        private void addppAutoOption(String autoName, SendableChooser<Command> chooser) {
+            try {
+                // Build the auto
+               Command autoCommand =  AutoBuilder.buildAuto(autoName);
+    
+               // Add the auto to the selector
+               chooser.addOption(autoName, autoCommand);
+            } catch (Exception e) {
+                DriverStation.reportError("Big oops: " + e.getMessage(), e.getStackTrace());
+            }
+    
     }
 }
