@@ -98,11 +98,11 @@ public class RobotContainer {
     /**
      * Adds a PathPlanner path to a SendableChooser.<br>
      * <br>
-     * If the function cannot find the path, it will be reported in the rioLog.<br>
+     * If the function cannot find the path, the issue will be reported in the rioLog.<br>
      * 
      * @param pathName The name of the path as a string. The path must be in src/main/deploy/pathplanner (it can be in a subfolder within this directory).
      * @param chooser The SendableChooser that you want the path to appear in. To make this appear in your SmartDashboard, use .addData(name, chooser).
-     * @return Nothing! To get the path in getAutonomousCommand, use .getSelected() on your SendableChooser.
+     * @return Nothing! To get the path in {@link #getAutonomousCommand()}, use .getSelected() on your SendableChooser.
      */
 
     private void addppPathOption(String pathName, SendableChooser<Command> chooser) {
@@ -120,6 +120,16 @@ public class RobotContainer {
         }
     }
 
+    /**
+     * Adds a PathPlanner auto to a SendableChooser.<br>
+     * <br>
+     * If the function cannot find the auto, the issue will be reported in the rioLog.<br>
+     * 
+     * @param autoName The name of the auto as a string. The auto must be in src/main/deploy/pathplanner (it can be in a subfolder within this directory).
+     * @param chooser The SendableChooser that you want the auto to appear in. To make the chooser appear in your SmartDashboard, use .addData(name, chooser).
+     * @return Nothing! To get the path in {@link #getAutonomousCommand()}, use .getSelected() on your SendableChooser.
+     */
+
     private void addppAutoOption(String autoName, SendableChooser<Command> chooser) {
         try {
             // Build the auto
@@ -133,6 +143,8 @@ public class RobotContainer {
     }
 
     private double recieveTurnRate() {
+        i++; // Iterator to prevent spam-logging
+
         // Convert controller left stick x and y to degrees (0 - 360)
         double angle = Math.atan2(joystick.getRightY(), joystick.getRightX());
         /* Right is 0 degrees */
@@ -141,12 +153,11 @@ public class RobotContainer {
             System.out.print("Angle data: " + -angle); // Negative because it's flipped beforehand
         }
 
-        /* Make up 0 degrees */
+        /* Make up = 0 degrees + turning right is positive & turning left is negative*/
         angle += 90;
         if (angle > 180) {
           angle -= 360;
         }
-        i++; // Iterator to prevent spam-logging
         if (i >= 10) {
           System.out.print("  " + angle);// Prints the angle to the console for debugging
         }
@@ -166,7 +177,7 @@ public class RobotContainer {
 
         double outputPower = (angle - currentAngle) / 180;
 
-        i = (i >= 10) ? 0 : i;
+        i = (i >= 10) ? 0 : i; // Reset iterator
 
         double joystickMag = Math.sqrt(Math.pow(joystick.getRightX(), 2) + Math.pow(joystick.getRightY(), 2));
         if (joystickMag >= 0.1) {
