@@ -131,6 +131,7 @@ public class RobotContainer {
         } catch (Exception e) {
             DriverStation.reportError("Big oops: " + e.getMessage(), e.getStackTrace());
         }
+    }
         
         private void addppAutoOption(String autoName, SendableChooser<Command> chooser) {
             try {
