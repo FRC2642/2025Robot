@@ -147,14 +147,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
      * @param modules                 Constants for each specific module
      */
 
-    /*
-     * Functions defined below to reduce ambiguity.
-     * 
-     * getPoseFromSD() and getCurrentSpeedsFromSD() use getState() to get the Pose
-     * and Chassis Speeds correspondingly
-     * 
-     */
-
     /** Swerve request to apply during robot-centric path following */
     private final SwerveRequest.ApplyRobotSpeeds m_pathApplyRobotSpeeds = new SwerveRequest.ApplyRobotSpeeds();
 

@@ -65,9 +65,10 @@ public class RobotContainer {
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->
-                drive.withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward) -- vertical axis on controller is flipped
-                    .withVelocityY(joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+                drive.withVelocityX(-modifyAxialInput(joystick.getLeftY(), joystick.getRightTriggerAxis(), 0.9) * MaxSpeed) // Drive forward with negative Y (forward) -- vertical axis on controller is flipped
+                    .withVelocityY(modifyAxialInput(joystick.getLeftX(), joystick.getRightTriggerAxis(), 0.9) * MaxSpeed) // Drive left with negative X (left)
                     .withRotationalRate(-recieveTurnRate() * MaxAngularRate) // Drive counterclockwise with negative X (left)
+                    // btw idk why x and y are flipped but I'm not going to fiddle the inconsistency
             )
         );
 
@@ -162,12 +163,18 @@ public class RobotContainer {
           System.out.print("  " + angle);// Prints the angle to the console for debugging
         }
 
-        double currentAngle = drivetrain.getState().Pose.getRotation().getDegrees();
+        double currentAngle = drivetrain.getPigeon2().getRotation2d().getDegrees();
+        currentAngle = currentAngle % 360;
+        if (currentAngle > 180) {currentAngle -= 360;}
+        currentAngle *= -1;
+        currentAngle += 111;
+        if (currentAngle > 180) {currentAngle -= 360;}
+        
         if (i >= 10) {
             System.out.println(" " + currentAngle);
         }
 
-        if (angle - currentAngle > 180) {
+        if (Math.abs(angle - currentAngle) > 180) {
             if (angle < 0) {
                 angle += 360;
             } else if (angle > 0) {
@@ -175,15 +182,60 @@ public class RobotContainer {
             }
         }
 
-        double outputPower = (angle - currentAngle) / 180;
+        double outputPower = (angle - currentAngle) / 45;
+        if (Math.abs(outputPower) > 1) {
+            outputPower /= Math.abs(outputPower);
+        }
 
         i = (i >= 10) ? 0 : i; // Reset iterator
 
         double joystickMag = Math.sqrt(Math.pow(joystick.getRightX(), 2) + Math.pow(joystick.getRightY(), 2));
-        if (joystickMag >= 0.1) {
+        if (joystickMag >= 0.12) {
             return outputPower;
         } else {
             return 0;
         }
+    }
+
+    /**
+     * Modifies the axial input, taking in an additional input to modify the original.
+     * 
+     * @param input The original input
+     * @param modifierInput The secondary, modifying input
+     * @param modifyPercent The percent of the value of the original input to be affected by the modifierInput
+     * @return The modified value
+     */
+
+    private double modifyAxialInput(double input, double modifierInput, double modifyPercent) {
+        input = cutValue(input, -1, 1);
+        modifierInput = cutValue(modifierInput, 0, 1);
+        double output = input * (1 - modifyPercent);
+        output += (modifierInput * modifyPercent) * getSign(input); // If the input is negative, made the modifier negative, and same for positive
+        return output;
+    }
+
+    /**
+     * Sets a value to the corresponding value if it is more than the min or less than the max.
+     * 
+     * @param value The input
+     * @param min The minimum to follow
+     * @param max The maximum to follow
+     * @return The cut value
+     */
+
+    private double cutValue(double value, double min, double max) {
+        if (value > max) { value = max; }
+        else if (value < min) { value = min; }
+        return value;
+    }
+
+    /**
+     * Gets the sign for the specified value
+     * @param value The input value
+     * @return -1 if negative and 1 if positive
+     */
+
+    private double getSign(double value) {
+        return value / Math.abs(value);
     }
 }
