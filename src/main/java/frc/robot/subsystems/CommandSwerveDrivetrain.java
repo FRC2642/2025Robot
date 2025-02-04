@@ -163,6 +163,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         }
     }
 
+    /*private Pose2d getPoseFromPigeon() {
+        return getPigeon2().
+    }*/
+
     private void ConfigurePPAutoBuilder() {
         try{
             ppRobotConfig = RobotConfig.fromGUISettings();

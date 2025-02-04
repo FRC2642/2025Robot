@@ -6,6 +6,7 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
+import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -65,7 +66,7 @@ public class RobotContainer {
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->
-                drive.withVelocityX(-modifyAxialInput(joystick.getLeftY(), joystick.getRightTriggerAxis(), 0.9) * MaxSpeed) // Drive forward with negative Y (forward) -- vertical axis on controller is flipped
+                drive.withVelocityX(modifyAxialInput(joystick.getLeftY(), joystick.getRightTriggerAxis(), 0.9) * MaxSpeed) // Drive forward with negative Y (forward) -- vertical axis on controller is flipped
                     .withVelocityY(modifyAxialInput(joystick.getLeftX(), joystick.getRightTriggerAxis(), 0.9) * MaxSpeed) // Drive left with negative X (left)
                     .withRotationalRate(-recieveTurnRate() * MaxAngularRate) // Drive counterclockwise with negative X (left)
                     // btw idk why x and y are flipped but I'm not going to fiddle the inconsistency
@@ -89,8 +90,6 @@ public class RobotContainer {
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }
-
-    
 
     public Command getAutonomousCommand() {
         return autoChooser.getSelected();
@@ -167,7 +166,7 @@ public class RobotContainer {
         currentAngle = currentAngle % 360;
         if (currentAngle > 180) {currentAngle -= 360;}
         currentAngle *= -1;
-        currentAngle += 111;
+        currentAngle += -103;
         if (currentAngle > 180) {currentAngle -= 360;}
         
         if (i >= 10) {
@@ -186,6 +185,12 @@ public class RobotContainer {
         if (Math.abs(outputPower) > 1) {
             outputPower /= Math.abs(outputPower);
         }
+
+        /* Testing functions because I need somewhere to put them */
+        /*Pigeon2 gyro = drivetrain.getPigeon2();
+        if (i >= 10) {
+            System.out.println(gyro.getAccelerationX());
+        }*/
 
         i = (i >= 10) ? 0 : i; // Reset iterator
 
