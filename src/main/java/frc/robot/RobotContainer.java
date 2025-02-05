@@ -42,7 +42,9 @@ public class RobotContainer {
 
     private final SendableChooser<Command> autoChooser; // Auto chooser for Path Planner; allows for the selection of paths
 
-    int i = 0; // For iterative, testing purposes
+    int i = 0; // For print delays
+
+    double rotationOffset = -103;
 
     public RobotContainer() {
         configureBindings();
@@ -166,7 +168,7 @@ public class RobotContainer {
         currentAngle = currentAngle % 360;
         if (currentAngle > 180) {currentAngle -= 360;}
         currentAngle *= -1;
-        currentAngle += -103;
+        currentAngle += rotationOffset; // Offset rotation
         if (currentAngle > 180) {currentAngle -= 360;}
         
         if (i >= 10) {
