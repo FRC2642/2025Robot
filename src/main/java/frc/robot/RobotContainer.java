@@ -62,9 +62,7 @@ public class RobotContainer {
         SmartDashboard.putData("Auto Chooser", autoChooser);
 
         addPPOption("forwardBack", autoChooser);
-        addPPOption("rotationtest", autoChooser);
         addPPOption("simpleTest", autoChooser);
-        addPPOption("swervetest", autoChooser);
         addPPOption("moontest", autoChooser);
         addPPOption("center1piece", autoChooser);
         addPPOption("center3piece", autoChooser);
