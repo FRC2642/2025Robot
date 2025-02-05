@@ -58,7 +58,7 @@ public class RobotContainer {
 
         SmartDashboard.putData("Auto Chooser", autoChooser);
 
-        addppPathOption("Example Path", autoChooser); // Function to make adding paths easier
+        
     }
 
     int joystickXModDirect = -1;
@@ -100,15 +100,15 @@ public class RobotContainer {
     }
 
     /**
-     * !!! DESPITE ITS NAME, THIS FUNCTION DOES NOT WORK WITH PATHS. ONLY AUTOS WORK. !!!
+     * *Only autos work. Theoretically, paths should work as well but it seems not.
      * <br>
-     * Adds a PathPlanner path to a SendableChooser.<br>
+     * Adds a PathPlanner auto* to a SendableChooser.<br>
      * <br>
-     * If the function cannot find the path, the issue will be reported in the rioLog.<br>
+     * If the function cannot find the auto*, the issue will be reported in the rioLog.<br>
      * 
-     * @param pathName The name of the path as a string. The path must be in src/main/deploy/pathplanner (it can be in a subfolder within this directory).
-     * @param chooser The SendableChooser that you want the path to appear in. To make this appear in your SmartDashboard, use .addData(name, chooser).
-     * @return Nothing! To get the path in {@link #getAutonomousCommand()}, use .getSelected() on your SendableChooser.
+     * @param pathName The name of the auto* as a string. The auto* must be in src/main/deploy/pathplanner (it can be in a subfolder within this directory).
+     * @param chooser The SendableChooser that you want the auto* to appear in. To make this appear in your SmartDashboard, use .addData(name, chooser).
+     * @return Nothing! To get the auto* in {@link #getAutonomousCommand()}, use .getSelected() on your SendableChooser.
      */
 
     private void addppPathOption(String pathName, SendableChooser<Command> chooser) {
@@ -226,12 +226,12 @@ public class RobotContainer {
     }
 
     /**
-     * Sets a value to the corresponding value if it is more than the min or less than the max.
+     * Limits a value between the min and the max.
      * 
-     * @param value The input
-     * @param min The minimum to follow
-     * @param max The maximum to follow
-     * @return The cut value
+     * @param value
+     * @param min
+     * @param max
+     * @return
      */
 
     private double cutValue(double value, double min, double max) {
@@ -241,8 +241,6 @@ public class RobotContainer {
     }
 
     /**
-     * Gets the sign for the specified value
-     * @param value The input value
      * @return -1 if negative and 1 if positive
      */
 
