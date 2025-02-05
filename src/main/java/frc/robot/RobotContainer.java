@@ -43,7 +43,7 @@ public class RobotContainer {
 
     int i = 0; // For print delays
 
-    double rotationOffset = -110;
+    double rotationOffset = -103 /*getRotationOffset()*/;
 
     public RobotContainer() {
         configureBindings();
@@ -170,13 +170,15 @@ public class RobotContainer {
 
         double currentAngle = drivetrain.getPigeon2().getRotation2d().getDegrees();
         currentAngle = currentAngle % 360;
-        if (currentAngle > 180) {currentAngle -= 360;}
+        if (currentAngle > 180) { currentAngle -= 360; }
         currentAngle *= -1;
         currentAngle += rotationOffset; // Offset rotation
-        if (currentAngle > 180) {currentAngle -= 360;}
+        if (currentAngle > 180) { currentAngle -= 360; }
         
         if (i >= 10) {
             System.out.println(" " + currentAngle);
+            double stateAngle = drivetrain.getState().Pose.getRotation().getDegrees();
+            System.out.println(" " + stateAngle);
         }
 
         if (Math.abs(angle - currentAngle) > 180) {
@@ -187,16 +189,10 @@ public class RobotContainer {
             }
         }
 
-        double outputPower = (angle - currentAngle) / 45;
+        double outputPower = (angle - currentAngle) / 45; // Modifies rotational speed; please set to 45
         if (Math.abs(outputPower) > 1) {
             outputPower /= Math.abs(outputPower);
         }
-
-        /* Testing functions because I need somewhere to put them */
-        /*Pigeon2 gyro = drivetrain.getPigeon2();
-        if (i >= 10) {
-            System.out.println(gyro.getAccelerationX());
-        }*/
 
         i = (i >= 10) ? 0 : i; // Reset iterator
 
@@ -208,13 +204,20 @@ public class RobotContainer {
         }
     }
 
+    private double getRotationOffset() {
+        double stateRotation = drivetrain.getState().Pose.getRotation().getDegrees();
+        double gyroRotation = drivetrain.getPigeon2().getRotation2d().getDegrees();
+        gyroRotation %= 360;
+        if (gyroRotation > 180) { gyroRotation -= 360; }
+        return stateRotation - gyroRotation;
+    }
+
     /**
-     * Modifies the axial input, taking in an additional input to modify the original.
+     * Modifies the axial input, taking in an additional input to modify the original. Returns the result.
      * 
      * @param input The original input
      * @param modifierInput The secondary, modifying input
      * @param modifyPercent The percent of the value of the original input to be affected by the modifierInput
-     * @return The modified value
      */
 
     private double modifyAxialInput(double input, double modifierInput, double modifyPercent) {
@@ -226,12 +229,7 @@ public class RobotContainer {
     }
 
     /**
-     * Limits a value between the min and the max.
-     * 
-     * @param value
-     * @param min
-     * @param max
-     * @return
+     * Limits a value between the min and the max and returns the limited value.
      */
 
     private double cutValue(double value, double min, double max) {
