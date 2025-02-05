@@ -63,7 +63,7 @@ public class RobotContainer {
 
         addPPOption("forwardBack", autoChooser);
         addPPOption("rotationtest", autoChooser);
-        addPPOption("simpletest", autoChooser);
+        addPPOption("simpleTest", autoChooser);
         addPPOption("swervetest", autoChooser);
         addPPOption("moontest", autoChooser);
         addPPOption("center1piece", autoChooser);
