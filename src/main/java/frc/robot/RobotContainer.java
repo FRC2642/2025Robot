@@ -6,7 +6,6 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
-import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -29,7 +28,7 @@ public class RobotContainer {
 
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-            .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
+            .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.05) // Add a 10% deadband for movement speed and 5% for rotational
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
@@ -44,7 +43,7 @@ public class RobotContainer {
 
     int i = 0; // For print delays
 
-    double rotationOffset = -103;
+    double rotationOffset = -110;
 
     public RobotContainer() {
         configureBindings();
@@ -62,14 +61,17 @@ public class RobotContainer {
         addppPathOption("Example Path", autoChooser); // Function to make adding paths easier
     }
 
+    int joystickXModDirect = -1;
+    int joystickYModDirect = -1;
+
     private void configureBindings() {
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->
-                drive.withVelocityX(modifyAxialInput(joystick.getLeftY(), joystick.getRightTriggerAxis(), 0.9) * MaxSpeed) // Drive forward with negative Y (forward) -- vertical axis on controller is flipped
-                    .withVelocityY(modifyAxialInput(joystick.getLeftX(), joystick.getRightTriggerAxis(), 0.9) * MaxSpeed) // Drive left with negative X (left)
+                drive.withVelocityX(joystickYModDirect * modifyAxialInput(joystick.getLeftY(), joystick.getRightTriggerAxis(), 0.9) * MaxSpeed) // Drive forward with negative Y (forward) -- vertical axis on controller is flipped
+                    .withVelocityY(joystickXModDirect * modifyAxialInput(joystick.getLeftX(), joystick.getRightTriggerAxis(), 0.9) * MaxSpeed) // Drive left with negative X (left)
                     .withRotationalRate(-recieveTurnRate() * MaxAngularRate) // Drive counterclockwise with negative X (left)
                     // btw idk why x and y are flipped but I'm not going to fiddle the inconsistency
             )
@@ -77,7 +79,7 @@ public class RobotContainer {
 
         joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
         joystick.b().whileTrue(drivetrain.applyRequest(() ->
-            point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
+            point.withModuleDirection(new Rotation2d(joystickXModDirect * joystick.getLeftY(), joystickYModDirect * joystick.getLeftX()))
         ));
 
         // Run SysId routines when holding back/start and X/Y.
@@ -98,6 +100,8 @@ public class RobotContainer {
     }
 
     /**
+     * !!! DESPITE ITS NAME, THIS FUNCTION DOES NOT WORK WITH PATHS. ONLY AUTOS WORK. !!!
+     * <br>
      * Adds a PathPlanner path to a SendableChooser.<br>
      * <br>
      * If the function cannot find the path, the issue will be reported in the rioLog.<br>
