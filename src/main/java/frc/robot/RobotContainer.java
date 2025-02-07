@@ -64,6 +64,7 @@ public class RobotContainer {
         addPPOption("forwardBack", autoChooser);
         addPPOption("simpleTest", autoChooser);
         addPPOption("driftTest", autoChooser);
+        addPPOption("moonTest", autoChooser);
     }
     private void configureBindings() {
         // Note that X is defined as forward according to WPILib convention,
