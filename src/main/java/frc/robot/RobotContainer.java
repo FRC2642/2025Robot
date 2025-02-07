@@ -44,6 +44,9 @@ public class RobotContainer {
 
     private final SendableChooser<Command> autoChooser;
 
+    private int i = 0;
+    private double rotationOffset;
+
     public RobotContainer() {
         configureBindings();
 
@@ -137,5 +140,103 @@ public class RobotContainer {
                 DriverStation.reportError("Big oops: " + e.getMessage(), e.getStackTrace());        
             }
     
+    }
+
+    private double recieveTurnRate() {
+        i++; // Iterator to prevent spam-logging
+
+        // Convert controller left stick x and y to degrees (0 - 360)
+        double angle = Math.atan2(joystick.getRightY(), joystick.getRightX());
+        /* Right is 0 degrees */
+        angle *= 180/Math.PI;
+        if (i >= 10) {
+            System.out.print("Angle data: " + -angle); // Negative because it's flipped beforehand
+        }
+
+        /* Make up = 0 degrees + turning right is positive & turning left is negative*/
+        angle += 90;
+        if (angle > 180) {
+          angle -= 360;
+        }
+        if (i >= 10) {
+          System.out.print("  " + angle);// Prints the angle to the console for debugging
+        }
+
+        double currentAngle = drivetrain.getPigeon2().getRotation2d().getDegrees();
+        currentAngle = currentAngle % 360;
+        if (currentAngle > 180) { currentAngle -= 360; }
+        currentAngle *= -1;
+        currentAngle += rotationOffset; // Offset rotation
+        if (currentAngle > 180) { currentAngle -= 360; }
+        
+        if (i >= 10) {
+            System.out.println(" " + currentAngle);
+            double stateAngle = drivetrain.getState().Pose.getRotation().getDegrees();
+            System.out.println(" " + stateAngle);
+        }
+
+        if (Math.abs(angle - currentAngle) > 180) {
+            if (angle < 0) {
+                angle += 360;
+            } else if (angle > 0) {
+                angle -= 360;
+            }
+        }
+
+        double outputPower = (angle - currentAngle) / 45; // Modifies rotational speed; please set to 45
+        if (Math.abs(outputPower) > 1) {
+            outputPower /= Math.abs(outputPower);
+        }
+
+        i = (i >= 10) ? 0 : i; // Reset iterator
+
+        double joystickMag = Math.sqrt(Math.pow(joystick.getRightX(), 2) + Math.pow(joystick.getRightY(), 2));
+        if (joystickMag >= 0.12) {
+            return outputPower;
+        } else {
+            return 0;
+        }
+    }
+
+    private double getRotationOffset() {
+        double stateRotation = drivetrain.getState().Pose.getRotation().getDegrees();
+        double gyroRotation = drivetrain.getPigeon2().getRotation2d().getDegrees();
+        gyroRotation %= 360;
+        if (gyroRotation > 180) { gyroRotation -= 360; }
+        return stateRotation - gyroRotation;
+    }
+
+    /**
+     * Modifies the axial input, taking in an additional input to modify the original. Returns the result.
+     * 
+     * @param input The original input
+     * @param modifierInput The secondary, modifying input
+     * @param modifyPercent The percent of the value of the original input to be affected by the modifierInput
+     */
+
+    private double modifyAxialInput(double input, double modifierInput, double modifyPercent) {
+        input = cutValue(input, -1, 1);
+        modifierInput = cutValue(modifierInput, 0, 1);
+        double output = input * (1 - modifyPercent);
+        output += (modifierInput * modifyPercent) * getSign(input); // If the input is negative, made the modifier negative, and same for positive
+        return output;
+    }
+
+    /**
+     * Limits a value between the min and the max and returns the limited value.
+     */
+
+    private double cutValue(double value, double min, double max) {
+        if (value > max) { value = max; }
+        else if (value < min) { value = min; }
+        return value;
+    }
+
+    /**
+     * @return -1 if negative and 1 if positive
+     */
+
+    private double getSign(double value) {
+        return value / Math.abs(value);
     }
 }
