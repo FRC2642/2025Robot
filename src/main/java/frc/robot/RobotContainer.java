@@ -45,7 +45,7 @@ public class RobotContainer {
     private final SendableChooser<Command> autoChooser;
 
     private int i = 0;
-    private double rotationOffset;
+    private double rotationOffset = -103;
 
     public RobotContainer() {
         configureBindings();
@@ -69,21 +69,25 @@ public class RobotContainer {
         addPPOption("driftTest", autoChooser);
         addPPOption("moonTest", autoChooser);
     }
+
+    int joystickXModDirect = -1; // Joystick x and y directions; change if flipped
+    int joystickYModDirect = -1;
+
     private void configureBindings() {
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->
-                drive.withVelocityX(joystick.getLeftY()/10 * MaxSpeed) // Drive forward with negative Y (forward)
-                    .withVelocityY(joystick.getLeftX()/10 * MaxSpeed) // Drive left with negative X (left)
+                drive.withVelocityX(joystickYModDirect * modifyAxialInput(joystick.getLeftY(), joystick.getRightTriggerAxis(), 0.9)* MaxSpeed) // Drive forward with negative Y (forward)
+                    .withVelocityY(joystickXModDirect * modifyAxialInput(joystick.getLeftX(), joystick.getRightTriggerAxis(), 0.9) * MaxSpeed) // Drive left with negative X (left)
                     .withRotationalRate(-joystick.getRightX()/10 * MaxAngularRate) // Drive counterclockwise with negative X (left)
             )
         );
 
         joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
         joystick.b().whileTrue(drivetrain.applyRequest(() ->
-            point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
+            point.withModuleDirection(new Rotation2d(joystickXModDirect * joystick.getLeftY(), joystickYModDirect * joystick.getLeftX()))
         ));
 
         // Run SysId routines when holding back/start and X/Y.
