@@ -26,7 +26,8 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
-    private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+    private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond);
+     // 3/4 of a rotation per second max angular velocity
 
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -64,16 +65,9 @@ public class RobotContainer {
         SmartDashboard.putData("Auto Chooser", autoChooser);
 
         addPPOption("forwardBack", autoChooser);
-        addPPOption("rotationtest", autoChooser);
-        addPPOption("simpletest", autoChooser);
-        addPPOption("swervetest", autoChooser);
-        addPPOption("moontest", autoChooser);
-        addPPOption("center1piece", autoChooser);
-        addPPOption("center3piece", autoChooser);
-        addPPOption("left1piece", autoChooser);
-        addPPOption("left2piece", autoChooser);
-        addPPOption("right1piece", autoChooser);
-        addPPOption("right2piece", autoChooser);
+        addPPOption("simpleTest", autoChooser);
+        addPPOption("driftTest", autoChooser);
+        addPPOption("moonTest", autoChooser);
     }
     private void configureBindings() {
         // Note that X is defined as forward according to WPILib convention,
@@ -81,9 +75,9 @@ public class RobotContainer {
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->
-                drive.withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
-                    .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-                    .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
+                drive.withVelocityX(joystick.getLeftY()/10 * MaxSpeed) // Drive forward with negative Y (forward)
+                    .withVelocityY(joystick.getLeftX()/10 * MaxSpeed) // Drive left with negative X (left)
+                    .withRotationalRate(-joystick.getRightX()/10 * MaxAngularRate) // Drive counterclockwise with negative X (left)
             )
         );
 
@@ -144,7 +138,7 @@ public class RobotContainer {
                // Add the auto to the selector
                chooser.addOption(autoName, autoCommand);
             } catch (Exception e) {
-                DriverStation.reportError("Big oops: " + e.getMessage(), e.getStackTrace());
+                DriverStation.reportError("Big oops: " + e.getMessage(), e.getStackTrace());        
             }
     
     }
