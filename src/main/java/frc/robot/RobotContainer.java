@@ -45,7 +45,7 @@ public class RobotContainer {
     private final SendableChooser<Command> autoChooser;
 
     private int i = 0;
-    private double rotationOffset = -103;
+    private double rotationOffset = getRotationOffset();
 
     public RobotContainer() {
         configureBindings();
