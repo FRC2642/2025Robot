@@ -31,7 +31,7 @@ public class RobotContainer {
 
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-            .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.025) // Add a 10% deadband for speed and 2.5% for rotation
+            .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.05) // Add a 10% deadband for speed and 5% for rotation
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
@@ -69,8 +69,8 @@ public class RobotContainer {
         addPPOption("moonTest", autoChooser);
     }
 
-    int joystickXModDirect = 1; // Joystick x and y directions; change if flipped
-    int joystickYModDirect = 1;
+    int joystickXModDirect = -1; // Joystick x and y directions; change if flipped
+    int joystickYModDirect = -1;
 
     private void configureBindings() {
         // Note that X is defined as forward according to WPILib convention,
