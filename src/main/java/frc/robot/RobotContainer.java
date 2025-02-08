@@ -43,7 +43,7 @@ public class RobotContainer {
 
     int i = 0; // For print delays
 
-    double rotationOffset = -103 /*getRotationOffset()*/;
+    double rotationOffset = getRotationOffset();
 
     public RobotContainer() {
         configureBindings();
@@ -61,8 +61,8 @@ public class RobotContainer {
         
     }
 
-    int joystickXModDirect = -1;
-    int joystickYModDirect = -1;
+    int joystickXModDirect = 1;
+    int joystickYModDirect = 1;
 
     private void configureBindings() {
         // Note that X is defined as forward according to WPILib convention,
@@ -209,6 +209,8 @@ public class RobotContainer {
         double gyroRotation = drivetrain.getPigeon2().getRotation2d().getDegrees();
         gyroRotation %= 360;
         if (gyroRotation > 180) { gyroRotation -= 360; }
+        //gyroRotation -= 90;
+        //if (gyroRotation < -180) { gyroRotation += 360; }
         return stateRotation - gyroRotation;
     }
 
