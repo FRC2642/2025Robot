@@ -194,7 +194,7 @@ public class RobotContainer {
             }
         }
 
-        if (Math.abs(angle - currentAngle) > 180) { System.out.println("WARNING");}
+        if (Math.abs(angle - currentAngle) > 180) { System.out.println("WARNING"); }
 
         double outputPower = (angle - currentAngle) / 60; // Modifies rotational speed; retest to find the best (60)
         if (Math.abs(outputPower) > 1) { outputPower /= Math.abs(outputPower); } // Limit the output power to (abs) 1
@@ -203,7 +203,7 @@ public class RobotContainer {
         while (prevRotationOutputs.size() > rotationOutputListLimit) { prevRotationOutputs.remove(0); } // Remove extra data points from the top of the list
         if (prevRotationOutputs.size() == rotationOutputListLimit && outputPower >= 0.9) { // Use if we have data and the outputPower is set to max or near max
             double prevOutputAvg = 0; // Get the average power over the last 30 code runs
-            for (int j = 0; j < prevRotationOutputs.size(); j++) { prevOutputAvg += prevRotationOutputs.get(j); }
+            for (int j = 0; j < prevRotationOutputs.size(); j++) { prevOutputAvg += Math.abs(prevRotationOutputs.get(j)); }
             prevOutputAvg /= prevRotationOutputs.size();
             outputPower *= prevOutputAvg; // The average is essentially a percent since power ranges from (abs) 0 to 1 so multiplying reduces power and creates acceleration
         }
