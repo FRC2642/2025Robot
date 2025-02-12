@@ -6,6 +6,8 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
+import java.util.ArrayList;
+
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -13,6 +15,7 @@ import com.pathplanner.lib.path.PathPlannerPath;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -36,17 +39,23 @@ public class RobotContainer {
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
     private final CommandXboxController joystick = new CommandXboxController(0);
+    private final XboxController control = new XboxController(0);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
     private final SendableChooser<Command> autoChooser; // Auto chooser for Path Planner; allows for the selection of paths
 
-    int i = 0; // For print delays
+    private int i = 0; // For print delays
+    private boolean turnDebug = false; // Set to true for turning debugging info 
 
-    double rotationOffset = getRotationOffset();
+    private double rotationOffset = getRotationOffset();
+    private ArrayList<Double> prevRotationOutputs = new ArrayList<>();
+    private int rotationOutputListLimit = 30;
 
     public RobotContainer() {
         configureBindings();
+
+        SmartDashboard.putBoolean("Rotation Debugging", turnDebug);
 
         /* More PathPlanner */
 
@@ -63,6 +72,7 @@ public class RobotContainer {
 
     int joystickXModDirect = 1;
     int joystickYModDirect = 1;
+    double movementPercentModifier = 0.9;
 
     private void configureBindings() {
         // Note that X is defined as forward according to WPILib convention,
@@ -70,8 +80,8 @@ public class RobotContainer {
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->
-                drive.withVelocityX(joystickYModDirect * modifyAxialInput(joystick.getLeftY(), joystick.getRightTriggerAxis(), 0.9) * MaxSpeed) // Drive forward with negative Y (forward) -- vertical axis on controller is flipped
-                    .withVelocityY(joystickXModDirect * modifyAxialInput(joystick.getLeftX(), joystick.getRightTriggerAxis(), 0.9) * MaxSpeed) // Drive left with negative X (left)
+                drive.withVelocityX(joystickYModDirect * modifyAxialInput(joystick.getLeftY(), joystick.getRightTriggerAxis(), movementPercentModifier) * MaxSpeed) // Drive forward with negative Y (forward) -- vertical axis on controller is flipped
+                    .withVelocityY(joystickXModDirect * modifyAxialInput(joystick.getLeftX(), joystick.getRightTriggerAxis(), movementPercentModifier) * MaxSpeed) // Drive left with negative X (left)
                     .withRotationalRate(-recieveTurnRate() * MaxAngularRate) // Drive counterclockwise with negative X (left)
                     // btw idk why x and y are flipped but I'm not going to fiddle the inconsistency
             )
@@ -149,29 +159,24 @@ public class RobotContainer {
     }
 
     private double recieveTurnRate() {
-        i++; // Iterator to prevent spam-logging
+        if (turnDebug) { i++; } // Iterator to prevent spam-logging
 
-        // Convert controller left stick x and y to degrees (0 - 360)
-        double angle = Math.atan2(joystick.getRightY(), joystick.getRightX());
-        /* Right is 0 degrees */
-        angle *= 180/Math.PI;
-        if (i >= 10) {
-            System.out.print("Angle data: " + -angle); // Negative because it's flipped beforehand
-        }
+        // Reset rotation offset 
+        if (control.getLeftBumperButtonPressed()) { rotationOffset = getRotationOffset(); }
 
-        /* Make up = 0 degrees + turning right is positive & turning left is negative*/
-        angle += 90;
-        if (angle > 180) {
-          angle -= 360;
-        }
+        /* Convert controller left stick x and y to degrees (0 - 360) */
+        double angle = Math.atan2(joystick.getRightY(), joystick.getRightX()); // Get raw positions
+        angle *= 180/Math.PI; // Degrees
+        angle += 90; // Turn 90 degrees to make 0 degrees up (unit circle by default)
+        if (angle > 180) { angle -= 360; }
         if (i >= 10) {
-          System.out.print("  " + angle);// Prints the angle to the console for debugging
+          System.out.print("  " + angle); // Prints the angle to the console for debugging
         }
 
         double currentAngle = drivetrain.getPigeon2().getRotation2d().getDegrees();
-        currentAngle = currentAngle % 360;
-        if (currentAngle > 180) { currentAngle -= 360; }
-        currentAngle *= -1;
+        currentAngle = currentAngle % 360; // Reports an insanely large value by default, so % 360 to get the actual value
+        if (currentAngle > 180) { currentAngle -= 360; } // Move values more than 180 to make the degrees scale from -180 to 180
+        currentAngle *= -1; // It's flipped.
         currentAngle += rotationOffset; // Offset rotation
         if (currentAngle > 180) { currentAngle -= 360; }
         
@@ -181,7 +186,7 @@ public class RobotContainer {
             System.out.println(" " + stateAngle);
         }
 
-        if (Math.abs(angle - currentAngle) > 180) {
+        if (Math.abs(angle - currentAngle) > 180) { // Optimizations
             if (angle < 0) {
                 angle += 360;
             } else if (angle > 0) {
@@ -189,14 +194,23 @@ public class RobotContainer {
             }
         }
 
-        double outputPower = (angle - currentAngle) / 45; // Modifies rotational speed; please set to 45
-        if (Math.abs(outputPower) > 1) {
-            outputPower /= Math.abs(outputPower);
+        if (Math.abs(angle - currentAngle) > 180) { System.out.println("WARNING");}
+
+        double outputPower = (angle - currentAngle) / 60; // Modifies rotational speed; retest to find the best (60)
+        if (Math.abs(outputPower) > 1) { outputPower /= Math.abs(outputPower); } // Limit the output power to (abs) 1
+
+        prevRotationOutputs.add(outputPower); // Add new values to the bottom of the list
+        while (prevRotationOutputs.size() > rotationOutputListLimit) { prevRotationOutputs.remove(0); } // Remove extra data points from the top of the list
+        if (prevRotationOutputs.size() == rotationOutputListLimit && outputPower >= 0.9) { // Use if we have data and the outputPower is set to max or near max
+            double prevOutputAvg = 0; // Get the average power over the last 30 code runs
+            for (int j = 0; j < prevRotationOutputs.size(); j++) { prevOutputAvg += prevRotationOutputs.get(j); }
+            prevOutputAvg /= prevRotationOutputs.size();
+            outputPower *= prevOutputAvg; // The average is essentially a percent since power ranges from (abs) 0 to 1 so multiplying reduces power and creates acceleration
         }
 
         i = (i >= 10) ? 0 : i; // Reset iterator
 
-        double joystickMag = Math.sqrt(Math.pow(joystick.getRightX(), 2) + Math.pow(joystick.getRightY(), 2));
+        double joystickMag = Math.sqrt(Math.pow(joystick.getRightX(), 2) + Math.pow(joystick.getRightY(), 2)); // Joystick magnitude for deadzones on friction joysticks
         if (joystickMag >= 0.12) {
             return outputPower;
         } else {
@@ -225,8 +239,8 @@ public class RobotContainer {
     private double modifyAxialInput(double input, double modifierInput, double modifyPercent) {
         input = cutValue(input, -1, 1);
         modifierInput = cutValue(modifierInput, 0, 1);
-        double output = input * (1 - modifyPercent);
-        output += (modifierInput * modifyPercent) * getSign(input); // If the input is negative, made the modifier negative, and same for positive
+        double output = input * (modifierInput * modifyPercent + (1 - modifyPercent));
+        // If the input is negative, made the modifier negative, and same for positive
         return output;
     }
 
