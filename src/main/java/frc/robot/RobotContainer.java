@@ -198,7 +198,7 @@ public class RobotContainer {
         if (joystickMag >= 0.12) {
             return outputPower;
         } else {
-            return 0;
+              return 0;
         }
     }
 
