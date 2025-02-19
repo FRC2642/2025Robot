@@ -31,7 +31,7 @@ public class ElevatorCommand extends Command {
   public void execute() {
     iterator++;
 
-    if (iterator >= 10) {System.out.println(elevatorSubsystem.shaftEncoder.get());}
+    
 
     iterator = (iterator >= 10) ? 0 : iterator; // Reset iterator
   }

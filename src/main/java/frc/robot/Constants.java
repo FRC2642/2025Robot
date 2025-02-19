@@ -18,7 +18,8 @@ public final class Constants {
   }
   
   public static class ElevatorConstants {
-    public static final int SHAFT_ENCODER_CHANNEL = 0;
+    public static final int SHAFT_ENCODER_CHANNEL_A = 0;
+    public static final int SHAFT_ENCODER_CHANNEL_B = 1;
     public static final int ELEVATOR_MOTOR_ID1 = 30;
     public static final int ELEVATOR_MOTOR_ID2 = 31;
   }

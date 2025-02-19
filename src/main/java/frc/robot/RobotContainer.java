@@ -22,9 +22,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-
+import frc.robot.commands.ElevatorCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.ElevatorSubsystem;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -52,12 +53,16 @@ public class RobotContainer {
     private ArrayList<Double> prevRotationOutputs = new ArrayList<>();
     private int rotationOutputListLimit = 30;
     private double movementPercentModifier = 0.9;
+
+    private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
     
     private int i = 0; // iterator for debugging
     private boolean turnDebug = false; // Set to true to enable debugging
 
     public RobotContainer() {
         configureBindings();
+
+        SmartDashboard.putNumber("ShaftEncoder", elevatorSubsystem.shaftEncoder.get());
 
         /* PathPlanner */
         // Build an auto chooser. This will use Commands.none() as the default option.
@@ -72,6 +77,8 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
+        elevatorSubsystem.setDefaultCommand(new ElevatorCommand(elevatorSubsystem));
+
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
         drivetrain.setDefaultCommand(

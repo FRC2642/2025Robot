@@ -4,13 +4,13 @@
 
 package frc.robot.subsystems;
 
-import edu.wpi.first.wpilibj.DutyCycleEncoder;
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class ElevatorSubsystem extends SubsystemBase {
   /** Creates a new ElevatorSubsystem. */
-  public DutyCycleEncoder shaftEncoder = new DutyCycleEncoder(Constants.ElevatorConstants.SHAFT_ENCODER_CHANNEL);
+  public Encoder shaftEncoder = new Encoder(Constants.ElevatorConstants.SHAFT_ENCODER_CHANNEL_A, Constants.ElevatorConstants.SHAFT_ENCODER_CHANNEL_B);
 
   public ElevatorSubsystem() {}
 
