@@ -39,7 +39,7 @@ public class RobotContainer {
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
-    private final CommandXboxController joystick = new CommandXboxController(0);
+    private final CommandXboxController joystick = new CommandXboxController(Constants.OperatorConstants.kDriverControllerPort);
     private final XboxController control = new XboxController(0);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
@@ -103,33 +103,6 @@ public class RobotContainer {
 
     public Command getAutonomousCommand() {
         return autoChooser.getSelected();
-    }
-
-    /**
-     * *Only autos work. Theoretically, paths should work as well but it seems not.
-     * <br>
-     * Adds a PathPlanner auto* to a SendableChooser.<br>
-     * <br>
-     * If the function cannot find the auto*, the issue will be reported in the rioLog.<br>
-     * 
-     * @param pathName The name of the auto* as a string. The auto* must be in src/main/deploy/pathplanner (it can be in a subfolder within this directory).
-     * @param chooser The SendableChooser that you want the auto* to appear in. To make this appear in your SmartDashboard, use .addData(name, chooser).
-     * @return Nothing! To get the auto* in {@link #getAutonomousCommand()}, use .getSelected() on your SendableChooser.
-     */
-
-    private void addppPathOption(String pathName, SendableChooser<Command> chooser) {
-        try {
-            // Load the path
-            PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
-
-            // Create the path
-            Command pathCommand = AutoBuilder.followPath(path);
-
-            // Add the path to the selector
-            chooser.addOption(pathName, pathCommand);
-        } catch (Exception e) {
-            DriverStation.reportError("Big oops: " + e.getMessage(), e.getStackTrace());
-        }
     }
 
     /**
