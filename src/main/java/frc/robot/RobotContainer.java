@@ -18,10 +18,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-import frc.robot.commands.ElevatorCommand;
+//import frc.robot.commands.ElevatorCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.ElevatorSubsystem;
+//import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.SwerveModifications;
 
 public class RobotContainer {
@@ -48,12 +48,10 @@ public class RobotContainer {
     // Custom Swerve Modifications
     private final SwerveModifications swerveModifications = new SwerveModifications(drivetrain, control);
 
-    private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
+    //private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
 
     public RobotContainer() {
         configureBindings();
-
-        SmartDashboard.putNumber("ShaftEncoder", elevatorSubsystem.shaftEncoder.get());
 
         /* PathPlanner */
         // Build an auto chooser. This will use Commands.none() as the default option.
@@ -68,7 +66,7 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        elevatorSubsystem.setDefaultCommand(new ElevatorCommand(elevatorSubsystem));
+        //elevatorSubsystem.setDefaultCommand(new ElevatorCommand(elevatorSubsystem));
 
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
