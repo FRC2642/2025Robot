@@ -8,16 +8,17 @@ import java.util.ArrayList;
 
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 
 public class SwerveModifications extends SubsystemBase {
   /** Creates a new SwerveModifications. */
-  public boolean turnDebug = false;
+  public boolean turnDebug = Constants.SwerveModifications.TURN_DEBUG;
   private int i = 0;
   public double rotationOffset;
 
   public ArrayList<Double> prevRotationOutputs = new ArrayList<>();
-  public int rotationOutputListLimit = 30;
-  public double movementPercentModifier = 0.9;
+  public int rotationOutputListLimit = Constants.SwerveModifications.ROTATION_OUTPUT_LIST_LIMIT;
+  public double movementPercentModifier = Constants.SwerveModifications.MOVEMENT_PERCENT_MODIFIER;
 
   private CommandSwerveDrivetrain drivetrain;
   XboxController control;

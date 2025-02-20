@@ -37,8 +37,8 @@ public class RobotContainer {
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
-    private final CommandXboxController joystick = new CommandXboxController(Constants.OperatorConstants.kDriverControllerPort);
-    private final XboxController control = new XboxController(0);
+    private final CommandXboxController joystick = new CommandXboxController(Constants.OperatorConstants.PRIMARY_CONTROLER_PORT);
+    private final XboxController control = new XboxController(Constants.OperatorConstants.PRIMARY_CONTROLER_PORT);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
@@ -46,7 +46,7 @@ public class RobotContainer {
     private final SendableChooser<Command> autoChooser;
     
     // Custom Swerve Modifications
-    private final SwerveModifications swerveModifications = new SwerveModifications(drivetrain, control);
+    private final SwerveModifications swerveModifications = new SwerveModifications(drivetrain, control); // Have to create a new instance due to the usage of changing values within the subsystem.
 
     //private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
 

@@ -14,13 +14,19 @@ package frc.robot;
  */
 public final class Constants {
   public static class OperatorConstants {
-    public static final int kDriverControllerPort = 0;
+    public static final int PRIMARY_CONTROLER_PORT = 0;
   }
   
-  public static class ElevatorConstants {
+  public static class Elevator {
     public static final int SHAFT_ENCODER_CHANNEL_A = 0;
     public static final int SHAFT_ENCODER_CHANNEL_B = 1;
     public static final int ELEVATOR_MOTOR_ID1 = 30;
     public static final int ELEVATOR_MOTOR_ID2 = 31;
+  }
+
+  public static class SwerveModifications {
+    public static final boolean TURN_DEBUG = false;
+    public static final int ROTATION_OUTPUT_LIST_LIMIT = 30;
+    public static final double MOVEMENT_PERCENT_MODIFIER = 0.9;
   }
 }
