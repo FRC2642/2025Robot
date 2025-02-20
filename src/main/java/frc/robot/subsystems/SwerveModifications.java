@@ -17,9 +17,7 @@ public class SwerveModifications extends SubsystemBase {
   private int i = 0;
   public double rotationOffset;
 
-  public ArrayList<Double> prevRotationOutputs = new ArrayList<>();
-  public int rotationOutputListLimit = Constants.SwerveModifications.ROTATION_OUTPUT_LIST_LIMIT;
-  public PIDController rotationPID = new PIDController(1.0, 0, 0);
+  public PIDController rotationPID = new PIDController(Constants.SwerveModifications.PID_KP, 0, 0);
   public double movementPercentModifier = Constants.SwerveModifications.MOVEMENT_PERCENT_MODIFIER;
 
   private CommandSwerveDrivetrain drivetrain;
@@ -69,17 +67,6 @@ public class SwerveModifications extends SubsystemBase {
 
     if (Math.abs(angle - currentAngle) > 180) { System.out.println("WARNING: HIGH CALCULATED ANGLE"); }
 
-    /*double outputPower = (angle - currentAngle) / 60; // Modifies rotational speed; retest to find the best (60)
-    if (Math.abs(outputPower) > 1) { outputPower /= Math.abs(outputPower); } // Limit the output power to (abs) 1
-
-    prevRotationOutputs.add(outputPower); // Add new values to the bottom of the list
-    while (prevRotationOutputs.size() > rotationOutputListLimit) { prevRotationOutputs.remove(0); } // Remove extra data points from the top of the list
-    if (prevRotationOutputs.size() == rotationOutputListLimit && outputPower >= 0.9) { // Use if we have data and the outputPower is set to max or near max
-        double prevOutputAvg = 0; // Get the average power over the last 30 code runs
-        for (int j = 0; j < prevRotationOutputs.size(); j++) { prevOutputAvg += Math.abs(prevRotationOutputs.get(j)); }
-        prevOutputAvg /= prevRotationOutputs.size();
-        outputPower *= prevOutputAvg; // The average is essentially a percent since power ranges from (abs) 0 to 1 so multiplying reduces power and creates acceleration
-    }*/ // Bunch of stuff that is easily replaced by a PID:
     double outputPower = rotationPID.calculate(currentAngle, angle);
 
     i = (i >= 10) ? 0 : i; // Reset iterator

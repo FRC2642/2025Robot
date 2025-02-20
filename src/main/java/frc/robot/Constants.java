@@ -26,7 +26,7 @@ public final class Constants {
 
   public static class SwerveModifications {
     public static final boolean TURN_DEBUG = false;
-    public static final int ROTATION_OUTPUT_LIST_LIMIT = 30;
+    public static final double PID_KP = 0.1;
     public static final double MOVEMENT_PERCENT_MODIFIER = 0.9;
   }
 }
