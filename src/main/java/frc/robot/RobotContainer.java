@@ -12,16 +12,18 @@ import com.pathplanner.lib.auto.AutoBuilder;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-//import frc.robot.commands.ElevatorCommand;
+import frc.robot.commands.ElevatorCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-//import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.SwerveModifications;
 
 public class RobotContainer {
@@ -37,8 +39,9 @@ public class RobotContainer {
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
-    private final CommandXboxController joystick = new CommandXboxController(Constants.OperatorConstants.PRIMARY_CONTROLER_PORT);
-    private final XboxController control = new XboxController(Constants.OperatorConstants.PRIMARY_CONTROLER_PORT);
+    private final CommandXboxController joystick = new CommandXboxController(Constants.OperatorConstants.DRIVE_CONTROLLER_PORT);
+    private final Joystick auxButtonBoard = new Joystick(Constants.OperatorConstants.AUX_BUTTON_BOARD_PORT);
+    private final XboxController control = new XboxController(Constants.OperatorConstants.DRIVE_CONTROLLER_PORT);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
@@ -48,7 +51,7 @@ public class RobotContainer {
     // Custom Swerve Modifications
     private final SwerveModifications swerveModifications = new SwerveModifications(drivetrain, control); // Have to create a new instance due to the usage of changing values within the subsystem.
 
-    //private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
+    private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
 
     public RobotContainer() {
         configureBindings();
@@ -56,6 +59,7 @@ public class RobotContainer {
         /* PathPlanner */
         // Build an auto chooser. This will use Commands.none() as the default option.
         autoChooser = AutoBuilder.buildAutoChooser();
+        autoChooser.setDefaultOption("NO AUTO SELECTED", new WaitCommand(15));
 
         // Another option that allows you to specify the default auto by its name:
         // autoChooser = AutoBuilder.buildAutoChooser("forwardBack");
@@ -66,7 +70,7 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        //elevatorSubsystem.setDefaultCommand(new ElevatorCommand(elevatorSubsystem));
+        elevatorSubsystem.setDefaultCommand(new ElevatorCommand(elevatorSubsystem, auxButtonBoard));
 
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.

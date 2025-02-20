@@ -14,7 +14,8 @@ package frc.robot;
  */
 public final class Constants {
   public static class OperatorConstants {
-    public static final int PRIMARY_CONTROLER_PORT = 0;
+    public static final int DRIVE_CONTROLLER_PORT = 0;
+    public static final int AUX_BUTTON_BOARD_PORT = 1;
   }
   
   public static class Elevator {
