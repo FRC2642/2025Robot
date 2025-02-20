@@ -119,7 +119,7 @@ public class RobotContainer {
            // Add the auto to the selector
            chooser.addOption(autoName, autoCommand);
         } catch (Exception e) {
-            DriverStation.reportError("Big oops: " + e.getMessage(), e.getStackTrace());
+            DriverStation.reportError("PathPlanner Error: " + e.getMessage(), e.getStackTrace());
         }
     }
 }

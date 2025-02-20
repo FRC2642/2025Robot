@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import java.util.ArrayList;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -18,6 +19,7 @@ public class SwerveModifications extends SubsystemBase {
 
   public ArrayList<Double> prevRotationOutputs = new ArrayList<>();
   public int rotationOutputListLimit = Constants.SwerveModifications.ROTATION_OUTPUT_LIST_LIMIT;
+  public PIDController rotationPID = new PIDController(1.0, 0, 0);
   public double movementPercentModifier = Constants.SwerveModifications.MOVEMENT_PERCENT_MODIFIER;
 
   private CommandSwerveDrivetrain drivetrain;
@@ -65,9 +67,9 @@ public class SwerveModifications extends SubsystemBase {
         }
     }
 
-    if (Math.abs(angle - currentAngle) > 180) { System.out.println("WARNING"); }
+    if (Math.abs(angle - currentAngle) > 180) { System.out.println("WARNING: HIGH CALCULATED ANGLE"); }
 
-    double outputPower = (angle - currentAngle) / 60; // Modifies rotational speed; retest to find the best (60)
+    /*double outputPower = (angle - currentAngle) / 60; // Modifies rotational speed; retest to find the best (60)
     if (Math.abs(outputPower) > 1) { outputPower /= Math.abs(outputPower); } // Limit the output power to (abs) 1
 
     prevRotationOutputs.add(outputPower); // Add new values to the bottom of the list
@@ -77,7 +79,8 @@ public class SwerveModifications extends SubsystemBase {
         for (int j = 0; j < prevRotationOutputs.size(); j++) { prevOutputAvg += Math.abs(prevRotationOutputs.get(j)); }
         prevOutputAvg /= prevRotationOutputs.size();
         outputPower *= prevOutputAvg; // The average is essentially a percent since power ranges from (abs) 0 to 1 so multiplying reduces power and creates acceleration
-    }
+    }*/ // Bunch of stuff that is easily replaced by a PID:
+    double outputPower = rotationPID.calculate(currentAngle, angle);
 
     i = (i >= 10) ? 0 : i; // Reset iterator
 
