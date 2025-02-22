@@ -103,7 +103,7 @@ public class JojoArmSubsystem extends SubsystemBase {
     speedLimit = max;
   }
 
-  
+
 
   //Intake angle names
   public enum IntakePosition {
