@@ -23,6 +23,12 @@ public final class Constants {
     public static final int SHAFT_ENCODER_CHANNEL_B = 1;
     public static final int ELEVATOR_MOTOR_ID1 = 30;
     public static final int ELEVATOR_MOTOR_ID2 = 31;
+
+    // Reef encoder measurements
+    public static final double L4 = 1000;
+    public static final double L3 = 600;
+    public static final double L2 = 300;
+    public static final double L1 = 10;
   }
 
   public static class SwerveModifications {

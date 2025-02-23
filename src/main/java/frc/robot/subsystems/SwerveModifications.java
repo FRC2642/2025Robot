@@ -10,6 +10,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.MathExt;
 
 public class SwerveModifications extends SubsystemBase {
   /** Creates a new SwerveModifications. */
@@ -23,7 +24,7 @@ public class SwerveModifications extends SubsystemBase {
   private CommandSwerveDrivetrain drivetrain;
   XboxController control;
 
-  public SwerveModifications(CommandSwerveDrivetrain drivetrainIN, XboxController controller) {
+  public SwerveModifications(CommandSwerveDrivetrain drivetrainIN, XboxController controller) { // In the future, include a way to input an offset to prevent odd orientating after running an auto
     this.drivetrain = drivetrainIN;
     this.control = controller;
     this.rotationOffset = this.getRotationOffset();
@@ -68,6 +69,7 @@ public class SwerveModifications extends SubsystemBase {
     if (Math.abs(angle - currentAngle) > 180) { System.out.println("WARNING: HIGH CALCULATED ANGLE"); }
 
     double outputPower = rotationPID.calculate(currentAngle, angle);
+    outputPower = MathExt.cutValue(outputPower, -1, 1);
 
     i = (i >= 10) ? 0 : i; // Reset iterator
 
@@ -89,39 +91,6 @@ public class SwerveModifications extends SubsystemBase {
     return stateRotation - gyroRotation;
   }
 
-  /**
-   * Modifies the axial input, taking in an additional input to modify the original. Returns the result.
-   * 
-   * @param input The original input
-   * @param modifierInput The secondary, modifying input
-   * @param modifyPercent The percent of the value of the original input to be affected by the modifierInput
-   */
-
-  public double modifyAxialInput(double input, double modifierInput, double modifyPercent) {
-    input = cutValue(input, -1, 1);
-    modifierInput = cutValue(modifierInput, 0, 1);
-    double output = input * (modifierInput * modifyPercent + (1 - modifyPercent));
-    // If the input is negative, made the modifier negative, and same for positive
-    return output;
-  }
-
-  /**
-   * Limits a value between the min and the max and returns the limited value.
-   */
-
-  public double cutValue(double value, double min, double max) {
-      if (value > max) { value = max; }
-      else if (value < min) { value = min; }
-      return value;
-  }
-
-  /**
-   * @return -1 if negative and 1 if positive
-   */
-
-  public double getSign(double value) {
-      return value / Math.abs(value);
-  }
 
   @Override
   public void periodic() {

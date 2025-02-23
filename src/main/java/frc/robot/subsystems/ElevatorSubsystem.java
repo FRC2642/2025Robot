@@ -10,6 +10,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.MathExt;
 
 public class ElevatorSubsystem extends SubsystemBase {
   /** Creates a new ElevatorSubsystem. */
@@ -19,6 +20,8 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   public PIDController elevatorPID = new PIDController(0.1, 0, 0);
   public ElevatorPosition elevatorAimPos = ElevatorPosition.L1;
+
+  private int i = 0;
 
   public ElevatorSubsystem() {}
 
@@ -31,14 +34,15 @@ public class ElevatorSubsystem extends SubsystemBase {
   }
 
   public double getMotorOutputPower() {
-    return elevatorPID.calculate(getEncoderValue(), elevatorAimPos.aim);
+    double output = elevatorPID.calculate(getEncoderValue(), elevatorAimPos.aim);
+    return MathExt.cutValue(output, -1, 1);
   }
 
   public enum ElevatorPosition {
-    L1(0),
-    L2(0.3),
-    L3(0.6),
-    L4(1);
+    L1(Constants.Elevator.L1),
+    L2(Constants.Elevator.L2),
+    L3(Constants.Elevator.L3),
+    L4(Constants.Elevator.L4);
 
     public final double aim;
     
@@ -51,5 +55,15 @@ public class ElevatorSubsystem extends SubsystemBase {
   public void periodic() {
     elevatorMotor1.set(getMotorOutputPower());
     elevatorMotor2.set(getMotorOutputPower());
+
+    /*i++;
+
+    if (i > 9) {
+      System.out.println("Encoder: " + getEncoderValue());
+      System.out.println("PID: " + getMotorOutputPower());
+
+    }
+
+    if (i >= 10) { i = 0; }*/
   }
 }
