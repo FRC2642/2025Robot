@@ -53,7 +53,7 @@ public class JojoArmSubsystem extends SubsystemBase {
 
   //Set intake speed
   public void setIntake(double speed) {
-    cylinderMotor.setControl(new DutyCycleOut(speed, true, false, false, false));
+    cylinderMotor.setControl(new DutyCycleOut(speed));
   }
 
   //Set the jojo arm movent to a certain speed
