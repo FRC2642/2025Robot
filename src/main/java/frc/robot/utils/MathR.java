@@ -53,8 +53,4 @@ public class MathR {
     public static double lerp(double outputMin, double outputMax, double inputMin, double inputMax, double input) {
         return outputMin + (outputMax - outputMin)*(input - inputMin)/(inputMax - inputMin);
     }
-
-    
-
-    
 }
