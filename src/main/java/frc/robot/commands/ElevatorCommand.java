@@ -6,6 +6,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem.ElevatorPosition;
 
@@ -15,9 +16,9 @@ public class ElevatorCommand extends Command {
   ElevatorSubsystem elevatorSubsystem;
   Joystick auxButtonBoard;
 
-  public ElevatorCommand(ElevatorSubsystem subsystem, Joystick auxButtonBoard) {
+  public ElevatorCommand(ElevatorSubsystem subsystem, Joystick auxButtonBoard ) {
     this.elevatorSubsystem = subsystem;
-    this.auxButtonBoard = auxButtonBoard;
+    this.auxButtonBoard  = auxButtonBoard;
 
     addRequirements(elevatorSubsystem);
   }
@@ -31,7 +32,7 @@ public class ElevatorCommand extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if (auxButtonBoard.getRawButtonPressed(1)) {
+    if (auxButtonBoard .getRawButtonPressed(1)) {
       elevatorSubsystem.elevatorAimPos = ElevatorPosition.L1;
     } else if (auxButtonBoard.getRawButtonPressed(2)) {
       elevatorSubsystem.elevatorAimPos = ElevatorPosition.L2;
