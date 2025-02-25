@@ -28,7 +28,8 @@ public final class Constants {
     public static final double L4 = 1000;
     public static final double L3 = 600;
     public static final double L2 = 300;
-    public static final double L1 = 10;
+    public static final double L1 = 100;
+    public static final double L0 = 10;
   }
 
   public static class SwerveModifications {

@@ -39,6 +39,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   }
 
   public enum ElevatorPosition {
+    L0(Constants.Elevator.L0),
     L1(Constants.Elevator.L1),
     L2(Constants.Elevator.L2),
     L3(Constants.Elevator.L3),

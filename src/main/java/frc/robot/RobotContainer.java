@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.*;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.path.PathPlannerPath;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -118,10 +119,29 @@ public class RobotContainer {
     private void addppAutoOption(String autoName, SendableChooser<Command> chooser) {
         try {
             // Build the auto
-           Command autoCommand =  AutoBuilder.buildAuto(autoName);
+           Command autoCommand = AutoBuilder.buildAuto(autoName);
 
            // Add the auto to the selector
            chooser.addOption(autoName, autoCommand);
+        } catch (Exception e) {
+            DriverStation.reportError("PathPlanner Error: " + e.getMessage(), e.getStackTrace());
+        }
+    }
+
+    /**
+     * Adds a Choreo path to a SendableChooser.<br>
+     * <br>
+     * If the function cannot find the path, the issue will be reported in the rioLog.<br>
+     * 
+     * 
+     */
+
+    private void addChoreoPathOption(String pathName, SendableChooser<Command> chooser) {
+        try {
+            // Get the path
+            PathPlannerPath path = PathPlannerPath.fromChoreoTrajectory(pathName);
+            
+            
         } catch (Exception e) {
             DriverStation.reportError("PathPlanner Error: " + e.getMessage(), e.getStackTrace());
         }
