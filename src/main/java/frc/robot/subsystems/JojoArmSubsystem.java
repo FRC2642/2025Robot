@@ -41,7 +41,8 @@ public class JojoArmSubsystem extends SubsystemBase {
   }
 
   public static double getPitch() {
-    return MathR.getDistanceToAngle(0, tiltEncoder.setDutyCycleRange(INTAKE_TILT_ENCODER_MIN_VALUE, INTAKE_TILT_ENCODER_MAX_VALUE));
+    return MathR.getDistanceToAngle(0, tiltEncoder.get());
+    //return MathR .get(0, tiltEncoder.setDutyCycleRange(INTAKE_TILT_ENCODER_MIN_VALUE, INTAKE_TILT_ENCODER_MAX_VALUE));
   }
 
   public void tiltToAngle(double degrees) {
