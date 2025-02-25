@@ -6,14 +6,11 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
-import java.util.ArrayList;
+import java.util.function.BooleanSupplier;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.path.PathPlannerPath;
-
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
@@ -21,8 +18,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.ElevatorArmCommand;
@@ -56,22 +53,6 @@ public class RobotContainer {
         //brake
         private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
 
-    //Control Triggers
-            //Elevator Buttons
-            //private Trigger L0_Button = auxController.button(0);
-            //private Trigger L1_Button = auxController.button(1);
-            //private Trigger L2_Button = auxController.button(2);
-            //private Trigger L3_Button = auxController.button(3);
-            //private Trigger L4_Button = auxController.button(4);
-            //Arm Button
-                //private Trigger Shoot_Button = auxController.button(5);
-            //Drive Buttons
-            private Trigger Brake = driveController.a();
-            private Trigger Turbo = driveController.leftTrigger();
-            //Jojo Arm Button
-            private Trigger JojoIntake = driveController.b();
-
-
 
     // PathPlanner
     private final SendableChooser<Command> autoChooser;
@@ -80,6 +61,7 @@ public class RobotContainer {
     private final SwerveModifications swerveModifications = new SwerveModifications(drivetrain, control); // Have to create a new instance due to the usage of changing values within the subsystem.
     private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
     private final ElevatorArmSubsystem elevatorArmSubsystem = new ElevatorArmSubsystem();
+    private JoystickButton shoot = new JoystickButton(auxController, 5);
 
     public RobotContainer() {
         configureBindings();
@@ -99,7 +81,9 @@ public class RobotContainer {
 
     private void configureBindings() {
         elevatorSubsystem.setDefaultCommand(new ElevatorCommand(elevatorSubsystem, auxController));
-        elevatorArmSubsystem.setDefaultCommand(new ElevatorArmCommand(elevatorArmSubsystem, auxController))
+        shoot.whileTrue(new ElevatorArmCommand(elevatorArmSubsystem, elevatorSubsystem));
+
+        
         //X is forward 
         //Y is left
         drivetrain.setDefaultCommand(
@@ -111,18 +95,7 @@ public class RobotContainer {
             )
         );
 
-        Brake.whileTrue(drivetrain.applyRequest(() -> brake));
-
-        //L0_Button.onTrue(new ElevatorCommand(elevatorSubsystem, auxController, 0));
-        //L1_Button.onTrue(new ElevatorCommand(elevatorSubsystem, auxController, 1));
-        //L2_Button.onTrue(new ElevatorCommand(elevatorSubsystem, auxController, 2));
-        //L3_Button.onTrue(new ElevatorCommand(elevatorSubsystem, auxController, 3));
-        //L4_Button.onTrue(new ElevatorCommand(elevatorSubsystem, auxController, 4));
-
-        Shoot_Button.onTrue();
-        Shoot_Button.onFalse();
-
-        JojoIntake.whileTrue();
+        driveController.a().whileTrue(drivetrain.applyRequest(() -> brake));
 
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.
