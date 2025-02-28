@@ -42,7 +42,7 @@ public class RobotContainer {
 
     private final CommandXboxController joystick = new CommandXboxController(Constants.OperatorConstants.DRIVE_CONTROLLER_PORT);
     private final Joystick auxButtonBoard = new Joystick(Constants.OperatorConstants.AUX_BUTTON_BOARD_PORT);
-    private final XboxController control = new XboxController(Constants.OperatorConstants.DRIVE_CONTROLLER_PORT);
+    private final XboxController control = new XboxController(Constants.OperatorConstants.DRIVE_CONTROLLER_PORT); // Xbox controller for boolean use
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
@@ -123,25 +123,6 @@ public class RobotContainer {
 
            // Add the auto to the selector
            chooser.addOption(autoName, autoCommand);
-        } catch (Exception e) {
-            DriverStation.reportError("PathPlanner Error: " + e.getMessage(), e.getStackTrace());
-        }
-    }
-
-    /**
-     * Adds a Choreo path to a SendableChooser.<br>
-     * <br>
-     * If the function cannot find the path, the issue will be reported in the rioLog.<br>
-     * 
-     * 
-     */
-
-    private void addChoreoPathOption(String pathName, SendableChooser<Command> chooser) {
-        try {
-            // Get the path
-            PathPlannerPath path = PathPlannerPath.fromChoreoTrajectory(pathName);
-            
-            
         } catch (Exception e) {
             DriverStation.reportError("PathPlanner Error: " + e.getMessage(), e.getStackTrace());
         }

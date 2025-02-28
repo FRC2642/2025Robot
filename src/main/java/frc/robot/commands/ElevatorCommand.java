@@ -31,15 +31,10 @@ public class ElevatorCommand extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if (auxButtonBoard.getRawButtonPressed(1)) {
-      elevatorSubsystem.elevatorAimPos = ElevatorPosition.L1;
-    } else if (auxButtonBoard.getRawButtonPressed(2)) {
-      elevatorSubsystem.elevatorAimPos = ElevatorPosition.L2;
-    } else if (auxButtonBoard.getRawButtonPressed(3)) {
-      elevatorSubsystem.elevatorAimPos = ElevatorPosition.L3;
-    } else if (auxButtonBoard.getRawButtonPressed(4)) {
-      elevatorSubsystem.elevatorAimPos = ElevatorPosition.L4;
-    }
+    if (auxButtonBoard.getRawButtonPressed(1)) elevatorSubsystem.elevatorAimPos = ElevatorPosition.L1;
+    else if (auxButtonBoard.getRawButtonPressed(2)) elevatorSubsystem.elevatorAimPos = ElevatorPosition.L2;
+    else if (auxButtonBoard.getRawButtonPressed(3)) elevatorSubsystem.elevatorAimPos = ElevatorPosition.L3;
+    else if (auxButtonBoard.getRawButtonPressed(4)) elevatorSubsystem.elevatorAimPos = ElevatorPosition.L4;
   }
 
   // Called once the command ends or is interrupted.
