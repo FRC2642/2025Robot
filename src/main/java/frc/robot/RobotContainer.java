@@ -29,7 +29,7 @@ import frc.robot.subsystems.SwerveModifications;
 
 import frc.robot.utils.MathR;
 import frc.robot.subsystems.JojoArmSubsystem;
-import frc.robot.Commands.JojoArmCommand;
+import frc.robot.commands.JojoArmCommand;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
