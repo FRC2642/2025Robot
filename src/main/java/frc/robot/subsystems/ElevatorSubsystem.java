@@ -14,20 +14,22 @@ import frc.robot.MathExt;
 
 public class ElevatorSubsystem extends SubsystemBase {
   /** Creates a new ElevatorSubsystem. */
+  public boolean motorOverride = false;
+
   public DutyCycleEncoder shaftEncoder = new DutyCycleEncoder(ElevatorConstants.SHAFT_ENCODER_CHANNEL);
   public double encoderValue;
-  public double prevEncoderValue;
-  public double encoderOffset;
-  public double encoderMax = 1.05; // Maximum value for encoders typically goes over 1
+  private double prevEncoderValue;
+  private double encoderOffset = ElevatorConstants.ENCODER_OFFSET;
+  private double encoderMax = 1.05; // Maximum value for encoders typically goes over 1
 
-  public TalonFX elevatorMotor1 = new TalonFX(ElevatorConstants.ELEVATOR_MOTOR_ID1);
-  public TalonFX elevatorMotor2 = new TalonFX(ElevatorConstants.ELEVATOR_MOTOR_ID2);
+  private TalonFX rightElevatorMotor = new TalonFX(ElevatorConstants.RIGHT_ELEVATOR_MOTOR_ID);
+  private TalonFX leftElevatorMotor = new TalonFX(ElevatorConstants.LEFT_ELEVATOR_MOTOR_ID);
 
   public PIDController elevatorPID = new PIDController(0.1, 0, 0);
   public ElevatorPosition elevatorAimPos = ElevatorPosition.L1;
 
   public ElevatorSubsystem() {
-    encoderValue = shaftEncoder.get();
+    encoderValue = shaftEncoder.get() + encoderOffset;
     prevEncoderValue = encoderValue;
   }
   
@@ -36,6 +38,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   }
 
   public double getMotorOutputPower() { // Calculate motor output power using a PID Controller
+    if (motorOverride) return 0;
     double output = elevatorPID.calculate(getEncoderValue(), elevatorAimPos.aim);
     return MathExt.cutValue(output, -1, 1);
   }
@@ -54,14 +57,18 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
   }
 
-  @Override
-  public void periodic() {
+  public void updateEncoderPos() {
     encoderValue = shaftEncoder.get() + encoderOffset; // Dynamically modify encoder values to prevent problems with the encoder reseting
     if (encoderValue - prevEncoderValue > 0.8) encoderOffset += encoderMax;
     else if (prevEncoderValue - encoderValue > 0.8) encoderOffset -= encoderMax;
     prevEncoderValue = encoderValue;
+  }
 
-    elevatorMotor1.set(getMotorOutputPower());
-    elevatorMotor2.set(getMotorOutputPower());
+  @Override
+  public void periodic() {
+    updateEncoderPos();
+
+    rightElevatorMotor.set(-getMotorOutputPower());
+    leftElevatorMotor.set(getMotorOutputPower());
   }
 }

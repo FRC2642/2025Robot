@@ -9,7 +9,6 @@ import static edu.wpi.first.units.Units.*;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.path.PathPlannerPath;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -21,9 +20,11 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import frc.robot.commands.ElevatorArmCommand;
 import frc.robot.commands.ElevatorCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.ElevatorArmSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.SwerveModifications;
 
@@ -52,7 +53,9 @@ public class RobotContainer {
     // Custom Swerve Modifications
     private final SwerveModifications swerveModifications = new SwerveModifications(drivetrain, control); // Have to create a new instance due to the usage of changing values within the subsystem.
 
+    // Component Subsystems
     private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
+    private final ElevatorArmSubsystem elevatorArmSubsystem = new ElevatorArmSubsystem();
 
     public RobotContainer() {
         configureBindings();
@@ -71,7 +74,8 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        elevatorSubsystem.setDefaultCommand(new ElevatorCommand(elevatorSubsystem, auxButtonBoard));
+        elevatorSubsystem.setDefaultCommand(new ElevatorCommand(elevatorSubsystem, elevatorArmSubsystem, auxButtonBoard));
+        elevatorArmSubsystem.setDefaultCommand(new ElevatorArmCommand(elevatorArmSubsystem, control));
 
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.

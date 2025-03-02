@@ -277,6 +277,7 @@ public class TunerConstants {
             SwerveModuleConstants<?, ?, ?>... modules
         ) {
             super(
+                
                 TalonFX::new, TalonFX::new, CANcoder::new,
                 drivetrainConstants, odometryUpdateFrequency,
                 odometryStandardDeviation, visionStandardDeviation, modules
