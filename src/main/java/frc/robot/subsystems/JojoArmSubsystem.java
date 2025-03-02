@@ -20,8 +20,8 @@ public class JojoArmSubsystem extends SubsystemBase {
 
   private PIDController tiltPID = new PIDController(0, 0, 0);
 
-  private TalonFX cylinderMotor = new TalonFX(21);
-  private static TalonFX jojoPivot = new TalonFX(20);
+  private TalonFX cylinderMotor = new TalonFX(20);
+  private static TalonFX jojoPivot = new TalonFX(21);
 
   private static DutyCycleEncoder tiltEncoder = new DutyCycleEncoder(0);
 
