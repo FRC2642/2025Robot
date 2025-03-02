@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.Commands;
+package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -33,8 +33,8 @@ public class JojoArmCommand extends Command {
     jojo.setIntake(0);
     jojo.setManual(0);
 
-    if (driveController.getAButton()){
-      jojo.setIntake(0.6);
+    if (driveController.getYButton()){
+      jojo.setIntake(0.3);
     }
     if (driveController.getLeftTriggerAxis() >= 0.1){
       jojo.setIntake(-1);
