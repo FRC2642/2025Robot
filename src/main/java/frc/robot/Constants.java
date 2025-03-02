@@ -18,21 +18,21 @@ public final class Constants {
     public static final int AUX_BUTTON_BOARD_PORT = 1;
   }
   
-  public static class Elevator {
-    public static final int SHAFT_ENCODER_CHANNEL_A = 0;
-    public static final int SHAFT_ENCODER_CHANNEL_B = 1;
+  public static class ElevatorConstants {
+    public static final int SHAFT_ENCODER_CHANNEL = 0;
+    public static final double ENCODER_OFFSET = 0;
     public static final int ELEVATOR_MOTOR_ID1 = 30;
     public static final int ELEVATOR_MOTOR_ID2 = 31;
 
     // Reef encoder measurements
-    public static final double L4 = 1000;
-    public static final double L3 = 600;
-    public static final double L2 = 300;
-    public static final double L1 = 100;
-    public static final double L0 = 10;
+    public static final double L4 = 10;
+    public static final double L3 = 6;
+    public static final double L2 = 3;
+    public static final double L1 = 1;
+    public static final double L0 = 0;
   }
 
-  public static class SwerveModifications {
+  public static class SwerveModificationConstants {
     public static final boolean TURN_DEBUG = false;
     public static final double PID_KP = 0.1;
     public static final double MOVEMENT_PERCENT_MODIFIER = 0.9;

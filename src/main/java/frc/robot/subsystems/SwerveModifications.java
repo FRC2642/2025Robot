@@ -7,17 +7,17 @@ package frc.robot.subsystems;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
+import frc.robot.Constants.SwerveModificationConstants;
 import frc.robot.MathExt;
 
 public class SwerveModifications extends SubsystemBase {
   /** Creates a new SwerveModifications. */
-  public boolean turnDebug = Constants.SwerveModifications.TURN_DEBUG;
+  public boolean turnDebug = SwerveModificationConstants.TURN_DEBUG;
   private int i = 0;
   public double rotationOffset;
 
-  public PIDController rotationPID = new PIDController(Constants.SwerveModifications.PID_KP, 0, 0);
-  public double movementPercentModifier = Constants.SwerveModifications.MOVEMENT_PERCENT_MODIFIER;
+  public PIDController rotationPID = new PIDController(SwerveModificationConstants.PID_KP, 0, 0);
+  public double movementPercentModifier = SwerveModificationConstants.MOVEMENT_PERCENT_MODIFIER;
 
   private CommandSwerveDrivetrain drivetrain;
   XboxController control;
