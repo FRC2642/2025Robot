@@ -31,7 +31,9 @@ public class ElevatorSubsystem extends SubsystemBase {
   }
 
   public double getMotorOutputPower() {
-    return elevatorPID.calculate(getEncoderValue(), elevatorAimPos.aim);
+    double output = elevatorPID.calculate(getEncoderValue(), elevatorAimPos.aim);
+    return output;
+    
   }
 
   public enum ElevatorPosition {
@@ -49,7 +51,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    elevatorMotor1.set(getMotorOutputPower());
-    elevatorMotor2.set(getMotorOutputPower());
+    //elevatorMotor1.set(getMotorOutputPower());
+    //elevatorMotor2.set(getMotorOutputPower());
   }
 }

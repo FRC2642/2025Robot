@@ -27,6 +27,7 @@ import frc.robot.subsystems.ElevatorArmSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.SwerveModifications;
 
+
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond);
@@ -56,7 +57,7 @@ public class RobotContainer {
     
     // Custom Swerve Modifications
     private final SwerveModifications swerveModifications = new SwerveModifications(drivetrain, control); // Have to create a new instance due to the usage of changing values within the subsystem.
-    private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
+    //private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
     private final ElevatorArmSubsystem elevatorArmSubsystem = new ElevatorArmSubsystem();
     private JoystickButton shoot = new JoystickButton(auxController, 5);
 
@@ -77,11 +78,11 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        elevatorSubsystem.setDefaultCommand(new ElevatorCommand(elevatorSubsystem, auxController));
-        shoot.whileTrue(new ElevatorArmCommand(elevatorArmSubsystem, elevatorSubsystem));
+        //elevatorSubsystem.setDefaultCommand(new ElevatorCommand(elevatorSubsystem, auxController));
+        driveController.y().whileTrue(new ElevatorArmCommand(elevatorArmSubsystem));
 
         
-        //X is forward 
+        //X is forward
         //Y is left
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically

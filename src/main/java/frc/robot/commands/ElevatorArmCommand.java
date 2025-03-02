@@ -13,10 +13,10 @@ import frc.robot.subsystems.ElevatorArmSubsystem.ArmRotation.ShootSpeed;
 public class ElevatorArmCommand extends Command {
   ElevatorArmSubsystem elevatorArmSubsystem;
   ElevatorSubsystem elevatorSubsystem;
-  public ElevatorArmCommand(ElevatorArmSubsystem elevatorArmSubsystem,ElevatorSubsystem elevatorSubsystem) {
+  public ElevatorArmCommand(ElevatorArmSubsystem elevatorArmSubsystem) {
     this.elevatorArmSubsystem = elevatorArmSubsystem;
-    this.elevatorSubsystem = elevatorSubsystem;
-    addRequirements(elevatorArmSubsystem, elevatorSubsystem);
+    //this.elevatorSubsystem = elevatorSubsystem;
+    addRequirements(elevatorArmSubsystem);
   }
 
   // Called when the command is initially scheduled.
@@ -36,7 +36,7 @@ public class ElevatorArmCommand extends Command {
   @Override
   public void end(boolean interrupted) {
     elevatorArmSubsystem.shootSpeed = ShootSpeed.stop;
-    elevatorSubsystem.elevatorAimPos = ElevatorPosition.L1;
+    // elevatorSubsystem.elevatorAimPos = ElevatorPosition.L1;
 
   }
 

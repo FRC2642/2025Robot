@@ -18,7 +18,7 @@ public class ElevatorArmSubsystem extends SubsystemBase {
   private Encoder shaftEncoder = new Encoder(Constants.ElevatorArm.SHAFT_ENCODER_CHANNEL_A, Constants.ElevatorArm.SHAFT_ENCODER_CHANNEL_B);
   public TalonFX shootMotor = new TalonFX(Constants.ElevatorArm.SHOOT_MOTOR);
   public TalonFX rotateMotor = new TalonFX(Constants.ElevatorArm.ROTATE_ARM_MOTOR);
-  public double maxShootOutput= 0.5;
+  public double maxShootOutput= -0.25;
 
   public ArmRotation armRot = ArmRotation.Default;
   public ShootSpeed shootSpeed = ShootSpeed.stop;
@@ -62,6 +62,6 @@ public class ElevatorArmSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     shootMotor.set(shootSpeed.speed * maxShootOutput);
-    rotateMotor.set(getrotateOutput());
+    //rotateMotor.set(getrotateOutput());
   }
 }
