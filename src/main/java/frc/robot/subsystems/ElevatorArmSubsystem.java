@@ -51,6 +51,13 @@ public class ElevatorArmSubsystem extends SubsystemBase {
     return shootSetSpeed;
   }
 
+  public void updateEncoderPos() {
+    encoderValue = shaftEncoder.get() + encoderOffset;
+    if (encoderValue - prevEncoderValue > 0.8) encoderOffset += encoderMax;
+    else if (prevEncoderValue - encoderValue > 0.8) encoderOffset -= encoderMax;
+    prevEncoderValue = encoderValue;
+  }
+
   public enum ArmPosition{ // TO BE ADJUSTED
     Rotation1(ElevatorArmConstants.rotation1),
     Rotation2(ElevatorArmConstants.rotation2),
@@ -73,14 +80,12 @@ public class ElevatorArmSubsystem extends SubsystemBase {
       this.speed = aimSpeed;
     }
   }
-
-  private void updateEncoderPos() {
-    
-  }
 }
 
   @Override
   public void periodic() {
+    updateEncoderPos();
+
     shootMotor.set(getShooterSpeed());
     rotateMotor.set(getrotateOutput());
   }
