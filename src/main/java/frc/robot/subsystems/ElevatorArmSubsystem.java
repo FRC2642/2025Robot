@@ -9,9 +9,9 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.MathExt;
 import frc.robot.Constants.ElevatorArmConstants;
 import frc.robot.subsystems.ElevatorArmSubsystem.ArmPosition.ShooterSpeed;
+import frc.robot.utilities.MathExt;
 
 public class ElevatorArmSubsystem extends SubsystemBase {
   

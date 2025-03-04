@@ -8,7 +8,8 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.SwerveModificationConstants;
-import frc.robot.MathExt;
+import frc.robot.utilities.DynamicController;
+import frc.robot.utilities.MathExt;
 
 public class SwerveModifications extends SubsystemBase {
   /** Creates a new SwerveModifications. */
@@ -17,6 +18,7 @@ public class SwerveModifications extends SubsystemBase {
   public double rotationOffset;
 
   public PIDController rotationPID = new PIDController(SwerveModificationConstants.PID_KP, 0, 0);
+  public DynamicController dynamicController = new DynamicController(30, 0.1, true);
   public double movementPercentModifier = SwerveModificationConstants.MOVEMENT_PERCENT_MODIFIER;
 
   private CommandSwerveDrivetrain drivetrain;
@@ -29,7 +31,7 @@ public class SwerveModifications extends SubsystemBase {
   }
 
   public double recieveTurnRate() {
-    if (turnDebug) { i++; } // Iterator to prevent spam-logging
+    if (turnDebug) i++; // Iterator to prevent spam-logging
 
     // Reset rotation offset 
     if (control.getLeftBumperButtonPressed()) { rotationOffset = getRotationOffset(); }
@@ -57,16 +59,13 @@ public class SwerveModifications extends SubsystemBase {
     }
 
     if (Math.abs(angle - currentAngle) > 180) { // Optimizations
-        if (angle < 0) {
-            angle += 360;
-        } else if (angle > 0) {
-            angle -= 360;
-        }
+        if (angle < 0) angle += 360;
+        else if (angle > 0) angle -= 360;
     }
 
-    if (Math.abs(angle - currentAngle) > 180) { System.out.println("WARNING: HIGH CALCULATED ANGLE"); }
+    if (Math.abs(angle - currentAngle) > 180) System.out.println("WARNING: HIGH CALCULATED ANGLE");
 
-    double outputPower = rotationPID.calculate(currentAngle, angle);
+    double outputPower = dynamicController.calculateOutput(currentAngle, angle);
     outputPower = MathExt.cutValue(outputPower, -1, 1);
 
     i = (i >= 10) ? 0 : i; // Reset iterator

@@ -4,7 +4,7 @@
 
 /* Additional math functions free for use. Made by Aditya Meher */
 
-package frc.robot;
+package frc.robot.utilities;
 
 /** Add your docs here. */
 public class MathExt {
@@ -25,11 +25,14 @@ public class MathExt {
     /**
      * Limits a value between the min and the max and returns the limited value.
      */
-
     public static double cutValue(double value, double min, double max) {
         if (value > max) { return max; }
         else if (value < min) { return min; }
         return value;
+    }
+    public static double cutValue(double value, double size) {
+        double limiter = Math.abs(size);
+        return cutValue(value, -limiter, limiter);
     }
 
     /**
