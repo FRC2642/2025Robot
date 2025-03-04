@@ -10,7 +10,6 @@ import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
-import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.utils.MathR;
 
@@ -18,12 +17,12 @@ public class JojoArmSubsystem extends SubsystemBase {
   
   private final int TILT_TOLERANCE = 0;
 
-  private PIDController tiltPID = new PIDController(0, 0, 0);
+  private PIDController tiltPID = new PIDController(0.01, 0, 0);
 
   private TalonFX cylinderMotor = new TalonFX(20);
   private static TalonFX jojoPivot = new TalonFX(21);
 
-  private static DutyCycleEncoder tiltEncoder = new DutyCycleEncoder(0);
+  private static DutyCycleEncoder tiltEncoder = new DutyCycleEncoder(2);
 
   private IntakePosition currentSetPosition = IntakePosition.RETRACTED;
   private double speedLimit = 0.2;
