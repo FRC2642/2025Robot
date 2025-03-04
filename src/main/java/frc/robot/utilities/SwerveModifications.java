@@ -2,13 +2,13 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.subsystems;
+package frc.robot.utilities;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.SwerveModificationConstants;
-import frc.robot.utilities.DynamicController;
+import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 public class SwerveModifications extends SubsystemBase {
   /** Creates a new SwerveModifications. */
