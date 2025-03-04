@@ -6,9 +6,11 @@ package frc.robot.utilities;
 
 import java.util.ArrayList;
 
+import edu.wpi.first.math.MathUtil;
+
 /** The Interpolator Class uses basic math to smooth values. <br>
  * For more information contact Aditya Meher.<br>
- * 
+ * There are multiple constructors avaliable for initializing a DynamicController. <br>
 */
 public class DynamicController {
     private ArrayList<Double> prevOutputs = new ArrayList<Double>();
@@ -99,7 +101,7 @@ public class DynamicController {
      */
     public double calculateOutput(double currentValue, double desiredValue) {
         double output = (currentValue - desiredValue) * modifier;
-        if (cutValue) output = MathExt.cutValue(output, outputMin, outputMax);
+        if (cutValue) output = MathUtil.clamp(output, outputMin, outputMax);
         updateOutputs(output);
         
         double average = 0;

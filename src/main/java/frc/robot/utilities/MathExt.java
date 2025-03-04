@@ -6,6 +6,8 @@
 
 package frc.robot.utilities;
 
+import edu.wpi.first.math.MathUtil;
+
 /** Add your docs here. */
 public class MathExt {
     
@@ -23,19 +25,6 @@ public class MathExt {
     }
 
     /**
-     * Limits a value between the min and the max and returns the limited value.
-     */
-    public static double cutValue(double value, double min, double max) {
-        if (value > max) { return max; }
-        else if (value < min) { return min; }
-        return value;
-    }
-    public static double cutValue(double value, double size) {
-        double limiter = Math.abs(size);
-        return cutValue(value, -limiter, limiter);
-    }
-
-    /**
      * Modifies the axial input, taking in an additional input to modify the original. Returns the result.
      * 
      * @param input The original input
@@ -44,8 +33,8 @@ public class MathExt {
      */
 
     public static double modifyAxialInput(double input, double modifierInput, double modifyPercent) {
-        input = cutValue(input, -1, 1);
-        modifierInput = cutValue(modifierInput, 0, 1);
+        input = MathUtil.clamp(input, -1, 1);
+        modifierInput = MathUtil.clamp(modifierInput, 0, 1);
         double output = input * (modifierInput * modifyPercent + (1 - modifyPercent));
         // If the input is negative, made the modifier negative, and same for positive
         return output;

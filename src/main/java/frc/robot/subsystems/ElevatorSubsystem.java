@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -40,7 +41,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   public double getMotorOutputPower() { // Calculate motor output power using a PID Controller
     if (motorOverride) return 0;
     double output = elevatorPID.calculate(getEncoderValue(), elevatorAimPos.aim);
-    return MathExt.cutValue(output, -1, 1);
+    return MathUtil.clamp(output, -1, 1);
   }
 
   public enum ElevatorPosition { // Enums for elevator positions

@@ -6,12 +6,12 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ElevatorArmConstants;
 import frc.robot.subsystems.ElevatorArmSubsystem.ArmPosition.ShooterSpeed;
-import frc.robot.utilities.MathExt;
 
 public class ElevatorArmSubsystem extends SubsystemBase {
   
@@ -43,7 +43,7 @@ public class ElevatorArmSubsystem extends SubsystemBase {
   public double getrotateOutput() {
     if (rotateMotorOverride) return 0;
     double output = rotatePID.calculate(getEncoderValue(), armPos.pos);
-    return MathExt.cutValue(output, -1, 1);
+    return MathUtil.clamp(output, -1, 1);
   }
 
   public double getShooterSpeed() {
