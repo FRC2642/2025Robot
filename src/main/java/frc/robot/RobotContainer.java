@@ -21,10 +21,13 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.ElevatorArmCommand;
 import frc.robot.commands.ElevatorCommand;
+import frc.robot.commands.RotateCoralArmCommand;
+import frc.robot.commands.RotateJojoCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.ElevatorArmSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.JojoArmSubsystem;
 import frc.robot.subsystems.SwerveModifications;
 
 
@@ -60,6 +63,7 @@ public class RobotContainer {
     //private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
     private final ElevatorArmSubsystem elevatorArmSubsystem = new ElevatorArmSubsystem();
     private JoystickButton shoot = new JoystickButton(auxController, 5);
+    private final JojoArmSubsystem jojoArmSubsystem = new JojoArmSubsystem();
 
     public RobotContainer() {
         configureBindings();
@@ -79,7 +83,9 @@ public class RobotContainer {
 
     private void configureBindings() {
         //elevatorSubsystem.setDefaultCommand(new ElevatorCommand(elevatorSubsystem, auxController));
-        driveController.y().whileTrue(new ElevatorArmCommand(elevatorArmSubsystem));
+        driveController.x().or(driveController.y()).whileTrue(new RotateCoralArmCommand(elevatorArmSubsystem, control));
+        driveController.a().or(driveController.b()).whileTrue(new ElevatorArmCommand(elevatorArmSubsystem, control));
+        driveController.rightBumper().or(driveController.leftBumper()).whileTrue(new RotateJojoCommand(jojoArmSubsystem, control));
 
         
         //X is forward
@@ -93,8 +99,6 @@ public class RobotContainer {
             )
         );
 
-        driveController.a().whileTrue(drivetrain.applyRequest(() -> brake));
-
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.
         driveController.back().and(driveController.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
@@ -102,8 +106,8 @@ public class RobotContainer {
         driveController.start().and(driveController.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
         driveController.start().and(driveController.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
-        // reset the field-centric heading on left bumper press
-        driveController.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+        //driveController.a().whileTrue(drivetrain.applyRequest(() -> brake));
+        //driveController.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
         drivetrain.registerTelemetry(logger::telemeterize);
     }
 

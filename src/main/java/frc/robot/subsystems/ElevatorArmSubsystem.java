@@ -5,8 +5,10 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -14,32 +16,38 @@ import frc.robot.subsystems.ElevatorArmSubsystem.ArmRotation.ShootSpeed;
 
 public class ElevatorArmSubsystem extends SubsystemBase {
   
-  private PIDController rotatePID = new PIDController(0.1, 0, 0);
-  private Encoder shaftEncoder = new Encoder(Constants.ElevatorArm.SHAFT_ENCODER_CHANNEL_A, Constants.ElevatorArm.SHAFT_ENCODER_CHANNEL_B);
+  private PIDController rotatePID = new PIDController(0.5, 0, 0);
+  private DutyCycleEncoder shaftEncoder= new DutyCycleEncoder(Constants.ElevatorArm.SHAFT_ENCODER_CHANNEL_A);
   public TalonFX shootMotor = new TalonFX(Constants.ElevatorArm.SHOOT_MOTOR);
   public TalonFX rotateMotor = new TalonFX(Constants.ElevatorArm.ROTATE_ARM_MOTOR);
-  public double maxShootOutput= -0.25;
+  public double maxShootOutput= 0.25;
+  public double maxRotateSpeed = 0.7;
+  public double stopBool = 0;
 
-  public ArmRotation armRot = ArmRotation.Default;
+  public ArmRotation armRot = ArmRotation.Score;
   public ShootSpeed shootSpeed = ShootSpeed.stop;
 
   public ElevatorArmSubsystem() {
   }
-
-  public void resetEncoder() {
-    shaftEncoder.reset();
-  }
   public double getEncoderValue() {
-    return shaftEncoder.getDistance();
+    double encoderValue = shaftEncoder.get();
+    return encoderValue;
   }
   public double getrotateOutput() {
-    return rotatePID.calculate(getEncoderValue(), armRot.rot);
+    double toRotate = rotatePID.calculate(getEncoderValue(), armRot.rot);
+    if (toRotate > maxRotateSpeed){
+      toRotate = maxRotateSpeed;
+    }
+    else if (toRotate < -maxRotateSpeed){
+      toRotate = maxRotateSpeed;
+    }
+    return toRotate;
   }
 
   public enum ArmRotation{
-    Rotation1(90),
-    Rotation2(120),
-    Default(0);
+    Score(0.27),
+    Default(0.075),
+    Bottom(0.572);
     
     public final double rot;
 
@@ -62,6 +70,6 @@ public class ElevatorArmSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     shootMotor.set(shootSpeed.speed * maxShootOutput);
-    //rotateMotor.set(getrotateOutput());
+    rotateMotor.set(getrotateOutput() * stopBool);
   }
 }

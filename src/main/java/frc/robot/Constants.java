@@ -33,7 +33,7 @@ public final class Constants {
   public static class ElevatorArm {
     public static final int ROTATE_ARM_MOTOR = 23; //needs to be changed to actuall ID
     public static final int SHOOT_MOTOR = 22; //needs to be changed to actuall ID
-    public static final int SHAFT_ENCODER_CHANNEL_A = 0; //needs to be changed to actuall ID
-    public static final int SHAFT_ENCODER_CHANNEL_B = 1; //needs to be changed to actuall ID
+    public static final int SHAFT_ENCODER_CHANNEL_A = 3; //needs to be changed to actuall ID
+    public static final int SHAFT_ENCODER_CHANNEL_B = 3; //needs to be changed to actuall ID
   }
 }
