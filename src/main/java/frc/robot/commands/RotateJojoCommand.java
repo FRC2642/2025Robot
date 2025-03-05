@@ -13,6 +13,7 @@ import frc.robot.subsystems.JojoArmSubsystem.JojoRotation;
 import frc.robot.subsystems.JojoArmSubsystem;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
+@SuppressWarnings("unused")
 public class RotateJojoCommand extends Command {
   JojoArmSubsystem jojoArmSubsystem;
   XboxController control;
