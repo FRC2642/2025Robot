@@ -18,12 +18,12 @@ public class JojoArmSubsystem extends SubsystemBase {
   
   private final int TILT_TOLERANCE = 0;
 
-  private PIDController tiltPID = new PIDController(0, 0, 0);
+  private PIDController tiltPID = new PIDController(0.01, 0, 0);
 
   private TalonFX cylinderMotor = new TalonFX(20);
   private static TalonFX jojoPivot = new TalonFX(21);
 
-  private static DutyCycleEncoder tiltEncoder = new DutyCycleEncoder(0);
+  private static DutyCycleEncoder tiltEncoder = new DutyCycleEncoder(2);
 
   private IntakePosition currentSetPosition = IntakePosition.RETRACTED;
   private double speedLimit = 0.2;
@@ -108,8 +108,8 @@ public class JojoArmSubsystem extends SubsystemBase {
 
   //Intake angle names
   public enum IntakePosition {
-    RETRACTED(100),
-    EXTENDED(1),
+    RETRACTED(90),
+    EXTENDED(180),
     MANUAL(-1);
 
     public final double angle;
