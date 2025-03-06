@@ -9,20 +9,20 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.ElevatorArmConstants;
 import frc.robot.Constants.ElevatorConstants;
 
 public class ElevatorSubsystem extends SubsystemBase {
   /** Creates a new ElevatorSubsystem. */
   public boolean motorOverride = false;
 
-  public int i = 0;
-
   public Encoder shaftEncoder = new Encoder(ElevatorConstants.SHAFT_ENCODER_CHANNEL_A, ElevatorConstants.SHAFT_ENCODER_CHANNEL_B);
-  //private double encoderOffset = ElevatorConstants.ENCODER_OFFSET;
+  public DutyCycleEncoder armEncoder = new DutyCycleEncoder(ElevatorArmConstants.SHAFT_ENCODER_CHANNEL);
 
   public TalonFX rightElevatorMotor = new TalonFX(ElevatorConstants.RIGHT_ELEVATOR_MOTOR_ID);
   public TalonFX leftElevatorMotor = new TalonFX(ElevatorConstants.LEFT_ELEVATOR_MOTOR_ID);
@@ -32,33 +32,32 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   public XboxController control;
 
-  public ElevatorSubsystem(XboxController controler) {
+  public ElevatorSubsystem(XboxController controller) {
     rightElevatorMotor.setNeutralMode(NeutralModeValue.Brake);
     leftElevatorMotor.setNeutralMode(NeutralModeValue.Brake);
-    this.control = controler;
+    this.control = controller;
 
     if (ElevatorConstants.ELEVATOR_DEBUG) {
       SmartDashboard.putData("Elevator PID", elevatorPID);
     }
   }
 
-  public double getEncoderValue() {
-    return shaftEncoder.get()/1000.0;
-  }
+  public double getEncoderValue() { return shaftEncoder.get()/1000.0; }
+
+  public double getArmEncoderValue() { return armEncoder.get(); }
+  public boolean interruptArmRelative() { if (getArmEncoderValue() < .26) return true; else return false; }
 
   /** Calculates and returns the motor output power. DO NOT USE MORE THAN ONCE IN A FRAME. */
   public double getMotorOutputPower() { // Calculate motor output power using a PID Controller
-    if (motorOverride) {
+    if (interruptArmRelative()) return 0;
+    else if (motorOverride) {
       if (control.getLeftBumperButtonPressed()) {motorOverride = false; shaftEncoder.reset();}
-      if (control.getLeftTriggerAxis() > 0.1) {
-        return -control.getLeftTriggerAxis()/5;
-      } else {
-        return 0;
-      }
+      if (control.getLeftTriggerAxis() > 0.1) return -control.getLeftTriggerAxis()/5;
+      else return 0;
     } else {
       if (control.getLeftBumperButtonPressed()) motorOverride = true;
-    double output = elevatorPID.calculate(getEncoderValue(), elevatorAimPos.aim);
-    return MathUtil.clamp(output, -1, 1);
+      double output = elevatorPID.calculate(getEncoderValue(), elevatorAimPos.aim);
+      return MathUtil.clamp(output, -1, 1);
     }
   }
 
@@ -82,7 +81,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     L2(ElevatorConstants.L2),
     L3(ElevatorConstants.L3),
     L4(ElevatorConstants.L4),
-    LM(ElevatorConstants.LMAX);
+    LM(ElevatorConstants.LMAX); // Max is slightly higher than L4
 
     public final double aim;
     

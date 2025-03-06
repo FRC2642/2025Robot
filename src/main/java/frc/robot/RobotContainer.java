@@ -14,18 +14,19 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import frc.robot.commands.ElevatorArmCommand;
 import frc.robot.commands.ElevatorCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.ElevatorArmSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
-import frc.robot.utilities.MathExt;
 import frc.robot.utilities.SwerveModifications;
 
 public class RobotContainer {
@@ -49,25 +50,18 @@ public class RobotContainer {
 
     // PathPlanner
     private final SendableChooser<Command> autoChooser;
-
-    //private final SendableChooser<Boolean> debugChooser;
     
     // Custom Swerve Modifications
     private final SwerveModifications swerveModifications = new SwerveModifications(drivetrain, control); // Have to create a new instance due to the usage of changing values within the subsystem.
 
     // Component Subsystems
     private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem(control);
-    //private final ElevatorArmSubsystem elevatorArmSubsystem = new ElevatorArmSubsystem();
+    private final ElevatorArmSubsystem elevatorArmSubsystem = new ElevatorArmSubsystem();
 
     public RobotContainer() {
-        configureBindings();
+        Shuffleboard.selectTab("Testing");
 
-        //debugChooser.setDefaultOption("Off", false);
-        //debugChooser.addOption("On", true);
-        //SmartDashboard.putData(debugChooser);
-        if (Constants.DEBUG) { // If we need it
-            
-        }
+        configureBindings();
 
         /* PathPlanner */
         // Build an auto chooser. This will use Commands.none() as the default option.
@@ -83,16 +77,16 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        elevatorSubsystem.setDefaultCommand(new ElevatorCommand(elevatorSubsystem, /*elevatorArmSubsystem,*/ control, auxButtonBoard));
-        //elevatorArmSubsystem.setDefaultCommand(new ElevatorArmCommand(elevatorArmSubsystem, control));
+        elevatorSubsystem.setDefaultCommand(new ElevatorCommand(elevatorSubsystem, control, auxButtonBoard));
+        elevatorArmSubsystem.setDefaultCommand(new ElevatorArmCommand(elevatorArmSubsystem, control));
 
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->
-                drive.withVelocityX(-MathExt.modifyAxialInput(joystick.getLeftY(), joystick.getRightTriggerAxis(), swerveModifications.movementPercentModifier) * MaxSpeed) // Drive forward with negative Y (forward)
-                    .withVelocityY(-MathExt.modifyAxialInput(joystick.getLeftX(), joystick.getRightTriggerAxis(), swerveModifications.movementPercentModifier) * MaxSpeed) // Drive left with negative X (left)
+                drive.withVelocityX(-SwerveModifications.modifyAxialInput(joystick.getLeftY(), joystick.getRightTriggerAxis(), swerveModifications.movementPercentModifier) * MaxSpeed) // Drive forward with negative Y (forward)
+                    .withVelocityY(-SwerveModifications.modifyAxialInput(joystick.getLeftX(), joystick.getRightTriggerAxis(), swerveModifications.movementPercentModifier) * MaxSpeed) // Drive left with negative X (left)
                     .withRotationalRate(-swerveModifications.recieveTurnRate() * MaxAngularRate) // Drive counterclockwise with negative X (left)
             )
         );

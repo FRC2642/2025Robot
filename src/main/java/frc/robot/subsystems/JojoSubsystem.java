@@ -23,7 +23,6 @@ public class JojoSubsystem extends SubsystemBase {
 
   public PIDController pivotPID = new PIDController(0.9, 0, 0);
   public IntakePosition intakePos;
-  public IntakeSpeed intakeSpeed;
 
   public JojoSubsystem() {
     cylinderMotor.setNeutralMode(NeutralModeValue.Brake);
@@ -48,16 +47,6 @@ public class JojoSubsystem extends SubsystemBase {
     IntakePosition(double position) {
       this.pos = position;
     }
-  }
-
-  public enum IntakeSpeed {
-    On(1),
-    Off(0),
-    Reverse(-1);
-
-    public final double speed;
-
-    IntakeSpeed(double speed) { this.speed = speed; }
   }
 
   @Override

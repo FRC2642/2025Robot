@@ -7,7 +7,6 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.ElevatorArmSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem.ElevatorPosition;
 
@@ -17,13 +16,12 @@ public class ElevatorCommand extends Command {
   ElevatorSubsystem elevatorSubsystem;
   //ElevatorArmSubsystem elevatorArmSubsystem;
   XboxController control;
-  //Joystick auxButtonBoard;
+  Joystick auxButtonBoard;
 
-  public ElevatorCommand(ElevatorSubsystem eSubsystem, /*ElevatorArmSubsystem aSubsystem,*/ XboxController controller, Joystick auxButtonBoard) {
+  public ElevatorCommand(ElevatorSubsystem eSubsystem, XboxController controller, Joystick buttonBoard) {
     this.elevatorSubsystem = eSubsystem;
-    //this.elevatorArmSubsystem = aSubsystem;
     this.control = controller;
-    //this.auxButtonBoard = auxButtonBoard;
+    this.auxButtonBoard = buttonBoard;
 
     addRequirements(elevatorSubsystem);
   }
@@ -37,17 +35,14 @@ public class ElevatorCommand extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if (control.getAButton()) elevatorSubsystem.elevatorAimPos = ElevatorPosition.L1;
-    else if (control.getXButton()) elevatorSubsystem.elevatorAimPos = ElevatorPosition.L2;
-    else if (control.getYButton()) elevatorSubsystem.elevatorAimPos = ElevatorPosition.L3;
-    else if (control.getBButton()) elevatorSubsystem.elevatorAimPos = ElevatorPosition.L4;
+    if (auxButtonBoard.getRawButton(6)) elevatorSubsystem.elevatorAimPos = ElevatorPosition.L0;
+    else if (auxButtonBoard.getRawButton(7)) elevatorSubsystem.elevatorAimPos = ElevatorPosition.L1;
+    else if (auxButtonBoard.getRawButton(8)) elevatorSubsystem.elevatorAimPos = ElevatorPosition.L2;
+    else if (auxButtonBoard.getRawButton(9)) elevatorSubsystem.elevatorAimPos = ElevatorPosition.L3;
+    else if (auxButtonBoard.getRawButton(10)) elevatorSubsystem.elevatorAimPos = ElevatorPosition.L4;
 
     elevatorSubsystem.autoSetMotors();
   }
-
-  /*public boolean getButtonPressed(int button) {
-
-  }*/
 
   // Called once the command ends or is interrupted.
   @Override

@@ -68,20 +68,16 @@ public class SwerveModifications extends SubsystemBase {
         System.out.println(" " + stateAngle);
     }*/
 
-    if (Math.abs(angle - currentAngle) > 180) { // Optimizations
-        if (angle < 0) angle += 360;
-        else if (angle > 0) angle -= 360;
-    }
+    if (absDiff(angle, currentAngle) > 180) { if (angle < 0) angle += 360; else if (angle > 0) angle -= 360; }
 
-    if (Math.abs(angle - currentAngle) > 180) System.out.println("WARNING: HIGH CALCULATED ANGLE");
+    if (absDiff(angle, currentAngle) > 180) System.out.println("WARNING: HIGH CALCULATED ANGLE");
 
     double outputPower = MathUtil.clamp(rotationPID.calculate(currentAngle, angle), -1, 1);
 
     //i = (i >= 10) ? 0 : i; // Reset iterator
 
     double joystickMag = Math.sqrt(Math.pow(control.getRightX(), 2) + Math.pow(control.getRightY(), 2)); // Joystick magnitude for deadzones on friction joysticks
-    if (joystickMag >= 0.12) return 0;//outputPower;
-    else return 0;
+    if (joystickMag >= 0.12) return outputPower; else return 0;
   }
 
   public double getRotationOffset() {
@@ -92,6 +88,24 @@ public class SwerveModifications extends SubsystemBase {
     //gyroRotation -= 90;
     //if (gyroRotation < -180) { gyroRotation += 360; }
     return stateRotation - gyroRotation;
+  }
+
+  private double absDiff(double n1, double n2) { return Math.abs(n1 - n2); }
+
+  /**
+     * Modifies the axial input, taking in an additional input to modify the original. Returns the result.
+     * 
+     * @param input The original input
+     * @param modifierInput The secondary, modifying input
+     * @param modifyPercent The percent of the value of the original input to be affected by the modifierInput
+     */
+
+  public static double modifyAxialInput(double input, double modifierInput, double modifyPercent) {
+    input = MathUtil.clamp(input, -1, 1);
+    modifierInput = MathUtil.clamp(modifierInput, 0, 1);
+    double output = input * (modifierInput * modifyPercent + (1 - modifyPercent));
+    // If the input is negative, made the modifier negative, and same for positive
+    return output;
   }
 
 

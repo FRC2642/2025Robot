@@ -5,6 +5,7 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -16,52 +17,31 @@ import frc.robot.subsystems.ElevatorArmSubsystem.ArmPosition.ShooterSpeed;
 public class ElevatorArmSubsystem extends SubsystemBase {
   
   public DutyCycleEncoder shaftEncoder = new DutyCycleEncoder(ElevatorArmConstants.ROTATION_MOTOR_ID);
-  public double encoderValue;
-  public double prevEncoderValue;
   public double encoderOffset;
-  public double encoderMax = ElevatorArmConstants.ENCODER_MAX;
 
   public TalonFX shootMotor = new TalonFX(ElevatorArmConstants.SHOOT_MOTOR_ID);
   public TalonFX rotateMotor = new TalonFX(ElevatorArmConstants.ROTATION_MOTOR_ID);
   public boolean rotateMotorOverride = false;
 
-  public ArmPosition armPos = ArmPosition.Default;
+  public ArmPosition armPos = ArmPosition.Retracted;
   public PIDController rotatePID = new PIDController(0.1, 0, 0);
   public ShooterSpeed shootSpeed = ShooterSpeed.stop;
-  public PIDController shootSpdPID = new PIDController(1, 0, 0);
   public double shootSetSpeed = 0;
 
   public ElevatorArmSubsystem() {
-    encoderValue = shaftEncoder.get();
-    prevEncoderValue = encoderValue;
-  }
-  
-  public double getEncoderValue() {
-    return encoderValue;
+    shootMotor.setNeutralMode(NeutralModeValue.Brake);
+    rotateMotor.setNeutralMode(NeutralModeValue.Brake);
   }
 
   public double getrotateOutput() {
     if (rotateMotorOverride) return 0;
-    double output = rotatePID.calculate(getEncoderValue(), armPos.pos);
-    return MathUtil.clamp(output, -1, 1);
-  }
-
-  public double getShooterSpeed() {
-    shootSetSpeed = shootSpdPID.calculate(shootSetSpeed, shootSpeed.speed);
-    return shootSetSpeed;
-  }
-
-  public void updateEncoderPos() {
-    encoderValue = shaftEncoder.get() + encoderOffset;
-    if (encoderValue - prevEncoderValue > 0.8) encoderOffset += encoderMax;
-    else if (prevEncoderValue - encoderValue > 0.8) encoderOffset -= encoderMax;
-    prevEncoderValue = encoderValue;
+    return MathUtil.clamp(rotatePID.calculate(shaftEncoder.get(), armPos.pos), -1, 1);
   }
 
   public enum ArmPosition{ // TO BE ADJUSTED
-    Rotation1(ElevatorArmConstants.rotation1),
-    Rotation2(ElevatorArmConstants.rotation2),
-    Default(ElevatorArmConstants.rotation0);
+    Retracted(ElevatorArmConstants.RETRACTED),
+    Score(ElevatorArmConstants.SCORE),
+    Extended(ElevatorArmConstants.FULL_EXTEND);
     
     public final double pos;
 
@@ -83,10 +63,5 @@ public class ElevatorArmSubsystem extends SubsystemBase {
 }
 
   @Override
-  public void periodic() {
-    /*updateEncoderPos();
-
-    shootMotor.set(getShooterSpeed());
-    rotateMotor.set(getrotateOutput());*/
-  }
+  public void periodic() {}
 }
