@@ -6,6 +6,8 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
+import java.time.OffsetDateTime;
+
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -50,6 +52,8 @@ public class RobotContainer {
 
     // PathPlanner
     private final SendableChooser<Command> autoChooser;
+
+    //private final SendableChooser<Boolean> debugChooser;
     
     // Custom Swerve Modifications
     private final SwerveModifications swerveModifications = new SwerveModifications(drivetrain, control); // Have to create a new instance due to the usage of changing values within the subsystem.
@@ -60,6 +64,13 @@ public class RobotContainer {
 
     public RobotContainer() {
         configureBindings();
+
+        //debugChooser.setDefaultOption("Off", false);
+        //debugChooser.addOption("On", true);
+        //SmartDashboard.putData(debugChooser);
+        if (Constants.DEBUG) { // If we need it
+            
+        }
 
         /* PathPlanner */
         // Build an auto chooser. This will use Commands.none() as the default option.
@@ -75,8 +86,8 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        elevatorSubsystem.setDefaultCommand(new ElevatorCommand(elevatorSubsystem, elevatorArmSubsystem, auxButtonBoard));
-        elevatorArmSubsystem.setDefaultCommand(new ElevatorArmCommand(elevatorArmSubsystem, control));
+        //elevatorSubsystem.setDefaultCommand(new ElevatorCommand(elevatorSubsystem, elevatorArmSubsystem, auxButtonBoard));
+        //elevatorArmSubsystem.setDefaultCommand(new ElevatorArmCommand(elevatorArmSubsystem, control));
 
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.

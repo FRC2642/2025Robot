@@ -13,6 +13,7 @@ package frc.robot;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+  public static boolean DEBUG = false; // DO NOT SET TO FINAL
 
   public static class OperatorConstants {
     public static final int DRIVE_CONTROLLER_PORT = 0;
@@ -20,28 +21,29 @@ public final class Constants {
   }
   
   public static class ElevatorConstants {
-    public static final int SHAFT_ENCODER_CHANNEL = 0;
+    public static final boolean ELEVATOR_DEBUG = false;
+    public static final int SHAFT_ENCODER_CHANNEL_A = 0;
+    public static final int SHAFT_ENCODER_CHANNEL_B = 1;
     public static final double ENCODER_OFFSET = 0;
     public static final double ENCODER_MAX = 1.05;
     public static final int RIGHT_ELEVATOR_MOTOR_ID = 24;
     public static final int LEFT_ELEVATOR_MOTOR_ID = 25;
 
     // Reef encoder measurements
-    public static final double L4 = 10;
-    public static final double L3 = 6;
-    public static final double L2 = 3;
-    public static final double L1 = 1;
+    public static final double L4 = 11000;
+    public static final double L3 = 9114;
+    public static final double L2 = 6269;
+    public static final double L1 = 4834;
     public static final double L0 = 0;
   }
 
   public static class SwerveModificationConstants {
-    public static final boolean TURN_DEBUG = false;
-    public static final double PID_KP = 0.1;
+    public static final boolean TURN_DEBUG = DEBUG; // Initially seperated but for specific testing can change
     public static final double MOVEMENT_PERCENT_MODIFIER = 0.9;
   }
 
   public static class ElevatorArmConstants {
-    public static final int SHAFT_ENCODER_CHANNEL = 1;
+    public static final int SHAFT_ENCODER_CHANNEL = 3;
     public static final double ENCODER_MAX = 1.05;
     public static final int ROTATION_MOTOR_ID = 32;
     public static final int SHOOT_MOTOR_ID = 33;
@@ -50,5 +52,16 @@ public final class Constants {
     public static final double rotation0 = 0;
     public static final double rotation1 = 0.5;
     public static final double rotation2 = 0.75;
+  }
+
+  public static class JojoConstants {
+    public static final boolean JOJO_DEBUG = false;
+    public static final int CYLLINDER_MOTOR_ID = 20;
+    public static final int PIVOT_MOTOR_ID = 21;
+    public static final int SHAFT_ENCODER_ID = 2;
+
+    // Arm Encoder measurements
+    public static final double ARM_UP = 0.27;
+    public static final double ARM_OUT = 0.52;
   }
 }

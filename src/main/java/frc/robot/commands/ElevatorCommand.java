@@ -38,6 +38,9 @@ public class ElevatorCommand extends Command {
     else if (auxButtonBoard.getRawButtonPressed(2)) elevatorSubsystem.elevatorAimPos = ElevatorPosition.L2;
     else if (auxButtonBoard.getRawButtonPressed(3)) elevatorSubsystem.elevatorAimPos = ElevatorPosition.L3;
     else if (auxButtonBoard.getRawButtonPressed(4)) elevatorSubsystem.elevatorAimPos = ElevatorPosition.L4;
+
+    elevatorSubsystem.rightElevatorMotor.set(-elevatorSubsystem.getMotorOutputPower());
+    elevatorSubsystem.leftElevatorMotor.set(elevatorSubsystem.getMotorOutputPower());
   }
 
   // Called once the command ends or is interrupted.
