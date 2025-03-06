@@ -80,7 +80,7 @@ public class SwerveModifications extends SubsystemBase {
     //i = (i >= 10) ? 0 : i; // Reset iterator
 
     double joystickMag = Math.sqrt(Math.pow(control.getRightX(), 2) + Math.pow(control.getRightY(), 2)); // Joystick magnitude for deadzones on friction joysticks
-    if (joystickMag >= 0.12) return outputPower;
+    if (joystickMag >= 0.12) return 0;//outputPower;
     else return 0;
   }
 

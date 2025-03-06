@@ -15,7 +15,7 @@ import frc.robot.subsystems.ElevatorArmSubsystem.ArmPosition.ShooterSpeed;
 
 public class ElevatorArmSubsystem extends SubsystemBase {
   
-  private DutyCycleEncoder shaftEncoder = new DutyCycleEncoder(ElevatorArmConstants.ROTATION_MOTOR_ID);
+  public DutyCycleEncoder shaftEncoder = new DutyCycleEncoder(ElevatorArmConstants.ROTATION_MOTOR_ID);
   public double encoderValue;
   public double prevEncoderValue;
   public double encoderOffset;
@@ -84,9 +84,9 @@ public class ElevatorArmSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    updateEncoderPos();
+    /*updateEncoderPos();
 
     shootMotor.set(getShooterSpeed());
-    rotateMotor.set(getrotateOutput());
+    rotateMotor.set(getrotateOutput());*/
   }
 }

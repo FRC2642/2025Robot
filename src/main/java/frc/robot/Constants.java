@@ -21,7 +21,7 @@ public final class Constants {
   }
   
   public static class ElevatorConstants {
-    public static final boolean ELEVATOR_DEBUG = false;
+    public static final boolean ELEVATOR_DEBUG = true;
     public static final int SHAFT_ENCODER_CHANNEL_A = 0;
     public static final int SHAFT_ENCODER_CHANNEL_B = 1;
     public static final double ENCODER_OFFSET = 0;
@@ -30,7 +30,8 @@ public final class Constants {
     public static final int LEFT_ELEVATOR_MOTOR_ID = 25;
 
     // Reef encoder measurements
-    public static final double L4 = 11000;
+    public static final double LMAX = 11000;
+    public static final double L4 = 10084;
     public static final double L3 = 9114;
     public static final double L2 = 6269;
     public static final double L1 = 4834;
