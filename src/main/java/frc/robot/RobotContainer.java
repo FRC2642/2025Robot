@@ -12,6 +12,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.event.BooleanEvent;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -19,16 +20,15 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-import frc.robot.commands.ElevatorArmCommand;
 import frc.robot.commands.ElevatorCommand;
-import frc.robot.commands.RotateCoralArmCommand;
-import frc.robot.commands.RotateJojoCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.ElevatorArmSubsystem;
+import frc.robot.subsystems.CoralArmSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.JojoArmSubsystem;
 import frc.robot.subsystems.SwerveModifications;
+import frc.robot.subsystems.CoralArmSubsystem.ArmRotation;
+import frc.robot.subsystems.JojoArmSubsystem.JojoRotation;
 
 
 public class RobotContainer {
@@ -41,55 +41,54 @@ public class RobotContainer {
     private final Telemetry logger = new Telemetry(Speed);
 
     private final CommandXboxController driveController = new CommandXboxController(Constants.OperatorConstants.DRIVE_CONTROLLER_PORT); //make variable
-    private final Joystick auxController = new Joystick(Constants.OperatorConstants.AUX_BUTTON_BOARD_PORT); //make variable
     private final XboxController control = new XboxController(Constants.OperatorConstants.DRIVE_CONTROLLER_PORT);
+    private final Joystick auxController = new Joystick(Constants.OperatorConstants.AUX_BUTTON_BOARD_PORT); //make variable
 
-    public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
-
+    //Subsystems
+        public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain(); //drive
+        private final CoralArmSubsystem coralArmSubsystem = new CoralArmSubsystem(); //CoralArm
+        private final JojoArmSubsystem jojoArmSubsystem = new JojoArmSubsystem(); //JojoArm
+        //private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem(); //Elevator
     //Swerve drive commands
-        //Drive
-        private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-                .withDeadband(Speed * 0.1).withRotationalDeadband(AngularRate * 0.1) // Add a 10% deadband
-                .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
-        //brake
-        private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
+        private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric() //drive
+                .withDeadband(Speed * 0.1).withRotationalDeadband(AngularRate * 0.1)
+                .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+        private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake(); // brake
+    //Conditions
 
 
     // PathPlanner
     private final SendableChooser<Command> autoChooser;
-    
     // Custom Swerve Modifications
     private final SwerveModifications swerveModifications = new SwerveModifications(drivetrain, control); // Have to create a new instance due to the usage of changing values within the subsystem.
-    //private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
-    private final ElevatorArmSubsystem elevatorArmSubsystem = new ElevatorArmSubsystem();
-    private JoystickButton shoot = new JoystickButton(auxController, 5);
-    private final JojoArmSubsystem jojoArmSubsystem = new JojoArmSubsystem();
-
     public RobotContainer() {
         configureBindings();
-
         /* PathPlanner */
         // Build an auto chooser. This will use Commands.none() as the default option.
         autoChooser = AutoBuilder.buildAutoChooser();
         autoChooser.setDefaultOption("NO AUTO SELECTED", new WaitCommand(15));
-
         // Another option that allows you to specify the default auto by its name:
         // autoChooser = AutoBuilder.buildAutoChooser("forwardBack");
-
         SmartDashboard.putData("Auto Chooser", autoChooser);
-
         // To add an auto to the autoChooser use addppAutoOption()
     }
 
     private void configureBindings() {
         //elevatorSubsystem.setDefaultCommand(new ElevatorCommand(elevatorSubsystem, auxController));
-        driveController.x().or(driveController.y()).whileTrue(new RotateCoralArmCommand(elevatorArmSubsystem, control));
-        driveController.a().or(driveController.b()).whileTrue(new ElevatorArmCommand(elevatorArmSubsystem, control));
-        driveController.rightBumper().or(driveController.leftBumper()).whileTrue(new RotateJojoCommand(jojoArmSubsystem, control));
+        //driveController.x().or(driveController.y()).whileTrue(new RotateCoralArmCommand(elevatorArmSubsystem, control));
+        //driveController.a().or(driveController.b()).whileTrue(new ElevatorArmCommand(elevatorArmSubsystem, control));
+        driveController.x().onTrue(coralArmSubsystem.rotateCommand(ArmRotation.Default));
+        driveController.y().onTrue(coralArmSubsystem.rotateCommand(ArmRotation.Bottom));
+        driveController.a().onTrue(coralArmSubsystem.rotateCommand(ArmRotation.Score));
+        driveController.b().whileTrue(coralArmSubsystem.shootCommand());
+
+
+        driveController.rightBumper().onTrue(jojoArmSubsystem.rotateCommand(JojoRotation.Intake));
+        driveController.leftBumper().onTrue(jojoArmSubsystem.rotateCommand(JojoRotation.Default));
+        driveController.rightBumper().whileTrue(jojoArmSubsystem.intakeCommand());
 
         
-        //X is forward
-        //Y is left
+        //DriveCommands
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->
@@ -98,6 +97,10 @@ public class RobotContainer {
                     .withRotationalRate(-swerveModifications.recieveTurnRate() * MaxAngularRate)
             )
         );
+        //driveController.a().whileTrue(drivetrain.applyRequest(() -> brake));
+        //driveController.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+
+
 
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.

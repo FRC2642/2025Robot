@@ -5,28 +5,60 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
-import frc.robot.subsystems.ElevatorArmSubsystem.ArmRotation;
-import frc.robot.subsystems.ElevatorArmSubsystem.ArmRotation.ShootSpeed;
 
 public class JojoArmSubsystem extends SubsystemBase {
-  private PIDController rotatePID = new PIDController(0.1, 0, 0);
-  private DutyCycleEncoder shaftEncoder = new DutyCycleEncoder(2);
   public TalonFX rotateJojoMotor = new TalonFX(21);
-  public double maxRotateSpeed = 0.5;
   public TalonFX intakeJojoMotor = new TalonFX(20);
-  public double maxintakeSpeed = 0.5;
-  public double stopBool = 0;
+  private DutyCycleEncoder shaftEncoder = new DutyCycleEncoder(2);
 
+  private PIDController rotatePID = new PIDController(0.3, 0, 0);
+
+  public double maxRotateSpeed = 0.9;
+  public double maxintakeSpeed = 0.25;
   public JojoRotation jojoRotation = JojoRotation.Default;
   public JojoIntake intakeMode = JojoIntake.stop;
 
+  public Trigger RotationStateReached = new Trigger(() -> Math.abs(getEncoderValue() - jojoRotation.rot) < 0.01);
 
-  public JojoArmSubsystem() {}
+
+
+  public JojoArmSubsystem() {
+    rotateJojoMotor.setNeutralMode(NeutralModeValue.Brake);
+    intakeJojoMotor.setNeutralMode(NeutralModeValue.Brake);
+
+    setDefaultCommand(runOnce(()-> {intakeMode = JojoIntake.stop; intakeJojoMotor.disable(); rotateJojoMotor.disable();})
+    .andThen(run(() -> {}))
+    .withName("Idle"));
+  }
+
+  public enum JojoRotation{
+    Default(.27),
+    Intake(.59);
+    
+    public final double rot;
+    
+    JojoRotation(double rotation) {
+      this.rot = rotation;
+    }
+  }
+  public enum JojoIntake{
+    intake(1),
+    stop(0);
+
+    public final double intakeSpeed;
+    JojoIntake(double speed){
+      this.intakeSpeed = speed;
+    }
+  }
 
   public double getEncoderValue() {
     double encoderValue = shaftEncoder.get();
@@ -46,29 +78,16 @@ public class JojoArmSubsystem extends SubsystemBase {
     return toRotate;
   }
 
-  public enum JojoRotation{
-    Default(-1),
-    Intake(1);
-    
-    public final double rot;
-    
-    JojoRotation(double rotation) {
-      this.rot = rotation;
-    }
+  public Command intakeCommand(){
+    return run(()->{intakeMode = JojoIntake.intake; intakeJojoMotor.set(intakeMode.intakeSpeed * maxintakeSpeed);})
+    .withName("Intake Algae");
   }
-  public enum JojoIntake{
-    intake(1),
-    stop(0);
-
-    public final double intakeSpeed;
-    JojoIntake(double speed){
-      this.intakeSpeed = speed;
-    }
+  public Command rotateCommand(JojoRotation rotation){
+    return new RunCommand(()-> {jojoRotation = rotation; rotateJojoMotor.set(getrotateOutput());}).until(RotationStateReached)
+    .andThen(runOnce(() -> rotateJojoMotor.disable())).withName("Rotate Jojo Arm");
   }
 
   @Override
   public void periodic() {
-    intakeJojoMotor.set(intakeMode.intakeSpeed * maxintakeSpeed);
-    rotateJojoMotor.set(jojoRotation.rot * stopBool * maxRotateSpeed);
   }
 }
