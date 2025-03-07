@@ -16,7 +16,7 @@ import frc.robot.subsystems.ElevatorArmSubsystem.ArmPosition.ShooterSpeed;
 
 public class ElevatorArmSubsystem extends SubsystemBase {
   
-  public DutyCycleEncoder shaftEncoder = new DutyCycleEncoder(ElevatorArmConstants.ROTATION_MOTOR_ID);
+  public DutyCycleEncoder shaftEncoder = new DutyCycleEncoder(ElevatorArmConstants.SHAFT_ENCODER_CHANNEL);
   public double encoderOffset;
 
   public TalonFX shootMotor = new TalonFX(ElevatorArmConstants.SHOOT_MOTOR_ID);

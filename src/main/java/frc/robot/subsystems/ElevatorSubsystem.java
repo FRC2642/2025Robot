@@ -21,8 +21,9 @@ public class ElevatorSubsystem extends SubsystemBase {
   /** Creates a new ElevatorSubsystem. */
   public boolean motorOverride = false;
 
+  ElevatorArmSubsystem armSubsystem;
+  
   public Encoder shaftEncoder = new Encoder(ElevatorConstants.SHAFT_ENCODER_CHANNEL_A, ElevatorConstants.SHAFT_ENCODER_CHANNEL_B);
-  public DutyCycleEncoder armEncoder = new DutyCycleEncoder(ElevatorArmConstants.SHAFT_ENCODER_CHANNEL);
 
   public TalonFX rightElevatorMotor = new TalonFX(ElevatorConstants.RIGHT_ELEVATOR_MOTOR_ID);
   public TalonFX leftElevatorMotor = new TalonFX(ElevatorConstants.LEFT_ELEVATOR_MOTOR_ID);
@@ -32,10 +33,11 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   public XboxController control;
 
-  public ElevatorSubsystem(XboxController controller) {
+  public ElevatorSubsystem(XboxController controller, ElevatorArmSubsystem subsystem) {
     rightElevatorMotor.setNeutralMode(NeutralModeValue.Brake);
     leftElevatorMotor.setNeutralMode(NeutralModeValue.Brake);
     this.control = controller;
+    this.armSubsystem = subsystem;
 
     if (ElevatorConstants.ELEVATOR_DEBUG) {
       SmartDashboard.putData("Elevator PID", elevatorPID);
@@ -44,7 +46,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   public double getEncoderValue() { return shaftEncoder.get()/1000.0; }
 
-  public double getArmEncoderValue() { return armEncoder.get(); }
+  public double getArmEncoderValue() { return armSubsystem.shaftEncoder.get(); }
   public boolean interruptArmRelative() { if (getArmEncoderValue() < .26) return true; else return false; }
 
   /** Calculates and returns the motor output power. DO NOT USE MORE THAN ONCE IN A FRAME. */

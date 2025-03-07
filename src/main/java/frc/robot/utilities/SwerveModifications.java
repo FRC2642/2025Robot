@@ -8,14 +8,13 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.SwerveModificationConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 /**
- * Enlists improvements to the 
+ * Enlists improvements to CTRE Swerve.
  */
-public class SwerveModifications extends SubsystemBase {
+public class SwerveModifications {
   /** Creates a new SwerveModifications. */
   public boolean turnDebug = SwerveModificationConstants.TURN_DEBUG;
   //private int i = 0;
@@ -106,12 +105,5 @@ public class SwerveModifications extends SubsystemBase {
     double output = input * (modifierInput * modifyPercent + (1 - modifyPercent));
     // If the input is negative, made the modifier negative, and same for positive
     return output;
-  }
-
-
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
-    SmartDashboard.updateValues();
   }
 }
