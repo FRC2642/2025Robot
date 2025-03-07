@@ -38,6 +38,10 @@ public class JojoSubsystem extends SubsystemBase {
     return MathUtil.clamp(output, -1, 1);
   }
 
+  public void updateMotors() {
+    cylinderMotor.set(getMotorOutputPower());
+  }
+
   public enum IntakePosition {
     Up(JojoConstants.ARM_UP),
     Out(JojoConstants.ARM_OUT);

@@ -43,7 +43,7 @@ public class SwerveModifications {
     //if (turnDebug) i++; // Iterator to prevent spam-logging
 
     // Reset rotation offset 
-    //if (control.getLeftBumperButtonPressed()) { rotationOffset = getRotationOffset(); }
+    //if (control.getRawButtonPressed(7)) { rotationOffset = getRotationOffset(); }
 
     /* Convert controller left stick x and y to degrees (0 - 360) */
     double angle = Math.atan2(control.getRightY(), control.getRightX()); // Get raw positions

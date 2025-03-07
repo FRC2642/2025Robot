@@ -53,11 +53,11 @@ public class ElevatorSubsystem extends SubsystemBase {
   public double getMotorOutputPower() { // Calculate motor output power using a PID Controller
     if (interruptArmRelative()) return 0;
     else if (motorOverride) {
-      if (control.getLeftBumperButtonPressed()) {motorOverride = false; shaftEncoder.reset();}
+      if (control.getRightBumperButton()) {motorOverride = false; shaftEncoder.reset();}
       if (control.getLeftTriggerAxis() > 0.1) return -control.getLeftTriggerAxis()/5;
       else return 0;
     } else {
-      if (control.getLeftBumperButtonPressed()) motorOverride = true;
+      if (control.getRightBumperButton()) motorOverride = true;
       double output = elevatorPID.calculate(getEncoderValue(), elevatorAimPos.aim);
       return MathUtil.clamp(output, -1, 1);
     }

@@ -36,6 +36,8 @@ public class JojoCommand extends Command {
 
     if (control.getLeftBumperButtonPressed()) jojoSubsystem.cylinderMotor.set(1);
     else jojoSubsystem.cylinderMotor.set(0);
+
+    
   }
 
   // Called once the command ends or is interrupted.

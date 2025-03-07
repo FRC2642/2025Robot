@@ -28,11 +28,11 @@ public final class Constants {
     public static final int LEFT_ELEVATOR_MOTOR_ID = 25;
 
     // Reef encoder measurements
-    public static final double LMAX = 11000;
-    public static final double L4 = 10084;
-    public static final double L3 = 9114;
-    public static final double L2 = 6269;
-    public static final double L1 = 4834;
+    public static final double LMAX = 11;
+    public static final double L4 = 10.084;
+    public static final double L3 = 9.114;
+    public static final double L2 = 6.269;
+    public static final double L1 = 4.834;
     public static final double L0 = 0;
   }
 
