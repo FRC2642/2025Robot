@@ -21,7 +21,7 @@ public class JojoSubsystem extends SubsystemBase {
   public TalonFX cylinderMotor = new TalonFX(JojoConstants.CYLLINDER_MOTOR_ID);
   public TalonFX pivotMotor = new TalonFX(JojoConstants.PIVOT_MOTOR_ID);
 
-  public PIDController pivotPID = new PIDController(0.9, 0, 0);
+  public PIDController pivotPID = new PIDController(2.5, 0, 0);
   public IntakePosition intakePos;
 
   public JojoSubsystem() {
@@ -39,7 +39,7 @@ public class JojoSubsystem extends SubsystemBase {
   }
 
   public void updateMotors() {
-    cylinderMotor.set(getMotorOutputPower());
+    pivotMotor.set(getMotorOutputPower());
   }
 
   public enum IntakePosition {

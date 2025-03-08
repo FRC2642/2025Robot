@@ -13,7 +13,7 @@ package frc.robot;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-  public static boolean DEBUG = false; // DO NOT SET TO FINAL
+  public static boolean DEBUG = true; // DO NOT SET TO FINAL
 
   public static class OperatorConstants {
     public static final int DRIVE_CONTROLLER_PORT = 0;
@@ -21,14 +21,15 @@ public final class Constants {
   }
   
   public static class ElevatorConstants {
-    public static final boolean ELEVATOR_DEBUG = true || DEBUG;
+    public static final boolean ELEVATOR_DEBUG = false || DEBUG;
     public static final int SHAFT_ENCODER_CHANNEL_A = 0;
     public static final int SHAFT_ENCODER_CHANNEL_B = 1;
+    public static final int LIMIT_SWITCH_CHANNEL = 5;
     public static final int RIGHT_ELEVATOR_MOTOR_ID = 24;
     public static final int LEFT_ELEVATOR_MOTOR_ID = 25;
 
     // Reef encoder measurements
-    public static final double LMAX = 11;
+    public static final double LMAX = 11; // DO NOT USE MAX; RISK OF BREAKING ELEVATOR
     public static final double L4 = 10.084;
     public static final double L3 = 9.114;
     public static final double L2 = 6.269;
@@ -62,6 +63,6 @@ public final class Constants {
 
     // Arm Encoder measurements
     public static final double ARM_UP = 0.27;
-    public static final double ARM_OUT = 0.52;
+    public static final double ARM_OUT = 0.64;
   }
 }

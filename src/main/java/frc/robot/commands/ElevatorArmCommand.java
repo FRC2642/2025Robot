@@ -13,11 +13,11 @@ import frc.robot.subsystems.ElevatorArmSubsystem;
 public class ElevatorArmCommand extends Command {
   /** Creates a new ElevatorArmCommand. */
   public ElevatorArmSubsystem elevatorArmSubsystem;
-  public XboxController controller;
+  public XboxController control;
 
-  public ElevatorArmCommand(ElevatorArmSubsystem eSubsystem, XboxController control) {
+  public ElevatorArmCommand(ElevatorArmSubsystem eSubsystem, XboxController controller) {
     this.elevatorArmSubsystem = eSubsystem;
-    this.controller = control;
+    this.control = controller;
 
     addRequirements(eSubsystem);
   }
@@ -30,7 +30,11 @@ public class ElevatorArmCommand extends Command {
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {}
+  public void execute() {
+    
+    
+    elevatorArmSubsystem.updateMotors();
+  }
 
   // Called once the command ends or is interrupted.
   @Override

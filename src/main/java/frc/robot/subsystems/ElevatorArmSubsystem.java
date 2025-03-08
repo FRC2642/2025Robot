@@ -10,6 +10,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ElevatorArmConstants;
 import frc.robot.subsystems.ElevatorArmSubsystem.ArmPosition.ShooterSpeed;
@@ -31,11 +32,19 @@ public class ElevatorArmSubsystem extends SubsystemBase {
   public ElevatorArmSubsystem() {
     shootMotor.setNeutralMode(NeutralModeValue.Brake);
     rotateMotor.setNeutralMode(NeutralModeValue.Brake);
+
+    if (ElevatorArmConstants.ARM_DEBUG) {
+      SmartDashboard.putData("Ele Arm PID", rotatePID);
+    }
   }
 
-  public double getrotateOutput() {
+  public double getRotateOutput() {
     if (rotateMotorOverride) return 0;
     return MathUtil.clamp(rotatePID.calculate(shaftEncoder.get(), armPos.pos), -1, 1);
+  }
+
+  public void updateMotors() {
+    rotateMotor.set(getRotateOutput());
   }
 
   public enum ArmPosition{ // TO BE ADJUSTED

@@ -35,11 +35,11 @@ public class ElevatorCommand extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if (auxButtonBoard.getRawButton(7)) elevatorSubsystem.elevatorAimPos = ElevatorPosition.L0;
-    else if (auxButtonBoard.getRawButton(8)) elevatorSubsystem.elevatorAimPos = ElevatorPosition.L1;
-    else if (auxButtonBoard.getRawButton(9)) elevatorSubsystem.elevatorAimPos = ElevatorPosition.L2;
-    else if (auxButtonBoard.getRawButton(10)) elevatorSubsystem.elevatorAimPos = ElevatorPosition.L3;
-    else if (auxButtonBoard.getRawButton(11)) elevatorSubsystem.elevatorAimPos = ElevatorPosition.L4;
+    if (auxButtonBoard.getRawButton(8)) elevatorSubsystem.elevatorAimPos = ElevatorPosition.L0;
+    else if (auxButtonBoard.getRawButton(9)) elevatorSubsystem.elevatorAimPos = ElevatorPosition.L1;
+    else if (auxButtonBoard.getRawButton(10)) elevatorSubsystem.elevatorAimPos = ElevatorPosition.L2;
+    else if (auxButtonBoard.getRawButton(11)) elevatorSubsystem.elevatorAimPos = ElevatorPosition.L3;
+    else if (auxButtonBoard.getRawButton(12)) elevatorSubsystem.elevatorAimPos = ElevatorPosition.L4;
 
     elevatorSubsystem.autoSetMotors();
   }

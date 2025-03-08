@@ -9,12 +9,12 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.wpilibj.DutyCycleEncoder;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.ElevatorArmConstants;
 import frc.robot.Constants.ElevatorConstants;
 
 public class ElevatorSubsystem extends SubsystemBase {
@@ -24,6 +24,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   ElevatorArmSubsystem armSubsystem;
   
   public Encoder shaftEncoder = new Encoder(ElevatorConstants.SHAFT_ENCODER_CHANNEL_A, ElevatorConstants.SHAFT_ENCODER_CHANNEL_B);
+  public DigitalInput limitSwitch = new DigitalInput(ElevatorConstants.LIMIT_SWITCH_CHANNEL);
 
   public TalonFX rightElevatorMotor = new TalonFX(ElevatorConstants.RIGHT_ELEVATOR_MOTOR_ID);
   public TalonFX leftElevatorMotor = new TalonFX(ElevatorConstants.LEFT_ELEVATOR_MOTOR_ID);
@@ -41,26 +42,39 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     if (ElevatorConstants.ELEVATOR_DEBUG) {
       SmartDashboard.putData("Elevator PID", elevatorPID);
+      SmartDashboard.putBoolean("Arm Override", interruptArmRelative(false));
     }
   }
 
   public double getEncoderValue() { return shaftEncoder.get()/1000.0; }
 
   public double getArmEncoderValue() { return armSubsystem.shaftEncoder.get(); }
-  public boolean interruptArmRelative() { if (getArmEncoderValue() < .26) return true; else return false; }
+  public boolean interruptArmRelative(boolean rumble) {
+    boolean bool = getArmEncoderValue() > .26;
+    if (rumble) {
+      if (bool) control.setRumble(RumbleType.kRightRumble, 0.05);
+      else control.setRumble(RumbleType.kRightRumble, 0);
+    }
+    return bool;
+  }
 
   /** Calculates and returns the motor output power. DO NOT USE MORE THAN ONCE IN A FRAME. */
-  public double getMotorOutputPower() { // Calculate motor output power using a PID Controller
-    if (interruptArmRelative()) return 0;
+  public double getMotorOutputPower() {
+    evalLimitSwitch();
+    if (interruptArmRelative(true)) return 0;
     else if (motorOverride) {
-      if (control.getRightBumperButton()) {motorOverride = false; shaftEncoder.reset();}
+      if (control.getRightBumperButtonPressed()) {motorOverride = false; shaftEncoder.reset();}
       if (control.getLeftTriggerAxis() > 0.1) return -control.getLeftTriggerAxis()/5;
       else return 0;
     } else {
-      if (control.getRightBumperButton()) motorOverride = true;
+      if (control.getRightBumperButtonPressed()) { motorOverride = true; return 0; }
       double output = elevatorPID.calculate(getEncoderValue(), elevatorAimPos.aim);
       return MathUtil.clamp(output, -1, 1);
     }
+  }
+
+  public void evalLimitSwitch() {
+    if (!limitSwitch.get()) shaftEncoder.reset();
   }
 
   /**
@@ -82,8 +96,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     L1(ElevatorConstants.L1),
     L2(ElevatorConstants.L2),
     L3(ElevatorConstants.L3),
-    L4(ElevatorConstants.L4),
-    LM(ElevatorConstants.LMAX); // Max is slightly higher than L4
+    L4(ElevatorConstants.L4);
 
     public final double aim;
     
@@ -95,6 +108,5 @@ public class ElevatorSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     System.out.println(shaftEncoder.get());
-
   }
 }

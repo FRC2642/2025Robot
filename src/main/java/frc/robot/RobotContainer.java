@@ -14,6 +14,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -60,9 +62,9 @@ public class RobotContainer {
     private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem(control, elevatorArmSubsystem);
     private final JojoSubsystem jojoSubsystem = new JojoSubsystem();
 
+    ShuffleboardTab tab;
+
     public RobotContainer() {
-        SmartDashboard.getBoolean("elevator override", elevatorSubsystem.motorOverride);
-        SmartDashboard.getBoolean("arm override", elevatorSubsystem.interruptArmRelative());
         configureBindings();
 
         /* PathPlanner */
@@ -80,7 +82,7 @@ public class RobotContainer {
 
     private void configureBindings() {
         elevatorSubsystem.setDefaultCommand(new ElevatorCommand(elevatorSubsystem, control, auxButtonBoard));
-        //elevatorArmSubsystem.setDefaultCommand(new ElevatorArmCommand(elevatorArmSubsystem, control));
+        elevatorArmSubsystem.setDefaultCommand(new ElevatorArmCommand(elevatorArmSubsystem, control));
         jojoSubsystem.setDefaultCommand(new JojoCommand(jojoSubsystem, control));
 
         // Note that X is defined as forward according to WPILib convention,
@@ -94,10 +96,10 @@ public class RobotContainer {
             )
         );
 
-        joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
-        joystick.b().whileTrue(drivetrain.applyRequest(() ->
+        joystick.x().whileTrue(drivetrain.applyRequest(() -> brake));
+        /*joystick.b().whileTrue(drivetrain.applyRequest(() ->
             point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
-        ));
+        ));*/
 
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.
@@ -112,9 +114,7 @@ public class RobotContainer {
         drivetrain.registerTelemetry(logger::telemeterize);
     }
 
-    public Command getAutonomousCommand() {
-        return autoChooser.getSelected();
-    }
+    public Command getAutonomousCommand() { return autoChooser.getSelected(); }
 
     /**
      * Adds a PathPlanner auto to a SendableChooser.<br>

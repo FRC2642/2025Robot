@@ -31,13 +31,10 @@ public class JojoCommand extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if (control.getLeftBumperButtonPressed()) jojoSubsystem.intakePos = IntakePosition.Out;
-    else jojoSubsystem.intakePos = IntakePosition.Up;
+    if (control.getLeftTriggerAxis() >= 0.01) { jojoSubsystem.intakePos = IntakePosition.Out; jojoSubsystem.cylinderMotor.set(0.4); }
+    else { jojoSubsystem.intakePos = IntakePosition.Up; jojoSubsystem.cylinderMotor.set(0); }
 
-    if (control.getLeftBumperButtonPressed()) jojoSubsystem.cylinderMotor.set(1);
-    else jojoSubsystem.cylinderMotor.set(0);
-
-    
+    jojoSubsystem.updateMotors();
   }
 
   // Called once the command ends or is interrupted.
