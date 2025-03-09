@@ -60,7 +60,7 @@ public class RobotContainer {
     // Component Subsystems
     //private final ElevatorArmSubsystem elevatorArmSubsystem = new ElevatorArmSubsystem();
     //private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem(control, elevatorArmSubsystem);
-    //private final JojoSubsystem jojoSubsystem = new JojoSubsystem();
+    private final JojoSubsystem jojoSubsystem = new JojoSubsystem();
 
     ShuffleboardTab tab;
 
@@ -83,7 +83,7 @@ public class RobotContainer {
     private void configureBindings() {
         //elevatorSubsystem.setDefaultCommand(new ElevatorCommand(elevatorSubsystem, control, auxButtonBoard));
         //elevatorArmSubsystem.setDefaultCommand(new ElevatorArmCommand(elevatorArmSubsystem, control));
-        //jojoSubsystem.setDefaultCommand(new JojoCommand(jojoSubsystem, control));
+        jojoSubsystem.setDefaultCommand(new JojoCommand(jojoSubsystem, control));
 
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
