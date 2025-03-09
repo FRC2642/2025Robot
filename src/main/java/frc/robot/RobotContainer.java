@@ -31,10 +31,10 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.CoralArmSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.JojoArmSubsystem;
-import frc.robot.subsystems.SwerveModifications;
 import frc.robot.subsystems.CoralArmSubsystem.ArmRotation;
 import frc.robot.subsystems.ElevatorSubsystem.ElevatorPosition;
 import frc.robot.subsystems.JojoArmSubsystem.JojoRotation;
+import frc.robot.utilities.SwerveModifications;
 
 
 @SuppressWarnings("unused")

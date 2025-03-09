@@ -33,9 +33,8 @@ public final class Constants {
 
   }
 
-  public static class SwerveModifications {
+  public static class SwerveModificationConstants {
     public static final boolean TURN_DEBUG = false;
-    public static final double PID_KP = 0.1;
     public static final double MOVEMENT_PERCENT_MODIFIER = 0.9;
   }
   public static class ElevatorArm {
