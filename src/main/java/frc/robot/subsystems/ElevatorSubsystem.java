@@ -29,7 +29,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   public TalonFX rightElevatorMotor = new TalonFX(ElevatorConstants.RIGHT_ELEVATOR_MOTOR_ID);
   public TalonFX leftElevatorMotor = new TalonFX(ElevatorConstants.LEFT_ELEVATOR_MOTOR_ID);
 
-  public PIDController elevatorPID = new PIDController(0.001, 0, 0);
+  public PIDController elevatorPID = new PIDController(0.1, 0, 0);
   public ElevatorPosition elevatorAimPos = ElevatorPosition.L0;
 
   public XboxController control;
@@ -50,7 +50,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   public double getArmEncoderValue() { return armSubsystem.shaftEncoder.get(); }
   public boolean interruptArmRelative(boolean rumble) {
-    boolean bool = getArmEncoderValue() > .26;
+    boolean bool = getArmEncoderValue() < .35;
     if (rumble) {
       if (bool) control.setRumble(RumbleType.kRightRumble, 0.05);
       else control.setRumble(RumbleType.kRightRumble, 0);

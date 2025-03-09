@@ -7,8 +7,8 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.ElevatorArmSubsystem;
+import frc.robot.subsystems.ElevatorArmSubsystem.ArmPosition;
 
-// We do this if we don't have a lot to put here ^^^\/
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class ElevatorArmCommand extends Command {
   /** Creates a new ElevatorArmCommand. */
@@ -31,7 +31,8 @@ public class ElevatorArmCommand extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    
+    if (control.getYButton()) elevatorArmSubsystem.armPos = ArmPosition.Extended;
+    else elevatorArmSubsystem.armPos = ArmPosition.Retracted;
     
     elevatorArmSubsystem.updateMotors();
   }
