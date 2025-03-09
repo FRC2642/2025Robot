@@ -91,7 +91,7 @@ public class DynamicController {
      * @param value Input 0 when idle. Otherwise, input the current output.
      */
     public void updateOutputs(double value) {
-        prevOutputs.add(value);
+        prevOutputs.add(Math.abs(value));
         if (prevOutputs.size() > listMax) prevOutputs.remove(0);
     }
 
@@ -100,15 +100,15 @@ public class DynamicController {
      * @param desiredValue
      */
     public double calculateOutput(double currentValue, double desiredValue) {
-        double output = (currentValue - desiredValue) * modifier;
+        double output = (desiredValue - currentValue) * modifier;
         if (cutValue) output = MathUtil.clamp(output, outputMin, outputMax);
         updateOutputs(output);
         
-        double average = 0;
-        for (int i = 0; i < prevOutputs.size(); i++) average += prevOutputs.get(i);
-        average /= prevOutputs.size();
+        double prevOutputAvg = 0; // Get the average power over the last 30 code runs
+        for (int j = 0; j < prevOutputs.size(); j++) { prevOutputAvg += Math.abs(prevOutputs.get(j)); }
+        prevOutputAvg /= prevOutputs.size();
+        output *= prevOutputAvg; // The average is essentially a percent since power ranges from (abs) 0 to 1 so multiplying reduces power and creates acceleration
 
-        if (Math.abs(output) > Math.abs(average)) return average;
-        else return output;
+        return output;
     }
 }
