@@ -6,7 +6,9 @@ package frc.robot.utilities;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.SwerveModificationConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -18,7 +20,8 @@ public class SwerveModifications {
   public boolean turnDebug = SwerveModificationConstants.TURN_DEBUG;
   public double rotationOffset;
 
-  public PIDController rotationPID = new PIDController(0.05, 1, 0);
+  //public PIDController rotationPID = new PIDController(0.05, 1, 0);
+  public DynamicController rotationController = new DynamicController(10, 0.01, true);
   public double movementPercentModifier = SwerveModificationConstants.MOVEMENT_PERCENT_MODIFIER;
 
   private CommandSwerveDrivetrain drivetrain;
@@ -32,7 +35,7 @@ public class SwerveModifications {
     this.rotationOffset = this.getRotationOffset();
 
     if (turnDebug) {
-      SmartDashboard.putData("Swerve Rotation PID", rotationPID);
+      //SmartDashboard.putData("Swerve Rotation PID", rotationPID);
       SmartDashboard.putNumber("Swerve Rotation Calculated Angle Diff", calculatedAngleDiff);
     }
   }
@@ -40,7 +43,7 @@ public class SwerveModifications {
   public double recieveTurnRate() {
 
     // Reset rotation offset 
-    //if (control.getRawButtonPressed(7)) { rotationOffset = getRotationOffset(); }
+    if (control.getRawButtonPressed(7)) { rotationOffset = getRotationOffset(); }
 
     /* Convert controller left stick x and y to degrees (0 - 360) */
     double angle = Math.atan2(control.getRightY(), control.getRightX());
@@ -51,6 +54,7 @@ public class SwerveModifications {
     double currentAngle = drivetrain.getPigeon2().getRotation2d().getDegrees();
     currentAngle = currentAngle % 360;
     if (currentAngle > 180) currentAngle -= 360;
+    else if (currentAngle < -180) currentAngle += 360;
     currentAngle *= -1;
     currentAngle += rotationOffset;
     if (currentAngle > 180) currentAngle -= 360;
@@ -59,8 +63,10 @@ public class SwerveModifications {
 
     if (absDiff(angle, currentAngle) > 180) System.out.println("WARNING: HIGH CALCULATED ANGLE");
 
-    double outputPower = MathUtil.clamp(rotationPID.calculate(currentAngle, angle), -1, 1);
+    double outputPower = rotationController.calculateOutput(currentAngle, angle);
+    //double outputPower = MathUtil.clamp(rotationPID.calculate(currentAngle, angle), -1, 1);
 
+    //Shuffleboard.update();
 
     double joystickMag = Math.sqrt(Math.pow(control.getRightX(), 2) + Math.pow(control.getRightY(), 2)); // Joystick magnitude for deadzones on friction joysticks
     if (joystickMag >= 0.12) return outputPower; else return 0;
