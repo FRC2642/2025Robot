@@ -5,50 +5,44 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
-import frc.robot.subsystems.ElevatorArmSubsystem.ArmRotation;
-import frc.robot.subsystems.ElevatorArmSubsystem.ArmRotation.ShootSpeed;
 
 public class JojoArmSubsystem extends SubsystemBase {
-  private PIDController rotatePID = new PIDController(0.1, 0, 0);
-  private DutyCycleEncoder shaftEncoder = new DutyCycleEncoder(2);
   public TalonFX rotateJojoMotor = new TalonFX(21);
-  public double maxRotateSpeed = 0.5;
   public TalonFX intakeJojoMotor = new TalonFX(20);
-  public double maxintakeSpeed = 0.5;
-  public double stopBool = 0;
+  private DutyCycleEncoder shaftEncoder = new DutyCycleEncoder(2);
 
+  private PIDController rotatePID = new PIDController(0.4, 0, 0);
+
+  public double maxRotateSpeed = 0.9;
+  public double maxintakeSpeed = 0.25;
   public JojoRotation jojoRotation = JojoRotation.Default;
   public JojoIntake intakeMode = JojoIntake.stop;
 
+  public Trigger RotationStateReached = new Trigger(() -> Math.abs(getEncoderValue() - jojoRotation.rot) < 0.01);
+  public Trigger RotationStateNear = new Trigger(() -> Math.abs(getEncoderValue() - jojoRotation.rot) < 0.1);
 
-  public JojoArmSubsystem() {}
 
-  public double getEncoderValue() {
-    double encoderValue = shaftEncoder.get();
-    
-    System.out.println(encoderValue);
-    return encoderValue;
-  }
+  public JojoArmSubsystem() {
+    rotateJojoMotor.setNeutralMode(NeutralModeValue.Brake);
+    intakeJojoMotor.setNeutralMode(NeutralModeValue.Brake);
 
-  public double getrotateOutput() {
-    double toRotate = rotatePID.calculate(getEncoderValue(), jojoRotation.rot);
-    if (toRotate > maxRotateSpeed){
-      toRotate = maxRotateSpeed;
-    }
-    else if (toRotate < -maxRotateSpeed){
-      toRotate = maxRotateSpeed;
-    }
-    return toRotate;
+    setDefaultCommand(runOnce(()-> {intakeMode = JojoIntake.stop; intakeJojoMotor.disable(); rotateJojoMotor.disable();})
+    .andThen(run(() -> {}))
+    .withName("Idle"));
   }
 
   public enum JojoRotation{
-    Default(-1),
-    Intake(1);
+    Default(.20),
+    Intake(.59);
     
     public final double rot;
     
@@ -66,9 +60,39 @@ public class JojoArmSubsystem extends SubsystemBase {
     }
   }
 
+  public double getEncoderValue() {
+    double encoderValue = shaftEncoder.get();
+    return encoderValue;
+  }
+
+  public double getrotateOutput() {
+    double toRotate = rotatePID.calculate(getEncoderValue(), jojoRotation.rot);
+    if (toRotate > maxRotateSpeed){
+      toRotate = maxRotateSpeed;
+    }
+    else if (toRotate < -maxRotateSpeed){
+      toRotate = maxRotateSpeed;
+    }
+    return toRotate;
+  }
+
+  public Command intakeCommand(){
+    return new RunCommand(()-> {jojoRotation = JojoRotation.Intake; intakeMode = JojoIntake.intake; 
+      rotateJojoMotor.set(getrotateOutput());
+      intakeJojoMotor.set(intakeMode.intakeSpeed * maxintakeSpeed);}).until(RotationStateReached)
+    .andThen(runOnce(() -> {rotateJojoMotor.disable();}))
+    .withName("Intake Jojo Arm");
+  }
+  
+  public Command retractCommand(){
+    return new RunCommand(()-> {jojoRotation = JojoRotation.Default;
+    intakeMode = JojoIntake.stop; intakeJojoMotor.disable(); rotateJojoMotor.set(getrotateOutput());}).until(RotationStateReached)
+    .andThen(runOnce(() -> rotateJojoMotor.disable()));
+  }
+
+
+
   @Override
   public void periodic() {
-    intakeJojoMotor.set(intakeMode.intakeSpeed * maxintakeSpeed);
-    rotateJojoMotor.set(jojoRotation.rot * stopBool * maxRotateSpeed);
   }
 }
