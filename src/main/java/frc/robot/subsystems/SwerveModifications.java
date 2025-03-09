@@ -71,7 +71,7 @@ public class SwerveModifications extends SubsystemBase {
 
     double joystickMag = Math.sqrt(Math.pow(control.getRightX(), 2) + Math.pow(control.getRightY(), 2)); // Joystick magnitude for deadzones on friction joysticks
     if (joystickMag >= 0.12) {
-        return outputPower;
+        return cutValue(outputPower, -1, 1);
     } else {
         return 0;
     }

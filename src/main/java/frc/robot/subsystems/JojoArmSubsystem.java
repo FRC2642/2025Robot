@@ -20,7 +20,7 @@ public class JojoArmSubsystem extends SubsystemBase {
   public TalonFX intakeJojoMotor = new TalonFX(20);
   private DutyCycleEncoder shaftEncoder = new DutyCycleEncoder(2);
 
-  private PIDController rotatePID = new PIDController(0.3, 0, 0);
+  private PIDController rotatePID = new PIDController(0.4, 0, 0);
 
   public double maxRotateSpeed = 0.9;
   public double maxintakeSpeed = 0.25;
@@ -28,7 +28,7 @@ public class JojoArmSubsystem extends SubsystemBase {
   public JojoIntake intakeMode = JojoIntake.stop;
 
   public Trigger RotationStateReached = new Trigger(() -> Math.abs(getEncoderValue() - jojoRotation.rot) < 0.01);
-
+  public Trigger RotationStateNear = new Trigger(() -> Math.abs(getEncoderValue() - jojoRotation.rot) < 0.1);
 
 
   public JojoArmSubsystem() {
@@ -41,7 +41,7 @@ public class JojoArmSubsystem extends SubsystemBase {
   }
 
   public enum JojoRotation{
-    Default(.27),
+    Default(.20),
     Intake(.59);
     
     public final double rot;
@@ -62,8 +62,6 @@ public class JojoArmSubsystem extends SubsystemBase {
 
   public double getEncoderValue() {
     double encoderValue = shaftEncoder.get();
-    
-    System.out.println(encoderValue);
     return encoderValue;
   }
 
@@ -79,13 +77,20 @@ public class JojoArmSubsystem extends SubsystemBase {
   }
 
   public Command intakeCommand(){
-    return run(()->{intakeMode = JojoIntake.intake; intakeJojoMotor.set(intakeMode.intakeSpeed * maxintakeSpeed);})
-    .withName("Intake Algae");
+    return new RunCommand(()-> {jojoRotation = JojoRotation.Intake; intakeMode = JojoIntake.intake; 
+      rotateJojoMotor.set(getrotateOutput());
+      intakeJojoMotor.set(intakeMode.intakeSpeed * maxintakeSpeed);}).until(RotationStateReached)
+    .andThen(runOnce(() -> {rotateJojoMotor.disable();}))
+    .withName("Intake Jojo Arm");
   }
-  public Command rotateCommand(JojoRotation rotation){
-    return new RunCommand(()-> {jojoRotation = rotation; rotateJojoMotor.set(getrotateOutput());}).until(RotationStateReached)
-    .andThen(runOnce(() -> rotateJojoMotor.disable())).withName("Rotate Jojo Arm");
+  
+  public Command retractCommand(){
+    return new RunCommand(()-> {jojoRotation = JojoRotation.Default;
+    intakeMode = JojoIntake.stop; intakeJojoMotor.disable(); rotateJojoMotor.set(getrotateOutput());}).until(RotationStateReached)
+    .andThen(runOnce(() -> rotateJojoMotor.disable()));
   }
+
+
 
   @Override
   public void periodic() {

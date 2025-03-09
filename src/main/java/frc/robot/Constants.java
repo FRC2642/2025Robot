@@ -18,11 +18,19 @@ public final class Constants {
     public static final int AUX_BUTTON_BOARD_PORT = 1;
   }
   
-  public static class Elevator {
+  public static class ElevatorConstants {
     public static final int SHAFT_ENCODER_CHANNEL_A = 0;
     public static final int SHAFT_ENCODER_CHANNEL_B = 1;
     public static final int ELEVATOR_MOTOR_ID1 = 30;
     public static final int ELEVATOR_MOTOR_ID2 = 31;
+    
+    public static final double LMAX = 11000;
+    public static final double L4 = 10084;
+    public static final double L3 = 9114;
+    public static final double L2 = 6269;
+    public static final double L1 = 4834;
+    public static final double L0 = 0;
+
   }
 
   public static class SwerveModifications {

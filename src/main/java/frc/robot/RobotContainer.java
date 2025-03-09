@@ -6,9 +6,13 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
+import org.ejml.simple.AutomaticSimpleMatrixConvert;
+
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
+
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
@@ -16,11 +20,12 @@ import edu.wpi.first.wpilibj.event.BooleanEvent;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-import frc.robot.commands.ElevatorCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.CoralArmSubsystem;
@@ -28,32 +33,36 @@ import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.JojoArmSubsystem;
 import frc.robot.subsystems.SwerveModifications;
 import frc.robot.subsystems.CoralArmSubsystem.ArmRotation;
+import frc.robot.subsystems.ElevatorSubsystem.ElevatorPosition;
 import frc.robot.subsystems.JojoArmSubsystem.JojoRotation;
 
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
-    private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond);
+    private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond) /2;
     
-    private double Speed = MaxSpeed / 1;
-    private double AngularRate = MaxAngularRate / 1;
+    private double Speed = MaxSpeed / 2;
+    private double AngularRate = MaxAngularRate / 4;
 
     private final Telemetry logger = new Telemetry(Speed);
 
     private final CommandXboxController driveController = new CommandXboxController(Constants.OperatorConstants.DRIVE_CONTROLLER_PORT); //make variable
     private final XboxController control = new XboxController(Constants.OperatorConstants.DRIVE_CONTROLLER_PORT);
-    private final Joystick auxController = new Joystick(Constants.OperatorConstants.AUX_BUTTON_BOARD_PORT); //make variable
+    private final CommandJoystick auxController = new CommandJoystick(Constants.OperatorConstants.AUX_BUTTON_BOARD_PORT); //make variable
 
     //Subsystems
         public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain(); //drive
         private final CoralArmSubsystem coralArmSubsystem = new CoralArmSubsystem(); //CoralArm
         private final JojoArmSubsystem jojoArmSubsystem = new JojoArmSubsystem(); //JojoArm
-        //private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem(); //Elevator
+        private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem(); //Elevator
     //Swerve drive commands
         private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric() //drive
                 .withDeadband(Speed * 0.1).withRotationalDeadband(AngularRate * 0.1)
                 .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
         private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake(); // brake
+        private final SwerveRequest. FieldCentricFacingAngle driveAtPoint = new SwerveRequest.FieldCentricFacingAngle()
+                .withDeadband(Speed * 0.1).withRotationalDeadband(AngularRate * 0.1)
+                .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
     //Conditions
 
 
@@ -74,31 +83,44 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        //elevatorSubsystem.setDefaultCommand(new ElevatorCommand(elevatorSubsystem, auxController));
-        //driveController.x().or(driveController.y()).whileTrue(new RotateCoralArmCommand(elevatorArmSubsystem, control));
-        //driveController.a().or(driveController.b()).whileTrue(new ElevatorArmCommand(elevatorArmSubsystem, control));
+
         driveController.x().onTrue(coralArmSubsystem.rotateCommand(ArmRotation.Default));
         driveController.y().onTrue(coralArmSubsystem.rotateCommand(ArmRotation.Bottom));
         driveController.a().onTrue(coralArmSubsystem.rotateCommand(ArmRotation.Score));
         driveController.b().whileTrue(coralArmSubsystem.shootCommand());
 
-
-        driveController.rightBumper().onTrue(jojoArmSubsystem.rotateCommand(JojoRotation.Intake));
-        driveController.leftBumper().onTrue(jojoArmSubsystem.rotateCommand(JojoRotation.Default));
         driveController.rightBumper().whileTrue(jojoArmSubsystem.intakeCommand());
+        driveController.rightBumper().onFalse(jojoArmSubsystem.retractCommand());
 
-        
+        driveController.leftTrigger().whileTrue(elevatorSubsystem.manualElevatorUpCommand(driveController));
+        driveController.rightTrigger().whileTrue(elevatorSubsystem.manualElevatorDownCommand(driveController));
+
+        auxController.button(8).onTrue(elevatorSubsystem.resetEncoder());
+
+        auxController.button(7).onTrue(elevatorSubsystem.elevatorL0Command());
+
+        auxController.button(10).onTrue(elevatorSubsystem.elevatorCommand(ElevatorPosition.L1)
+            .onlyWhile(coralArmSubsystem.IsSafeFromElevator));
+        auxController.button(9).onTrue(elevatorSubsystem.elevatorCommand(ElevatorPosition.L2)
+            .onlyWhile(coralArmSubsystem.IsSafeFromElevator));
+        auxController.button(11).onTrue(elevatorSubsystem.elevatorCommand(ElevatorPosition.L3)
+            .onlyWhile(coralArmSubsystem.IsSafeFromElevator));
+        auxController.button(12).onTrue(elevatorSubsystem.elevatorCommand(ElevatorPosition.L4)
+            .onlyWhile(coralArmSubsystem.IsSafeFromElevator));
+
         //DriveCommands
+        
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->
-                drive.withVelocityX(-swerveModifications.modifyAxialInput(driveController.getLeftY(), driveController.getRightTriggerAxis(), swerveModifications.movementPercentModifier) * MaxSpeed) // Drive forward with negative Y (forward)
-                    .withVelocityY(-swerveModifications.modifyAxialInput(driveController.getLeftX(), driveController.getRightTriggerAxis(), swerveModifications.movementPercentModifier) * MaxSpeed) // Drive left with negative X (left)
-                    .withRotationalRate(-swerveModifications.recieveTurnRate() * MaxAngularRate)
+                drive.withVelocityX(-swerveModifications.modifyAxialInput(driveController.getLeftY(), driveController.getRightTriggerAxis(), swerveModifications.movementPercentModifier) * Speed) // Drive forward with negative Y (forward)
+                    .withVelocityY(-swerveModifications.modifyAxialInput(driveController.getLeftX(), driveController.getRightTriggerAxis(), swerveModifications.movementPercentModifier) * Speed) // Drive left with negative X (left)
+                    .withRotationalRate(-swerveModifications.recieveTurnRate() * AngularRate)
             )
         );
+
         //driveController.a().whileTrue(drivetrain.applyRequest(() -> brake));
-        //driveController.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+        driveController.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
 
 
@@ -109,8 +131,6 @@ public class RobotContainer {
         driveController.start().and(driveController.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
         driveController.start().and(driveController.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
-        //driveController.a().whileTrue(drivetrain.applyRequest(() -> brake));
-        //driveController.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
         drivetrain.registerTelemetry(logger::telemeterize);
     }
 

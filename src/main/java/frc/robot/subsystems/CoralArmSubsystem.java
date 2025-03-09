@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import java.util.function.BooleanSupplier;
 
+import com.ctre.phoenix6.hardware.CANrange;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
@@ -21,17 +22,20 @@ import frc.robot.Constants;
 public class CoralArmSubsystem extends SubsystemBase {
   public TalonFX shootMotor = new TalonFX(Constants.ElevatorArm.SHOOT_MOTOR);
   public TalonFX rotateMotor = new TalonFX(Constants.ElevatorArm.ROTATE_ARM_MOTOR);  
+  //public CANrange beamBreak = new CANrange(0);
   private DutyCycleEncoder shaftEncoder= new DutyCycleEncoder(Constants.ElevatorArm.SHAFT_ENCODER_CHANNEL_A);
   
+
   private PIDController rotatePID = new PIDController(0.5, 0, 0);
 
   public double maxShootOutput= 0.25;
   public double maxRotateSpeed = 0.9;
   public ArmRotation armRot = ArmRotation.Score;
   public ShootSpeed shootSpeed = ShootSpeed.stop;
+  public double safeValue = 0.3;
 
   public Trigger RotationStateReached = new Trigger(() -> Math.abs(getEncoderValue() - armRot.rot) < 0.01);
-
+  public Trigger IsSafeFromElevator = new Trigger(() -> getEncoderValue() > safeValue);
   
   public CoralArmSubsystem() {
     rotateMotor.setNeutralMode(NeutralModeValue.Brake);
@@ -45,7 +49,8 @@ public class CoralArmSubsystem extends SubsystemBase {
   public enum ArmRotation{
     Score(0.27),
     Default(0.075),
-    Bottom(0.572);
+    Bottom(0.572),
+    Safe(0.3);
       public final double rot;
       ArmRotation(double rotation) {
         this.rot = rotation;}
