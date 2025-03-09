@@ -3,13 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.254,
-        "y": 2.685
+        "x": 5.095,
+        "y": 2.639
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.494523584401532,
-        "y": 2.7531792149165657
+        "x": 5.425595436649494,
+        "y": 2.8346707610616466
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 4.056117824773059,
+        "y": 2.1062972054410216
+      },
+      "prevControl": {
+        "x": 4.4530354417055,
+        "y": 2.2387356953823048
+      },
+      "nextControl": {
+        "x": 3.818970781565648,
+        "y": 2.027168955757472
       },
       "isLocked": false,
       "linkedName": null
@@ -20,8 +36,8 @@
         "y": 1.127
       },
       "prevControl": {
-        "x": 0.8909409893688695,
-        "y": 1.0506592673775839
+        "x": 0.8211108823042104,
+        "y": 0.9885913098228525
       },
       "nextControl": null,
       "isLocked": false,
@@ -34,7 +50,7 @@
   "eventMarkers": [
     {
       "name": "grab coral",
-      "waypointRelativePos": 1.0,
+      "waypointRelativePos": 2.0,
       "endWaypointRelativePos": null,
       "command": null
     }
