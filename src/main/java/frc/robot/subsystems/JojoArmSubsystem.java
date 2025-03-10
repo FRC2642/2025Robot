@@ -20,7 +20,7 @@ public class JojoArmSubsystem extends SubsystemBase {
   public TalonFX intakeJojoMotor = new TalonFX(20);
   private DutyCycleEncoder shaftEncoder = new DutyCycleEncoder(2);
 
-  private PIDController rotatePID = new PIDController(0.4, 0, 0);
+  private PIDController rotatePID = new PIDController(2.5, 0, 0);
 
   public double maxRotateSpeed = 0.9;
   public double maxintakeSpeed = 0.25;

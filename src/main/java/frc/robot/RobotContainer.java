@@ -42,8 +42,8 @@ public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond) /2;
     
-    private double Speed = MaxSpeed / 2;
-    private double AngularRate = MaxAngularRate / 4;
+    private double Speed = MaxSpeed / 1;
+    private double AngularRate = MaxAngularRate / 1;
 
     private final Telemetry logger = new Telemetry(Speed);
 
