@@ -82,6 +82,12 @@ public class RobotContainer {
         SmartDashboard.putData("Auto Chooser", autoChooser);
 
         // To add an auto to the autoChooser use addppAutoOption()
+        addppAutoOption("leave start", autoChooser);
+        addppAutoOption("mid 1 piece", autoChooser);
+        addppAutoOption("left 1 piece", autoChooser);
+        addppAutoOption("right 1 piece", autoChooser);
+        addppAutoOption("left 2 piece", autoChooser);
+        addppAutoOption("right 2 piece", autoChooser);
     }
 
     private void configureBindings() {
