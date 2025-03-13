@@ -35,7 +35,7 @@ public final class Constants {
 
   public static class SwerveModificationConstants {
     public static final boolean TURN_DEBUG = false;
-    public static final double MOVEMENT_PERCENT_MODIFIER = 0.9;
+    public static final double MOVEMENT_PERCENT_MODIFIER = 0.5;
   }
   public static class ElevatorArm {
     public static final int ROTATE_ARM_MOTOR = 23; //needs to be changed to actuall ID

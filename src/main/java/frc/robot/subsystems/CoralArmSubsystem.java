@@ -4,60 +4,69 @@
 
 package frc.robot.subsystems;
 
-import java.util.function.BooleanSupplier;
-
 import com.ctre.phoenix6.hardware.CANrange;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
-import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
+import frc.robot.subsystems.ElevatorSubsystem.ElevatorPosition;
 
 public class CoralArmSubsystem extends SubsystemBase {
   public TalonFX shootMotor = new TalonFX(Constants.ElevatorArm.SHOOT_MOTOR);
   public TalonFX rotateMotor = new TalonFX(Constants.ElevatorArm.ROTATE_ARM_MOTOR);  
-  //public CANrange beamBreak = new CANrange(0);
+  public CANrange beamBreak = new CANrange(26);
   private DutyCycleEncoder shaftEncoder= new DutyCycleEncoder(Constants.ElevatorArm.SHAFT_ENCODER_CHANNEL_A);
   
 
-  private PIDController rotatePID = new PIDController(0.5, 0, 0);
+  private PIDController rotatePID = new PIDController(0.4, 0.2, 0);
 
   public double maxShootOutput= 0.25;
-  public double maxRotateSpeed = 0.9;
-  public ArmRotation armRot = ArmRotation.Score;
+  public double maxRotateSpeed = 1;
+  public ArmRotation armRot = ArmRotation.Default;
   public ShootSpeed shootSpeed = ShootSpeed.stop;
-  public double safeValue = 0.3;
+  public boolean intakeToggle = false;
 
   public Trigger RotationStateReached = new Trigger(() -> Math.abs(getEncoderValue() - armRot.rot) < 0.01);
-  public Trigger IsSafeFromElevator = new Trigger(() -> getEncoderValue() > safeValue);
+  public Trigger IsSafeFromElevator = new Trigger(() -> getEncoderValue() > 0.3);
+  public Trigger hasCoral = new Trigger(() -> beamBreak.getDistance().getValueAsDouble() < 0.08);
+  public Trigger holdingAlgae = new Trigger(()-> intakeToggle == true);
   
   public CoralArmSubsystem() {
-    rotateMotor.setNeutralMode(NeutralModeValue.Brake);
+    rotateMotor.setNeutralMode(NeutralModeValue.Brake); 
     shootMotor.setNeutralMode(NeutralModeValue.Brake);
     
-    setDefaultCommand(runOnce(()-> {shootSpeed = ShootSpeed.stop; shootMotor.disable(); rotateMotor.disable();})
-    .andThen(run(() -> {}))
+    setDefaultCommand(run(() -> {
+      if(getEncoderValue() < 0.086 || getEncoderValue() > 0.54){
+        rotateMotor.disable();
+      }else{
+        rotateMotor.set(getrotateOutput());
+      }
+      if (intakeToggle == false){
+        shootSpeed = ShootSpeed.stop;
+        shootMotor.disable();
+      }
+      System.out.println(IsSafeFromElevator.getAsBoolean());})
     .withName("Idle"));
   }
 
   public enum ArmRotation{
     Score(0.27),
-    Default(0.075),
-    Bottom(0.572),
-    Safe(0.3);
+    Default(0.085),
+    Bottom(0.55),
+    Safe(0.37);
       public final double rot;
       ArmRotation(double rotation) {
         this.rot = rotation;}
   }
   public enum ShootSpeed{
-    intake(-1),
-    shoot(1),
+    intake(1),
+    shoot(-1), //use only this
     stop(0);
       public final double speed;
       ShootSpeed(double speed){
@@ -77,14 +86,44 @@ public class CoralArmSubsystem extends SubsystemBase {
     return toRotate;
   }
 
-  public Command shootCommand(){
-    return run(()-> {shootSpeed = ShootSpeed.shoot; shootMotor.set(shootSpeed.speed * maxShootOutput);})
+  public Command shootCommand(ShootSpeed speed){
+    return new RunCommand(()-> {
+      intakeToggle = false;
+      if (ElevatorSubsystem.elevatorPosition == ElevatorPosition.L4 || ElevatorSubsystem.elevatorPosition == ElevatorPosition.algae){
+        shootSpeed = ShootSpeed.intake;
+        shootMotor.set(shootSpeed.speed * maxShootOutput);
+      }else{
+      shootMotor.set(speed.speed * maxShootOutput);}})
     .withName("Shoot Coral");
   }
+  public Command toggleAlgaeIntake(){
+    return new RunCommand(()-> {
+      intakeToggle = !intakeToggle;
+      if (intakeToggle == true){
+        shootSpeed = ShootSpeed.shoot;
+        shootMotor.set(shootSpeed.speed * maxShootOutput);
+      }
+      else{
+        shootSpeed = ShootSpeed.stop;
+        shootMotor.set(shootSpeed.speed * maxShootOutput);
+      }
+    });
+  }
   public Command rotateCommand(ArmRotation armRotMode){
-    return new RunCommand(()-> {armRot = armRotMode; rotateMotor.set(getrotateOutput());}).until(RotationStateReached)
+    return new RunCommand(()-> {
+      //System.out.println("Rotating: " + getEncoderValue()); 
+      armRot = armRotMode; rotateMotor.set(getrotateOutput() * 4);
+      System.out.println(IsSafeFromElevator.getAsBoolean());
+    }).until(RotationStateReached)
     .andThen(runOnce(() -> rotateMotor.disable()))
     .withName("Rotate Coral Arm");
+  }
+
+  public Command quickGetTheArmToSafty(){
+    return new RunCommand(()->{
+      armRot = ArmRotation.Bottom;
+      rotateMotor.set(getrotateOutput() * 4);
+    }).until(IsSafeFromElevator);
   }
 
 

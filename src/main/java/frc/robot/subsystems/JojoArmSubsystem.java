@@ -13,7 +13,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants;
 
 public class JojoArmSubsystem extends SubsystemBase {
   public TalonFX rotateJojoMotor = new TalonFX(21);
@@ -23,13 +22,13 @@ public class JojoArmSubsystem extends SubsystemBase {
   private PIDController rotatePID = new PIDController(0.4, 0, 0);
 
   public double maxRotateSpeed = 0.9;
-  public double maxintakeSpeed = 0.25;
+  public double maxintakeSpeed = 0.8;
   public JojoRotation jojoRotation = JojoRotation.Default;
   public JojoIntake intakeMode = JojoIntake.stop;
 
   public Trigger RotationStateReached = new Trigger(() -> Math.abs(getEncoderValue() - jojoRotation.rot) < 0.01);
   public Trigger RotationStateNear = new Trigger(() -> Math.abs(getEncoderValue() - jojoRotation.rot) < 0.1);
-
+  public Trigger CurrentSpike = new Trigger(() -> Math.abs(rotateJojoMotor.getStatorCurrent().getValue().magnitude()) > 10);
 
   public JojoArmSubsystem() {
     rotateJojoMotor.setNeutralMode(NeutralModeValue.Brake);
@@ -41,7 +40,7 @@ public class JojoArmSubsystem extends SubsystemBase {
   }
 
   public enum JojoRotation{
-    Default(.20),
+    Default(.1),
     Intake(.59);
     
     public final double rot;
@@ -71,22 +70,30 @@ public class JojoArmSubsystem extends SubsystemBase {
       toRotate = maxRotateSpeed;
     }
     else if (toRotate < -maxRotateSpeed){
-      toRotate = maxRotateSpeed;
+      toRotate = -maxRotateSpeed;
     }
     return toRotate;
   }
 
   public Command intakeCommand(){
-    return new RunCommand(()-> {jojoRotation = JojoRotation.Intake; intakeMode = JojoIntake.intake; 
-      rotateJojoMotor.set(getrotateOutput());
-      intakeJojoMotor.set(intakeMode.intakeSpeed * maxintakeSpeed);}).until(RotationStateReached)
-    .andThen(runOnce(() -> {rotateJojoMotor.disable();}))
+    return run(()-> {intakeMode = JojoIntake.intake;
+                    intakeJojoMotor.set(intakeMode.intakeSpeed * maxintakeSpeed * 0.5);});
+  }
+  public Command extendCommand(){
+    return new RunCommand(()-> {jojoRotation = JojoRotation.Intake; intakeMode = JojoIntake.intake;
+      rotateJojoMotor.set(getrotateOutput() * 10);
+      intakeJojoMotor.set(intakeMode.intakeSpeed * maxintakeSpeed);
+      //System.out.println(Math.abs(rotateJojoMotor.getStatorCurrent().getValue().magnitude()));
+      //System.out.println(CurrentSpike.getAsBoolean());
+    }).until(RotationStateReached)
+    .andThen(run(() -> {rotateJojoMotor.disable(); 
+      intakeJojoMotor.set(intakeMode.intakeSpeed * maxintakeSpeed);}))
     .withName("Intake Jojo Arm");
   }
   
   public Command retractCommand(){
     return new RunCommand(()-> {jojoRotation = JojoRotation.Default;
-    intakeMode = JojoIntake.stop; intakeJojoMotor.disable(); rotateJojoMotor.set(getrotateOutput());}).until(RotationStateReached)
+    intakeMode = JojoIntake.stop; intakeJojoMotor.disable(); rotateJojoMotor.set(getrotateOutput() * 5);}).until(RotationStateReached)
     .andThen(runOnce(() -> rotateJojoMotor.disable()));
   }
 
