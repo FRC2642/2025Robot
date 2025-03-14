@@ -7,6 +7,7 @@ package frc.robot.subsystems;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -73,6 +74,49 @@ public class JojoArmSubsystem extends SubsystemBase {
       toRotate = -maxRotateSpeed;
     }
     return toRotate;
+  }
+
+  //RYLAN CHANGED
+  public Command manualRotateOut(double speed){
+    return run(()-> {
+      rotateJojoMotor.set(speed);
+      intakeJojoMotor.set(0.5);
+    })
+    .andThen(
+      runOnce(()->{
+        rotateJojoMotor.set(0);
+        intakeJojoMotor.set(0);
+      })
+    );
+  }
+
+  public Command manualRotateIn(double speed){
+    return run(()-> {
+      rotateJojoMotor.set(-speed);
+      intakeJojoMotor.set(0.5);
+      
+    }).andThen(
+      runOnce(()->{
+        rotateJojoMotor.set(0);
+        intakeJojoMotor.set(0);
+      })
+    );
+  }
+
+  public Command manualIntake(){
+    return run(()->{
+      intakeJojoMotor.set(0.5);
+    }).andThen(
+      runOnce(()->intakeJojoMotor.set(0))
+    );
+  }
+
+  public Command manualOuttake(){
+    return run(()->{
+      intakeJojoMotor.set(-0.5);
+    }).andThen(
+      runOnce(()->intakeJojoMotor.set(0))
+    );
   }
 
   public Command intakeCommand(){

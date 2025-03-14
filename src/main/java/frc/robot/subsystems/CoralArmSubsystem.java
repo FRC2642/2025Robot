@@ -104,9 +104,23 @@ public class CoralArmSubsystem extends SubsystemBase {
 
   }
 
+  public Command manualShootOutCommand(){
+    return run(()->{
+      shootMotor.set(0.8);
+    }).andThen(runOnce(()->shootMotor.set(0))
+    );
+  }
+
+  public Command manualShootInCommand(){
+    return run(()->{
+      shootMotor.set(-0.4);
+    }).andThen(runOnce(()->shootMotor.set(0))
+    );
+  }
+
   public Command shootCommand(ShootSpeed speed){
     return new RunCommand(()-> {
-      System.out.println("shoot Running");
+      //System.out.println("shoot Running");
       //intakeToggle = false;
       if (ElevatorSubsystem.elevatorPosition == ElevatorPosition.L4 || ElevatorSubsystem.elevatorPosition == ElevatorPosition.algae){
         shootSpeed = ShootSpeed.intake;

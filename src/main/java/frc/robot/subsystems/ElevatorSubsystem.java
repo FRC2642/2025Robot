@@ -21,6 +21,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   public TalonFX leftElevatorMotor = new TalonFX(25);
   public Encoder shaftEncoder = new Encoder(0, 1);
   public DigitalInput limitSwitch = new DigitalInput(5);
+  public DigitalInput topLimitSwitch = new DigitalInput(6);
 
   public PIDController elevatorPID = new PIDController(0.006, 0.001, 0);
   public double maxElevatorSpeed = 0.5;
@@ -32,6 +33,8 @@ public class ElevatorSubsystem extends SubsystemBase {
   public Trigger elevatorTopLimitReached = new Trigger(() -> getEncoderValue() > 5000);
   public Trigger elevatorNearBottom = new Trigger(()-> getEncoderValue() < 500);
   public Trigger limitReached = new Trigger(limitSwitch::get).negate();
+  //RYLAN CHANGED
+  public Trigger hitTop = new Trigger(topLimitSwitch::get).negate();
 
   public Trigger elevatorAtL4;
   public ElevatorSubsystem() {
@@ -125,18 +128,28 @@ public class ElevatorSubsystem extends SubsystemBase {
   public Command manualElevatorUpCommand(CommandXboxController control){
     return run(()-> {
       manualMode = true;
-      rightElevatorMotor.set(maxElevatorSpeed * 0.4);
-      leftElevatorMotor.set(-maxElevatorSpeed * 0.4);
-      System.out.println(getEncoderValue());})
+
+      if (!hitTop.getAsBoolean()){
+        rightElevatorMotor.set(maxElevatorSpeed * 0.8);
+        leftElevatorMotor.set(-maxElevatorSpeed * 0.8);
+      }
+      
+      //System.out.println(getEncoderValue());
+    })
       .withName("Manually Position Elevator Up");
   }
 
   public Command manualElevatorDownCommand(CommandXboxController control){
     return run(()-> {
       manualMode = true;
-      rightElevatorMotor.set(-maxElevatorSpeed * 0.4);
-      leftElevatorMotor.set(maxElevatorSpeed * 0.4);
-      System.out.println(getEncoderValue());})
+
+      //RYLAN CHANGED
+      if (!limitReached.getAsBoolean()){
+        rightElevatorMotor.set(-maxElevatorSpeed * 0.8);
+        leftElevatorMotor.set(maxElevatorSpeed * 0.8);
+      //System.out.println(getEncoderValue());
+      }
+      })
       .withName("Manually Position Elevator Down");
   }
 

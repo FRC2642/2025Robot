@@ -17,6 +17,7 @@ public final class Constants {
     public static final int DRIVE_CONTROLLER_PORT = 0;
     public static final int AUX_BUTTON_BOARD_PORT = 1;
     public static final int AUX_BUTTON_BOARD_2_PORT = 2;
+    public static final int AUX_XBOX_CONTROLLER_PORT = 2;
   }
   
   public static class ElevatorConstants {

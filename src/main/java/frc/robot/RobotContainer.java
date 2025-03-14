@@ -54,9 +54,12 @@ public class RobotContainer {
 
     private final Telemetry logger = new Telemetry(Speed);
 
+    //Controllers
     private final CommandXboxController driveController = new CommandXboxController(Constants.OperatorConstants.DRIVE_CONTROLLER_PORT); //make variable
     private final XboxController control = new XboxController(Constants.OperatorConstants.DRIVE_CONTROLLER_PORT);
-    private final CommandJoystick auxController = new CommandJoystick(Constants.OperatorConstants.AUX_BUTTON_BOARD_PORT); //make variable
+    //RYLAN CHANGED
+    private final CommandXboxController auxXboxController = new CommandXboxController(Constants.OperatorConstants.AUX_XBOX_CONTROLLER_PORT);
+    //private final CommandJoystick auxController = new CommandJoystick(Constants.OperatorConstants.AUX_BUTTON_BOARD_PORT); //make variable
     //Subsystem
         public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain(); //drive
         private final CoralArmSubsystem coralArmSubsystem = new CoralArmSubsystem(); //CoralArm
@@ -95,17 +98,21 @@ public class RobotContainer {
     private void configureBindings() {
 
 
-    //CORAL ARM
-        driveController.y().whileTrue(coralArmSubsystem.manualRotateCommand(ArmRotation.out));
-        driveController.b().whileTrue(coralArmSubsystem.manualRotateCommand(ArmRotation.in));
-        auxController.button(7).whileTrue(coralArmSubsystem.shootCommand(ShootSpeed.intake));
-        auxController.button(8).whileTrue(coralArmSubsystem.shootCommand(ShootSpeed.shoot));
-    //JOJO
+    //CORAL ARM -- RYLAN CHANGED
+        auxXboxController.y().whileTrue(coralArmSubsystem.manualRotateCommand(ArmRotation.out));
+        auxXboxController.b().whileTrue(coralArmSubsystem.manualRotateCommand(ArmRotation.in));
+        auxXboxController.leftBumper().whileTrue(coralArmSubsystem.manualShootOutCommand());
+        auxXboxController.rightBumper().whileTrue(coralArmSubsystem.manualShootInCommand());
+    //JOJO --RYLAN CHANGED
+        driveController.y().whileTrue(jojoArmSubsystem.manualRotateOut(0.5));
+        driveController.b().whileTrue(jojoArmSubsystem.manualRotateIn(0.5));
+        driveController.a().whileTrue(jojoArmSubsystem.manualIntake());
+        driveController.button(8).whileTrue(jojoArmSubsystem.manualOuttake());
         //extend retract jojo arm
-        driveController.rightTrigger().whileTrue(jojoArmSubsystem.extendCommand());
-        driveController.rightTrigger().onFalse(jojoArmSubsystem.retractCommand());
+        //driveController.rightTrigger().whileTrue(jojoArmSubsystem.extendCommand());
+        //driveController.rightTrigger().onFalse(jojoArmSubsystem.retractCommand());
         //jojo intake without rotating arm
-        driveController.a().whileTrue(jojoArmSubsystem.intakeCommand());
+        //driveController.a().whileTrue(jojoArmSubsystem.intakeCommand());
 
     //SCORE/INTAKE
         //TODO: maybe fix sensor (google better way to acsess value)
@@ -115,7 +122,8 @@ public class RobotContainer {
         driveController.leftBumper().whileTrue(coralArmSubsystem.shootCommand(ShootSpeed.intake).onlyWhile(coralArmSubsystem.hasCoral.negate())
         .andThen(coralArmSubsystem.shootCommand(ShootSpeed.superSlow).until(coralArmSubsystem.hasCoral.negate())));
         //aux shoot coral or algae (L4 and Algae are included, shoot is reversed)
-        auxController.button(4).whileTrue(coralArmSubsystem.shootCommand(ShootSpeed.shoot));
+        //RYLAN CHANGED
+        //auxController.button(4).whileTrue(coralArmSubsystem.shootCommand(ShootSpeed.shoot));
     //ELEVATOR PRESETS
         //TODO: test shortened slowdown phase
         //TODO: test new control works and move back on release
@@ -123,6 +131,9 @@ public class RobotContainer {
         //set elevator to L0
         //when the elevator is down, rotate coral arm to default
         //L0
+        
+        //RYLAN CHANGED
+        /*
         auxController.button(4).onFalse(
             new ParallelCommandGroup(
             coralArmSubsystem.shootCommand(ShootSpeed.stop),
@@ -132,7 +143,7 @@ public class RobotContainer {
             drive.withVelocityX(limeLightSubsystem.getRangeOutput()/2)
                  .withVelocityY(-SwerveModifications.modifyAxialInput(driveController.getLeftX(), driveController.getRightTriggerAxis(), swerveModifications.movementPercentModifier) * Speed)
                  .withRotationalRate(0))
-            */
+            
         ).until(elevatorSubsystem.elevatorPositionReached)
         .andThen(coralArmSubsystem.rotateCommand(ArmRotation.Default)));
 
@@ -166,10 +177,11 @@ public class RobotContainer {
         //TODO: test all align modes and button IDs
         //TODO: maybe fix rotation alignment
         //align to reef with limelight
-        auxController.button(2).onFalse(new RunCommand(() -> limeLightSubsystem.alignment = ReefAlignment.center));
-        auxController.button(1).onFalse(new RunCommand(() -> limeLightSubsystem.alignment = ReefAlignment.center));
-        auxController.button(2).onTrue(new RunCommand(() -> limeLightSubsystem.alignment = ReefAlignment.left));
-        auxController.button(1).onTrue(new RunCommand(() -> limeLightSubsystem.alignment = ReefAlignment.right));
+        //RYLAN CHANGED
+        auxXboxController.pov(270).onFalse(new RunCommand(() -> limeLightSubsystem.alignment = ReefAlignment.center));
+        auxXboxController.pov(90).onFalse(new RunCommand(() -> limeLightSubsystem.alignment = ReefAlignment.center));
+        auxXboxController.pov(270).onTrue(new RunCommand(() -> limeLightSubsystem.alignment = ReefAlignment.left));
+        auxXboxController.pov(90).onTrue(new RunCommand(() -> limeLightSubsystem.alignment = ReefAlignment.right));
         driveController.x().whileTrue(drivetrain.applyRequest(() -> 
         drive.withVelocityX(0)
             .withVelocityY(0)
@@ -197,12 +209,15 @@ public class RobotContainer {
         //move coral arm to safe
         //driveController.y().onTrue(coralArmSubsystem.rotateCommand(ArmRotation.Safe));
         //move elevator up/down
-        driveController.povUp().whileTrue(elevatorSubsystem.manualElevatorUpCommand(driveController));
-        driveController.povDown().whileTrue(elevatorSubsystem.manualElevatorDownCommand(driveController));
+        
+       //RYLAN CHANGED 
+        auxXboxController.povUp().whileTrue(elevatorSubsystem.manualElevatorUpCommand(driveController));
+        auxXboxController.povDown().whileTrue(elevatorSubsystem.manualElevatorDownCommand(driveController));
         //TODO: test that elevator auto resets at bottom
         //reset elevator encoder
-        auxController.button(6).onTrue(elevatorSubsystem.resetEncoder());
-        driveController.povLeft().onTrue(coralArmSubsystem.rotateCommand(ArmRotation.Score));
+        //RYLAN CHANGED
+        //auxController.button(6).onTrue(elevatorSubsystem.resetEncoder());
+        //driveController.povLeft().onTrue(coralArmSubsystem.rotateCommand(ArmRotation.Score));
     //OTHER
         //TODO: maybe add auto Brake
         //driveController.a().whileTrue(drivetrain.applyRequest(() -> brake));
