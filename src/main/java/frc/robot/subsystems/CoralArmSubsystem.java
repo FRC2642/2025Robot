@@ -43,11 +43,14 @@ public class CoralArmSubsystem extends SubsystemBase {
     shootMotor.setNeutralMode(NeutralModeValue.Brake);
     
     setDefaultCommand(run(() -> {
+      rotateMotor.set(0);
+      /*
       if(getEncoderValue() < 0.086){
         rotateMotor.set(0);
       }else{
         rotateMotor.set(getrotateOutput());
       }
+        */
       if (intakeToggle == false){
         shootSpeed = ShootSpeed.stop;
         shootMotor.set(0);
@@ -61,6 +64,8 @@ public class CoralArmSubsystem extends SubsystemBase {
   }
 
   public enum ArmRotation{
+    in(1),
+    out(-1),
     Score(0.25),
     Default(0.085),
     Bottom(0.55),
@@ -71,7 +76,7 @@ public class CoralArmSubsystem extends SubsystemBase {
   }
   public enum ShootSpeed{
     superSlow(-0.25),
-    intake(1.25),
+    intake(1), //1.25
     shoot(-1), //use only this
     stop(0);
       public final double speed;
@@ -90,6 +95,13 @@ public class CoralArmSubsystem extends SubsystemBase {
     else if (toRotate < -maxRotateSpeed){
       toRotate = maxRotateSpeed;}
     return toRotate;
+  }
+
+
+  public Command manualRotateCommand(ArmRotation position){
+    double output = position.rot / 5;
+    return run(()->{rotateMotor.set(output);});
+
   }
 
   public Command shootCommand(ShootSpeed speed){

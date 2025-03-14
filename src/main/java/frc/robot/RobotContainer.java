@@ -93,6 +93,13 @@ public class RobotContainer {
         // To add an auto to the autoChooser use addppAutoOption()
     }
     private void configureBindings() {
+
+
+    //CORAL ARM
+        driveController.y().whileTrue(coralArmSubsystem.manualRotateCommand(ArmRotation.out));
+        driveController.b().whileTrue(coralArmSubsystem.manualRotateCommand(ArmRotation.in));
+        auxController.button(7).whileTrue(coralArmSubsystem.shootCommand(ShootSpeed.intake));
+        auxController.button(8).whileTrue(coralArmSubsystem.shootCommand(ShootSpeed.shoot));
     //JOJO
         //extend retract jojo arm
         driveController.rightTrigger().whileTrue(jojoArmSubsystem.extendCommand());
@@ -167,13 +174,13 @@ public class RobotContainer {
         drive.withVelocityX(0)
             .withVelocityY(0)
             .withRotationalRate(-swerveModifications.recieveTurnRate(-Math.cos(limeLightSubsystem.getRotationOutput()), -Math.sin(limeLightSubsystem.getRotationOutput())) * AngularRate)));
-        auxController.button(8).whileTrue(drivetrain.applyRequest(() -> 
+        /*auxController.button(8).whileTrue(drivetrain.applyRequest(() -> 
         drive.withVelocityX(-limeLightSubsystem.getRangeOutput())
             .withVelocityY(-limeLightSubsystem.getStrafeOutput())
             .withRotationalRate(0)));
-        
+        */
         driveController.x().whileTrue(new RunCommand(()-> {System.out.println(limeLightSubsystem.alignment);}));
-    //DRIVE    
+    //DRIVE
         //TODO: maybe fix weird rotation bug and adjust PID (P value down)
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
@@ -186,9 +193,9 @@ public class RobotContainer {
 
     //MANUALS (default arm, safe arm, manual elevator, reset elevator encoder)
         //move coral arm to default
-        driveController.b().onTrue(coralArmSubsystem.rotateCommand(ArmRotation.Default));
+        //driveController.b().onTrue(coralArmSubsystem.rotateCommand(ArmRotation.Default));
         //move coral arm to safe
-        driveController.y().onTrue(coralArmSubsystem.rotateCommand(ArmRotation.Safe));
+        //driveController.y().onTrue(coralArmSubsystem.rotateCommand(ArmRotation.Safe));
         //move elevator up/down
         driveController.povUp().whileTrue(elevatorSubsystem.manualElevatorUpCommand(driveController));
         driveController.povDown().whileTrue(elevatorSubsystem.manualElevatorDownCommand(driveController));
