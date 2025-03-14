@@ -34,7 +34,7 @@ public class JojoArmSubsystem extends SubsystemBase {
     rotateJojoMotor.setNeutralMode(NeutralModeValue.Brake);
     intakeJojoMotor.setNeutralMode(NeutralModeValue.Brake);
 
-    setDefaultCommand(runOnce(()-> {intakeMode = JojoIntake.stop; intakeJojoMotor.disable(); rotateJojoMotor.disable();})
+    setDefaultCommand(runOnce(()-> {intakeMode = JojoIntake.stop; intakeJojoMotor.set(0); rotateJojoMotor.set(0);})
     .andThen(run(() -> {}))
     .withName("Idle"));
   }
@@ -86,15 +86,15 @@ public class JojoArmSubsystem extends SubsystemBase {
       //System.out.println(Math.abs(rotateJojoMotor.getStatorCurrent().getValue().magnitude()));
       //System.out.println(CurrentSpike.getAsBoolean());
     }).until(RotationStateReached)
-    .andThen(run(() -> {rotateJojoMotor.disable(); 
+    .andThen(run(() -> {rotateJojoMotor.set(0); 
       intakeJojoMotor.set(intakeMode.intakeSpeed * maxintakeSpeed);}))
     .withName("Intake Jojo Arm");
   }
   
   public Command retractCommand(){
     return new RunCommand(()-> {jojoRotation = JojoRotation.Default;
-    intakeMode = JojoIntake.stop; intakeJojoMotor.disable(); rotateJojoMotor.set(getrotateOutput() * 5);}).until(RotationStateReached)
-    .andThen(runOnce(() -> rotateJojoMotor.disable()));
+    intakeMode = JojoIntake.stop; intakeJojoMotor.set(0); rotateJojoMotor.set(getrotateOutput() * 5);}).until(RotationStateReached)
+    .andThen(runOnce(() -> rotateJojoMotor.set(0)));
   }
 
 

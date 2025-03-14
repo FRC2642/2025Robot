@@ -16,6 +16,7 @@ public final class Constants {
   public static class OperatorConstants {
     public static final int DRIVE_CONTROLLER_PORT = 0;
     public static final int AUX_BUTTON_BOARD_PORT = 1;
+    public static final int AUX_BUTTON_BOARD_2_PORT = 2;
   }
   
   public static class ElevatorConstants {
@@ -35,7 +36,7 @@ public final class Constants {
 
   public static class SwerveModificationConstants {
     public static final boolean TURN_DEBUG = false;
-    public static final double MOVEMENT_PERCENT_MODIFIER = 0.5;
+    public static final double MOVEMENT_PERCENT_MODIFIER = 0.8;
   }
   public static class ElevatorArm {
     public static final int ROTATE_ARM_MOTOR = 23; //needs to be changed to actuall ID

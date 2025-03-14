@@ -28,7 +28,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   public boolean manualMode = true;
 
-  public Trigger elevatorPositionReached = new Trigger(()-> Math.abs(getEncoderValue() - elevatorPosition.aim) < 5);
+  public Trigger elevatorPositionReached = new Trigger(()-> Math.abs(getEncoderValue() - elevatorPosition.aim) < 25);
   public Trigger elevatorTopLimitReached = new Trigger(() -> getEncoderValue() > 5000);
   public Trigger elevatorNearBottom = new Trigger(()-> getEncoderValue() < 500);
   public Trigger limitReached = new Trigger(limitSwitch::get).negate();
@@ -41,14 +41,14 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     setDefaultCommand(run(() -> {
       if(elevatorNearBottom.getAsBoolean() || manualMode == true){
-        rightElevatorMotor.disable(); 
-        leftElevatorMotor.disable();
+        rightElevatorMotor.set(0); 
+        leftElevatorMotor.set(0);
       }
       else{
         rightElevatorMotor.set(getMotorOutput()); 
         leftElevatorMotor.set(-getMotorOutput()); 
       }
-      System.out.println("default Command, encoder: " + getEncoderValue() + " setpoint: " + elevatorPosition.aim);
+      //System.out.println("default Command, encoder: " + getEncoderValue() + " setpoint: " + elevatorPosition.aim);
       //System.out.println("Default Command Running");
     }));
   }
@@ -58,7 +58,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     L1(4813),
     L2(6158),
     L3(9238),
-    L4(10084), //10084
+    L4(10200), //10084
     algae(10909),
     LM(11000); // Max is slightly higher than L4
 
@@ -97,8 +97,8 @@ public class ElevatorSubsystem extends SubsystemBase {
       .andThen(runOnce(() -> {
       System.out.println("targetReached");
       System.out.println("encoder " + getEncoderValue());
-      rightElevatorMotor.disable();
-      leftElevatorMotor.disable();}))
+      rightElevatorMotor.set(0);
+      leftElevatorMotor.set(0);}))
       .withName("Position Elevator");
   }
 
@@ -114,11 +114,11 @@ public class ElevatorSubsystem extends SubsystemBase {
         leftElevatorMotor.set(0.05);}).until(elevatorPositionReached)
         .andThen(runOnce(() -> {shaftEncoder.reset();
                               System.out.println("end slowdown");
-                              rightElevatorMotor.disable();
-                              leftElevatorMotor.disable();})))
+                              rightElevatorMotor.set(0);
+                              leftElevatorMotor.set(0);})))
     .andThen(runOnce(() ->{
-      rightElevatorMotor.disable();
-      leftElevatorMotor.disable();
+      rightElevatorMotor.set(0);
+      leftElevatorMotor.set(0);
     }));
   }
 

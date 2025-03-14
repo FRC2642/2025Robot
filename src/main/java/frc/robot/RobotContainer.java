@@ -11,6 +11,7 @@ import org.ejml.simple.AutomaticSimpleMatrixConvert;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -44,6 +45,7 @@ import frc.robot.utilities.SwerveModifications;
 
 @SuppressWarnings("unused")
 public class RobotContainer {
+    private PathPlannerAuto auto;
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond) /2;
     
@@ -55,8 +57,7 @@ public class RobotContainer {
     private final CommandXboxController driveController = new CommandXboxController(Constants.OperatorConstants.DRIVE_CONTROLLER_PORT); //make variable
     private final XboxController control = new XboxController(Constants.OperatorConstants.DRIVE_CONTROLLER_PORT);
     private final CommandJoystick auxController = new CommandJoystick(Constants.OperatorConstants.AUX_BUTTON_BOARD_PORT); //make variable
-
-    //Subsystems
+    //Subsystem
         public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain(); //drive
         private final CoralArmSubsystem coralArmSubsystem = new CoralArmSubsystem(); //CoralArm
         private final JojoArmSubsystem jojoArmSubsystem = new JojoArmSubsystem(); //JojoArm
@@ -67,8 +68,11 @@ public class RobotContainer {
                 .withDeadband(Speed * 0.1).withRotationalDeadband(AngularRate * 0.1)
                 .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
         private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake(); // brake
-        private final SwerveRequest. FieldCentricFacingAngle driveAtPoint = new SwerveRequest.FieldCentricFacingAngle()
+        private final SwerveRequest.FieldCentricFacingAngle driveAtPoint = new SwerveRequest.FieldCentricFacingAngle()
                 .withDeadband(Speed * 0.1).withRotationalDeadband(AngularRate * 0.1)
+                .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+        private final SwerveRequest.RobotCentric robotDrive = new SwerveRequest.RobotCentric()
+                .withDeadband(Speed * 0.1).withRotationalDeadband(AngularRate * 0.1)        
                 .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
     // PathPlanner
@@ -77,6 +81,7 @@ public class RobotContainer {
     private final SwerveModifications swerveModifications = new SwerveModifications(drivetrain, control); // Have to create a new instance due to the usage of changing values within the subsystem.
     
     public RobotContainer() {
+        auto = new PathPlannerAuto("Just Move Auto");
         configureBindings();
         /* PathPlanner */
         // Build an auto chooser. This will use Commands.none() as the default option.
@@ -100,10 +105,10 @@ public class RobotContainer {
         //driver algae intake
         driveController.rightBumper().onTrue(coralArmSubsystem.toggleAlgaeIntake());
         //driver coral intake
-        driveController.leftBumper().whileTrue(coralArmSubsystem.shootCommand(ShootSpeed.intake).onlyIf(coralArmSubsystem.hasCoral.negate()));
+        driveController.leftBumper().whileTrue(coralArmSubsystem.shootCommand(ShootSpeed.intake).onlyWhile(coralArmSubsystem.hasCoral.negate())
+        .andThen(coralArmSubsystem.shootCommand(ShootSpeed.superSlow).until(coralArmSubsystem.hasCoral.negate())));
         //aux shoot coral or algae (L4 and Algae are included, shoot is reversed)
-        auxController.button(7).whileTrue(coralArmSubsystem.shootCommand(ShootSpeed.shoot));
-    
+        auxController.button(4).whileTrue(coralArmSubsystem.shootCommand(ShootSpeed.shoot));
     //ELEVATOR PRESETS
         //TODO: test shortened slowdown phase
         //TODO: test new control works and move back on release
@@ -111,59 +116,71 @@ public class RobotContainer {
         //set elevator to L0
         //when the elevator is down, rotate coral arm to default
         //L0
-        auxController.button(7).onFalse(
-        new ParallelCommandGroup(
+        auxController.button(4).onFalse(
+            new ParallelCommandGroup(
+            coralArmSubsystem.shootCommand(ShootSpeed.stop),
             elevatorSubsystem.elevatorL0Command(), 
-            coralArmSubsystem.rotateCommand(ArmRotation.Safe),
-            drivetrain.applyRequest(()->
-            drive.withVelocityX(-Speed / 2)
+            coralArmSubsystem.rotateCommand(ArmRotation.Safe)
+            /**drivetrain.applyRequest(()->
+            drive.withVelocityX(limeLightSubsystem.getRangeOutput()/2)
                  .withVelocityY(-SwerveModifications.modifyAxialInput(driveController.getLeftX(), driveController.getRightTriggerAxis(), swerveModifications.movementPercentModifier) * Speed)
-                 .withRotationalRate(0)))
-        .until(elevatorSubsystem.elevatorPositionReached)
+                 .withRotationalRate(0))
+            */
+        ).until(elevatorSubsystem.elevatorPositionReached)
         .andThen(coralArmSubsystem.rotateCommand(ArmRotation.Default)));
 
         //L1
-        auxController.button(10).onTrue(coralArmSubsystem.quickGetTheArmToSafty()
+        auxController.button(12).onTrue(coralArmSubsystem.quickGetTheArmToSafty()
         .andThen(new ParallelCommandGroup(elevatorSubsystem.elevatorCommand(ElevatorPosition.L1).onlyWhile(coralArmSubsystem.IsSafeFromElevator), 
         coralArmSubsystem.rotateCommand(ArmRotation.Bottom))));
         //L2
-        auxController.button(9).onTrue(coralArmSubsystem.quickGetTheArmToSafty()
+        auxController.button(11).onTrue(coralArmSubsystem.quickGetTheArmToSafty()
         .andThen(new ParallelCommandGroup(elevatorSubsystem.elevatorCommand(ElevatorPosition.L2).onlyWhile(coralArmSubsystem.IsSafeFromElevator), 
         coralArmSubsystem.rotateCommand(ArmRotation.Bottom))));
         //L3
-        auxController.button(11).onTrue(coralArmSubsystem.quickGetTheArmToSafty()
+        auxController.button(9).onTrue(coralArmSubsystem.quickGetTheArmToSafty()
         .andThen(new ParallelCommandGroup(elevatorSubsystem.elevatorCommand(ElevatorPosition.L3).onlyWhile(coralArmSubsystem.IsSafeFromElevator), 
         coralArmSubsystem.rotateCommand(ArmRotation.Bottom))));
         //L4
-        auxController.button(12).onTrue(coralArmSubsystem.quickGetTheArmToSafty()
+        auxController.button(10).onTrue(coralArmSubsystem.quickGetTheArmToSafty()
         .andThen(new ParallelCommandGroup(elevatorSubsystem.elevatorCommand(ElevatorPosition.L4).onlyWhile(coralArmSubsystem.IsSafeFromElevator), 
-        coralArmSubsystem.rotateCommand(ArmRotation.Safe))).onlyIf(coralArmSubsystem.holdingAlgae.negate()));
+        coralArmSubsystem.rotateCommand(ArmRotation.Safe)).until(elevatorSubsystem.elevatorPositionReached))
+        .andThen(coralArmSubsystem.rotateCommand(ArmRotation.Score))
+        //.onlyIf(coralArmSubsystem.holdingAlgae.negate())
+        );
         //TODO: test algae elevator preset, test full algae functionality
         //Algae
+        /**
         auxController.button(12).onTrue(coralArmSubsystem.quickGetTheArmToSafty()
         .andThen(new ParallelCommandGroup(elevatorSubsystem.elevatorCommand(ElevatorPosition.algae).onlyWhile(coralArmSubsystem.IsSafeFromElevator),
         coralArmSubsystem.rotateCommand(ArmRotation.Safe))).onlyIf(coralArmSubsystem.holdingAlgae));
-    
+        **/
     //VISION ALIGNMENT
         //TODO: test all align modes and button IDs
         //TODO: maybe fix rotation alignment
         //align to reef with limelight
-        auxController.button(13).and(auxController.button(14)).whileFalse(new RunCommand(() -> limeLightSubsystem.alignment = ReefAlignment.center));
-        auxController.button(13).onTrue(new RunCommand(() -> limeLightSubsystem.alignment = ReefAlignment.left));
-        auxController.button(14).onTrue(new RunCommand(() -> limeLightSubsystem.alignment = ReefAlignment.right));
+        auxController.button(2).onFalse(new RunCommand(() -> limeLightSubsystem.alignment = ReefAlignment.center));
+        auxController.button(1).onFalse(new RunCommand(() -> limeLightSubsystem.alignment = ReefAlignment.center));
+        auxController.button(2).onTrue(new RunCommand(() -> limeLightSubsystem.alignment = ReefAlignment.left));
+        auxController.button(1).onTrue(new RunCommand(() -> limeLightSubsystem.alignment = ReefAlignment.right));
         driveController.x().whileTrue(drivetrain.applyRequest(() -> 
+        drive.withVelocityX(0)
+            .withVelocityY(0)
+            .withRotationalRate(-swerveModifications.recieveTurnRate(-Math.cos(limeLightSubsystem.getRotationOutput()), -Math.sin(limeLightSubsystem.getRotationOutput())) * AngularRate)));
+        auxController.button(8).whileTrue(drivetrain.applyRequest(() -> 
         drive.withVelocityX(-limeLightSubsystem.getRangeOutput())
             .withVelocityY(-limeLightSubsystem.getStrafeOutput())
             .withRotationalRate(0)));
-    
+        
+        driveController.x().whileTrue(new RunCommand(()-> {System.out.println(limeLightSubsystem.alignment);}));
     //DRIVE    
         //TODO: maybe fix weird rotation bug and adjust PID (P value down)
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->
-                drive.withVelocityX(-SwerveModifications.modifyAxialInput(driveController.getLeftY(), driveController.getRightTriggerAxis(), swerveModifications.movementPercentModifier) * Speed) // Drive forward with negative Y (forward)
-                    .withVelocityY(-SwerveModifications.modifyAxialInput(driveController.getLeftX(), driveController.getRightTriggerAxis(), swerveModifications.movementPercentModifier) * Speed) // Drive left with negative X (left)
-                    .withRotationalRate(-swerveModifications.recieveTurnRate(driveController.getRightX(), driveController.getRightY()) * AngularRate)
+                drive.withVelocityX(-SwerveModifications.modifyAxialInput(driveController.getLeftY(), driveController.getLeftTriggerAxis(), swerveModifications.movementPercentModifier) * Speed) // Drive forward with negative Y (forward)
+                    .withVelocityY(-SwerveModifications.modifyAxialInput(driveController.getLeftX(), driveController.getLeftTriggerAxis(), swerveModifications.movementPercentModifier) * Speed) // Drive left with negative X (left)
+                    .withRotationalRate(-swerveModifications.recieveTurnRate(-driveController.getRightX(), -driveController.getRightY()) * AngularRate)
             )
         );
 
@@ -177,8 +194,8 @@ public class RobotContainer {
         driveController.povDown().whileTrue(elevatorSubsystem.manualElevatorDownCommand(driveController));
         //TODO: test that elevator auto resets at bottom
         //reset elevator encoder
-        auxController.button(8).onTrue(elevatorSubsystem.resetEncoder());
-
+        auxController.button(6).onTrue(elevatorSubsystem.resetEncoder());
+        driveController.povLeft().onTrue(coralArmSubsystem.rotateCommand(ArmRotation.Score));
     //OTHER
         //TODO: maybe add auto Brake
         //driveController.a().whileTrue(drivetrain.applyRequest(() -> brake));
@@ -195,7 +212,8 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        return autoChooser.getSelected();
+        //return autoChooser.getSelected();
+        return auto;
     }
 
     /**

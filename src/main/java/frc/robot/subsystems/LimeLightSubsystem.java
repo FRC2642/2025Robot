@@ -6,7 +6,12 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
+import java.nio.channels.Pipe;
+import java.util.ArrayList;
+import java.util.List;
+
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.generated.TunerConstants;
@@ -17,19 +22,57 @@ public class LimeLightSubsystem extends SubsystemBase {
   /** Creates a new LimeLightSubsystem. */
   int id;
   double speed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) / 2;
-  public ReefAlignment alignment = ReefAlignment.left;
+  public ReefAlignment alignment = ReefAlignment.center;
   public PIDController strafePID = new PIDController(0.01, 0, 0);
+  public static List<Integer> redAllianceAprilTagIDs = new ArrayList<Integer>();
+  public static List<Integer> blueAllianceAprilTagIDs = new ArrayList<Integer>();
+  public static List<Integer> shopAllianceAprilTagIDs = new ArrayList<Integer>();
+
+  public Field selectedField = Field.shop;
+
   public LimeLightSubsystem() {
     LimelightHelper.setPipelineIndex("limelight", 0);
+    //redAlliance
+      redAllianceAprilTagIDs.add(0, 7);
+      redAllianceAprilTagIDs.add(1, 8);
+      redAllianceAprilTagIDs.add(2, 9);
+      redAllianceAprilTagIDs.add(3, 10);
+      redAllianceAprilTagIDs.add(4, 11);
+      redAllianceAprilTagIDs.add(5, 6);
+
+    //blueAlliance
+      blueAllianceAprilTagIDs.add(0, 17);
+      blueAllianceAprilTagIDs.add(1, 22);
+      blueAllianceAprilTagIDs.add(2, 21);
+      blueAllianceAprilTagIDs.add(3, 20);
+      blueAllianceAprilTagIDs.add(4, 19);
+      blueAllianceAprilTagIDs.add(5, 18);
+  
+    //shop
+      shopAllianceAprilTagIDs.add(0, 15);
+      shopAllianceAprilTagIDs.add(1, 9);
+      shopAllianceAprilTagIDs.add(2, 11);
+      shopAllianceAprilTagIDs.add(3, 12);
+      shopAllianceAprilTagIDs.add(4, 16);
+      shopAllianceAprilTagIDs.add(5, 19);
   }
 
+  public enum Field {
+    redAlliance(redAllianceAprilTagIDs),
+    blueAlliance(blueAllianceAprilTagIDs),
+    shop(shopAllianceAprilTagIDs);
+
+    public final List<Integer> tagIDs;
+    Field(List<Integer> IDs) {
+      this.tagIDs = IDs;
+    }
+  }
   public enum ReefAlignment {
     right(-20.43),
     left(10.2),
     center(0);
 
     public final double alignment;
-    
     ReefAlignment(double align) {
       this.alignment = align;
     }
@@ -42,7 +85,7 @@ public class LimeLightSubsystem extends SubsystemBase {
   }
   public double getVerticalOffset(){
     double verticalOffset = LimelightHelper.getTY("limelight");
-    return verticalOffset - 8.41;
+    return verticalOffset - 9.41;
   }
 
   public double getStrafeOutput(){
@@ -52,31 +95,45 @@ public class LimeLightSubsystem extends SubsystemBase {
 
   public double getRangeOutput(){
     double output = getVerticalOffset() / 15;
-    System.out.println(output);
+    //System.out.println(output);
     return output;
   }
 
-
-
-
-  public double getRotationOutput(){
+  public double getAprilTagIDIndex(){
+    List<Integer> IDs = selectedField.tagIDs;
     RawFiducial[] fiducials = LimelightHelper.getRawFiducials("limelight");
     for (RawFiducial fiducial : fiducials){
       id = fiducial.id;
     }
-    if (id == 7){
-      return 0;
-    }
-    else{return 0;}
+    return IDs.indexOf(id);
   }
 
-  public Command printStuff(){
-    RawFiducial[] fiducials = LimelightHelper.getRawFiducials("limelight");
-    for (RawFiducial fiducial : fiducials){
-      id = fiducial.id;
+  public double getRotationOutput(){
+    System.out.println("field: " + selectedField);
+    System.out.println("tag ID: " + id);
+    System.out.println("tag ID index: " + getAprilTagIDIndex());
+    double toRotate = 0;
+    if(getAprilTagIDIndex() == 0){
+      toRotate = -90;
     }
-    String toPrint = (LimelightHelper.getTV("limelight") + " Tag ID: " + id);
-    return run(()->{System.out.println(toPrint);});
+    if(getAprilTagIDIndex() == 1){
+      toRotate = -150;
+    }
+    if(getAprilTagIDIndex() == 2){
+      toRotate = 150;
+    }
+    if(getAprilTagIDIndex() == 3){
+      toRotate = 90; //180
+    }
+    if(getAprilTagIDIndex() == 4){
+      toRotate = 30; 
+    }
+    if(getAprilTagIDIndex() == 5){
+      toRotate = -30;
+    }
+    System.out.println("angle: " + toRotate);
+    
+    return toRotate * Math.PI / 180;
   }
 
   @Override

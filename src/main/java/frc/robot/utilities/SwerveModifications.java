@@ -37,7 +37,7 @@ public class SwerveModifications {
   public double recieveTurnRate(double xAim, double yAim) {
 
     // Reset rotation offset 
-    if (control.getRightBumperButtonPressed()) { rotationOffset = getRotationOffset(); }
+    if (control.getRawButtonPressed(7)) { rotationOffset = getRotationOffset(); }
 
     /* Convert controller left stick x and y to degrees (0 - 360) */
     double angle = Math.atan2(yAim, xAim);
@@ -52,7 +52,6 @@ public class SwerveModifications {
     currentAngle *= -1;
     currentAngle += rotationOffset;
     if (currentAngle > 180) currentAngle -= 360;
-
     if (absDiff(angle, currentAngle) > 180) { if (angle < 0) angle += 360; else if (angle > 0) angle -= 360; }
 
     if (absDiff(angle, currentAngle) > 180) System.out.println("WARNING: HIGH CALCULATED ANGLE");
@@ -82,9 +81,13 @@ public class SwerveModifications {
      */
 
   public static double modifyAxialInput(double input, double modifierInput, double modifyPercent) {
+    //input = MathUtil.clamp(input, -0.2, 0.2);
     input = MathUtil.clamp(input, -1, 1);
+
+    System.out.println("joystick " + input);
+    System.out.println("trigger: " + modifierInput);
     modifierInput = MathUtil.clamp(modifierInput, 0, 1);
-    double output = input * (modifierInput * modifyPercent + (1 - modifyPercent));
+    double output = input * (modifierInput * modifyPercent + (1 - modifyPercent)); /*i input + MathUtil.clamp(modifierInput, 0, 0.8);*/
     return output;
   }
 }
