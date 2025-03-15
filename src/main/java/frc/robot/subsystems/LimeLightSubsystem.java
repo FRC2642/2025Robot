@@ -6,13 +6,10 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
-import java.nio.channels.Pipe;
 import java.util.ArrayList;
 import java.util.List;
 
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.generated.TunerConstants;
 import frc.robot.utilities.LimelightHelper;
@@ -28,7 +25,7 @@ public class LimeLightSubsystem extends SubsystemBase {
   public static List<Integer> blueAllianceAprilTagIDs = new ArrayList<Integer>();
   public static List<Integer> shopAllianceAprilTagIDs = new ArrayList<Integer>();
 
-  public Field selectedField = Field.shop;
+  public Field selectedField = Field.redAlliance;
 
   public LimeLightSubsystem() {
     LimelightHelper.setPipelineIndex("limelight", 0);

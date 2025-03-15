@@ -84,7 +84,7 @@ public class RobotContainer {
     private final SwerveModifications swerveModifications = new SwerveModifications(drivetrain, control); // Have to create a new instance due to the usage of changing values within the subsystem.
     
     public RobotContainer() {
-        auto = new PathPlannerAuto("Just Move Auto");
+        auto = new PathPlannerAuto("Taxi Auto");
         configureBindings();
         /* PathPlanner */
         // Build an auto chooser. This will use Commands.none() as the default option.
@@ -115,7 +115,6 @@ public class RobotContainer {
         //driveController.a().whileTrue(jojoArmSubsystem.intakeCommand());
 
     //SCORE/INTAKE
-        //TODO: maybe fix sensor (google better way to acsess value)
         //driver algae intake
         driveController.rightBumper().onTrue(coralArmSubsystem.toggleAlgaeIntake());
         //driver coral intake
@@ -125,8 +124,6 @@ public class RobotContainer {
         //RYLAN CHANGED
         //auxController.button(4).whileTrue(coralArmSubsystem.shootCommand(ShootSpeed.shoot));
     //ELEVATOR PRESETS
-        //TODO: test shortened slowdown phase
-        //TODO: test new control works and move back on release
         //drive backwards and move arm to safe until elevator is down
         //set elevator to L0
         //when the elevator is down, rotate coral arm to default
@@ -166,7 +163,6 @@ public class RobotContainer {
         .andThen(coralArmSubsystem.rotateCommand(ArmRotation.Score))
         //.onlyIf(coralArmSubsystem.holdingAlgae.negate())
         );
-        //TODO: test algae elevator preset, test full algae functionality
         //Algae
         /**
         auxController.button(12).onTrue(coralArmSubsystem.quickGetTheArmToSafty()
@@ -174,26 +170,23 @@ public class RobotContainer {
         coralArmSubsystem.rotateCommand(ArmRotation.Safe))).onlyIf(coralArmSubsystem.holdingAlgae));
         **/
     //VISION ALIGNMENT
-        //TODO: test all align modes and button IDs
-        //TODO: maybe fix rotation alignment
         //align to reef with limelight
         //RYLAN CHANGED
         auxXboxController.pov(270).onFalse(new RunCommand(() -> limeLightSubsystem.alignment = ReefAlignment.center));
         auxXboxController.pov(90).onFalse(new RunCommand(() -> limeLightSubsystem.alignment = ReefAlignment.center));
         auxXboxController.pov(270).onTrue(new RunCommand(() -> limeLightSubsystem.alignment = ReefAlignment.left));
         auxXboxController.pov(90).onTrue(new RunCommand(() -> limeLightSubsystem.alignment = ReefAlignment.right));
-        driveController.x().whileTrue(drivetrain.applyRequest(() -> 
+        
+        /* driveController.x().whileTrue(drivetrain.applyRequest(() -> 
         drive.withVelocityX(0)
             .withVelocityY(0)
-            .withRotationalRate(-swerveModifications.recieveTurnRate(-Math.cos(limeLightSubsystem.getRotationOutput()), -Math.sin(limeLightSubsystem.getRotationOutput())) * AngularRate)));
-        /*auxController.button(8).whileTrue(drivetrain.applyRequest(() -> 
+            .withRotationalRate(-swerveModifications.recieveTurnRate(-Math.cos(limeLightSubsystem.getRotationOutput()), -Math.sin(limeLightSubsystem.getRotationOutput())) * AngularRate)));  */      /*auxController.button(8).whileTrue(drivetrain.applyRequest(() -> 
         drive.withVelocityX(-limeLightSubsystem.getRangeOutput())
             .withVelocityY(-limeLightSubsystem.getStrafeOutput())
             .withRotationalRate(0)));
         */
-        driveController.x().whileTrue(new RunCommand(()-> {System.out.println(limeLightSubsystem.alignment);}));
+        driveController.x().whileTrue(new RunCommand(()-> {System.out.println("final print: " + limeLightSubsystem.getRotationOutput());}));
     //DRIVE
-        //TODO: maybe fix weird rotation bug and adjust PID (P value down)
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->
@@ -213,13 +206,11 @@ public class RobotContainer {
        //RYLAN CHANGED 
         auxXboxController.povUp().whileTrue(elevatorSubsystem.manualElevatorUpCommand(driveController));
         auxXboxController.povDown().whileTrue(elevatorSubsystem.manualElevatorDownCommand(driveController));
-        //TODO: test that elevator auto resets at bottom
         //reset elevator encoder
         //RYLAN CHANGED
         //auxController.button(6).onTrue(elevatorSubsystem.resetEncoder());
         //driveController.povLeft().onTrue(coralArmSubsystem.rotateCommand(ArmRotation.Score));
     //OTHER
-        //TODO: maybe add auto Brake
         //driveController.a().whileTrue(drivetrain.applyRequest(() -> brake));
         driveController.button(7).onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
@@ -235,7 +226,11 @@ public class RobotContainer {
 
     public Command getAutonomousCommand() {
         //return autoChooser.getSelected();
-        return auto;
+        return drivetrain.applyRequest(() ->
+            drive.withVelocityX(0.55)
+                .withVelocityY(0)
+                .withRotationalRate(0)
+    ).withTimeout(7);
     }
 
     /**

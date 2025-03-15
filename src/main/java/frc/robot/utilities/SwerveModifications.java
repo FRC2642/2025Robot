@@ -84,8 +84,8 @@ public class SwerveModifications {
     //input = MathUtil.clamp(input, -0.2, 0.2);
     input = MathUtil.clamp(input, -1, 1);
 
-    System.out.println("joystick " + input);
-    System.out.println("trigger: " + modifierInput);
+   // System.out.println("joystick " + input);
+   // System.out.println("trigger: " + modifierInput);
     modifierInput = MathUtil.clamp(modifierInput, 0, 1);
     double output = input * (modifierInput * modifyPercent + (1 - modifyPercent)); /*i input + MathUtil.clamp(modifierInput, 0, 0.8);*/
     return output;
