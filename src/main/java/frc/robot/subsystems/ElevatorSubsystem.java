@@ -30,7 +30,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   public boolean manualMode = true;
 
   public Trigger elevatorPositionReached = new Trigger(()-> Math.abs(getEncoderValue() - elevatorPosition.aim) < 25);
-  public Trigger elevatorTopLimitReached = new Trigger(() -> getEncoderValue() > 5000);
+  public Trigger elevatorTopLimitReached = new Trigger(() -> getEncoderValue() > 10200);
   public Trigger elevatorNearBottom = new Trigger(()-> getEncoderValue() < 500);
   public Trigger limitReached = new Trigger(limitSwitch::get).negate();
   //RYLAN CHANGED
@@ -51,6 +51,9 @@ public class ElevatorSubsystem extends SubsystemBase {
         rightElevatorMotor.set(getMotorOutput()); 
         leftElevatorMotor.set(-getMotorOutput()); 
       }
+      //System.out.println("bottom limit: " + limitSwitch.get() + " Trigger Value: " + limitReached.getAsBoolean());
+      //System.out.println("top limit: " + topLimitSwitch.get() + " Trigger Value: " + hitTop.getAsBoolean());
+
       //System.out.println("default Command, encoder: " + getEncoderValue() + " setpoint: " + elevatorPosition.aim);
       //System.out.println("Default Command Running");
     }));
@@ -85,6 +88,30 @@ public class ElevatorSubsystem extends SubsystemBase {
       
     return output;
     
+  }
+
+  public Command elevatorL4AutoCommand(){
+    return new RunCommand(()->{
+      if (!hitTop.getAsBoolean()){
+        rightElevatorMotor.set(maxElevatorSpeed * 0.6);
+        leftElevatorMotor.set(-maxElevatorSpeed * 0.6);
+      }
+    }).until(hitTop.or(elevatorTopLimitReached)).andThen(runOnce(()->{ //TODO: check elevator top limit trigger
+        rightElevatorMotor.set(0);
+        leftElevatorMotor.set(0);
+    }));
+  }
+
+  public Command elevatorDownAutoCommand(){
+    return new RunCommand(()->{
+      if (!limitReached.getAsBoolean()){
+        rightElevatorMotor.set(-maxElevatorSpeed * 0.6);
+        leftElevatorMotor.set(maxElevatorSpeed * 0.6);
+      }
+    }).until(limitReached).andThen(runOnce(()-> {
+        rightElevatorMotor.set(0);
+        leftElevatorMotor.set(0);
+    }));
   }
 
   public Command elevatorCommand(ElevatorPosition position){

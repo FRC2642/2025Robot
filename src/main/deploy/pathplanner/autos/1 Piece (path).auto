@@ -9,6 +9,18 @@
           "data": {
             "pathName": "Align path"
           }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Approch Reef"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Leave Reef"
+          }
         }
       ]
     }

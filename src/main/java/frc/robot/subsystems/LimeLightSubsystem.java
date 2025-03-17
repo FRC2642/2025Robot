@@ -10,6 +10,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.util.sendable.Sendable;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.generated.TunerConstants;
 import frc.robot.utilities.LimelightHelper;
@@ -24,7 +30,7 @@ public class LimeLightSubsystem extends SubsystemBase {
   public static List<Integer> redAllianceAprilTagIDs = new ArrayList<Integer>();
   public static List<Integer> blueAllianceAprilTagIDs = new ArrayList<Integer>();
   public static List<Integer> shopAllianceAprilTagIDs = new ArrayList<Integer>();
-
+  private final SendableChooser<Field> fieldChooser = new SendableChooser<>();
   public Field selectedField = Field.redAlliance;
 
   public LimeLightSubsystem() {
@@ -46,12 +52,24 @@ public class LimeLightSubsystem extends SubsystemBase {
       blueAllianceAprilTagIDs.add(5, 18);
   
     //shop
-      shopAllianceAprilTagIDs.add(0, 15);
+      shopAllianceAprilTagIDs.add(0, 6);
       shopAllianceAprilTagIDs.add(1, 9);
       shopAllianceAprilTagIDs.add(2, 11);
       shopAllianceAprilTagIDs.add(3, 12);
       shopAllianceAprilTagIDs.add(4, 16);
       shopAllianceAprilTagIDs.add(5, 19);
+    fieldChooser.setDefaultOption("shop field", Field.shop);
+    fieldChooser.addOption("blue aliiance", Field.blueAlliance);
+    fieldChooser.addOption("red aliiance", Field.redAlliance);
+    SmartDashboard.putData("Field Chooser", fieldChooser);
+    Shuffleboard.getTab("LiveWindow").add("align", 0).withWidget(BuiltInWidgets.kDial);
+    //putData("Alignnent", alignment);
+    selectedField = fieldChooser.getSelected();
+
+    setDefaultCommand(run(()-> {
+      System.out.println(alignment);
+      SmartDashboard.putString("Alignment", alignment.toString());
+    }));
   }
 
   public enum Field {

@@ -33,7 +33,9 @@ public class CoralArmSubsystem extends SubsystemBase {
   public boolean intakeToggle = false;
 
   public Trigger RotationStateReached = new Trigger(() -> Math.abs(getEncoderValue() - armRot.rot) < 0.01);
-  public Trigger IsSafeFromElevator = new Trigger(() -> getEncoderValue() > 0.3);
+  public Trigger IsSafeFromElevator = new Trigger(() -> getEncoderValue() > 0.35);
+  public Trigger IsScorePosition = new Trigger(()-> getEncoderValue() < 0.25);
+  public Trigger IsDefaultPosition = new Trigger(()-> getEncoderValue() < 0.084);
   public Trigger hasCoral = new Trigger(() -> beamBreak.getDistance().getValueAsDouble() < 0.08);
   public Trigger holdingAlgae = new Trigger(()-> intakeToggle == true);
   
@@ -54,6 +56,7 @@ public class CoralArmSubsystem extends SubsystemBase {
         shootSpeed = ShootSpeed.stop;
         shootMotor.set(0);
       }
+      //System.out.println("Arm Safty: " + IsSafeFromElevator.getAsBoolean());
       //System.out.println("default arm" + getEncoderValue());
       //System.out.println(intakeToggle);
       //System.out.println(beamBreak.getDistance().getValueAsDouble());
@@ -95,6 +98,41 @@ public class CoralArmSubsystem extends SubsystemBase {
       toRotate = maxRotateSpeed;}
     return toRotate;
   }
+//AUTO COMMANDS
+  public Command armOutAutoCommand(){
+    return new RunCommand(() ->{rotateMotor.set(0.2);})
+    .until(IsSafeFromElevator).andThen(runOnce(()->{
+      rotateMotor.set(0);
+    }));
+  }
+  public Command armScoreAutoCommand(){
+    return new RunCommand(() ->{rotateMotor.set(-0.2);})
+    .until(IsScorePosition).andThen(runOnce(()->{
+      rotateMotor.set(0);
+    }));
+  }
+  public Command armInAutoCommand(){
+    return new RunCommand(() ->{rotateMotor.set(-0.2);})
+    .until(IsDefaultPosition).andThen(runOnce(()->{
+      rotateMotor.set(0);
+    }));
+  }
+  public Command shootL4AutoCommand(){
+    return runOnce(() ->{shootMotor.set(-1);});
+  }
+  public Command stopShooterAutoCommand(){
+    return runOnce(() ->{shootMotor.set(0);});
+  }
+  public Command intakeCoralAutoCommand(){
+    return new RunCommand(() ->{shootMotor.set(0.3);
+    }).until(hasCoral).andThen(()->{
+      shootMotor.set(-0.25);
+    }).until(hasCoral.negate()).andThen(runOnce(()-> {
+      shootMotor.set(0);
+    }));
+  }
+
+
 
 
   public Command manualRotateCommand(ArmRotation position){
