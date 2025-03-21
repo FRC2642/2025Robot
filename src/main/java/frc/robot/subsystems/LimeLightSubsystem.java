@@ -67,7 +67,7 @@ public class LimeLightSubsystem extends SubsystemBase {
     selectedField = fieldChooser.getSelected();
 
     setDefaultCommand(run(()-> {
-      System.out.println(alignment);
+      //System.out.println(alignment);
       SmartDashboard.putString("Alignment", alignment.toString());
     }));
   }
