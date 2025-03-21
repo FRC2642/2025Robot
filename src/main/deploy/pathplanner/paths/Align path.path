@@ -3,11 +3,15 @@
   "waypoints": [
     {
       "anchor": {
+        "x": 7.138162251655628,
+        "y": 7.052
         "x": 7.456,
         "y": 4.8128
       },
       "prevControl": null,
       "nextControl": {
+        "x": 6.697974870859967,
+        "y": 6.8093771627974276
         "x": 6.572620948254444,
         "y": 5.21603637191997
       },
@@ -20,6 +24,8 @@
         "y": 5.517469262295082
       },
       "prevControl": {
+        "x": 4.839793362338433,
+        "y": 5.26422092601656
         "x": 4.9218784599888865,
         "y": 5.568085585740466
       },
@@ -31,7 +37,14 @@
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "Coral Arm Out",
+      "waypointRelativePos": 1.0,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,

@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.963563598463862,
-        "y": 5.197774762275078
+        "x": 4.96455310830025,
+        "y": 5.198971312123642
       },
       "isLocked": false,
       "linkedName": "Reef Align"
@@ -20,8 +20,8 @@
         "y": 5.273
       },
       "prevControl": {
-        "x": 5.129553596556339,
-        "y": 5.487863307028595
+        "x": 5.108935551682816,
+        "y": 5.4988567189845154
       },
       "nextControl": null,
       "isLocked": false,
@@ -31,7 +31,26 @@
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "Elevator L4",
+      "waypointRelativePos": 0,
+      "endWaypointRelativePos": null,
+      "command": null
+    },
+    {
+      "name": "Coral Arm Score",
+      "waypointRelativePos": 1.0,
+      "endWaypointRelativePos": null,
+      "command": null
+    },
+    {
+      "name": "Shoot L4",
+      "waypointRelativePos": 1.0,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,
