@@ -52,7 +52,7 @@ public class LimeLightSubsystem extends SubsystemBase {
       blueAllianceAprilTagIDs.add(5, 18);
   
     //shop
-      shopAllianceAprilTagIDs.add(0, 6);
+      shopAllianceAprilTagIDs.add(0, 15);
       shopAllianceAprilTagIDs.add(1, 9);
       shopAllianceAprilTagIDs.add(2, 11);
       shopAllianceAprilTagIDs.add(3, 12);
@@ -68,7 +68,11 @@ public class LimeLightSubsystem extends SubsystemBase {
 
     setDefaultCommand(run(()-> {
       //System.out.println(alignment);
+<<<<<<< HEAD
       SmartDashboard.putString("Alignment", alignment.toString());
+=======
+      Shuffleboard.update();
+>>>>>>> 6c01c44a15d7c15ae248fe254fcf1579c4ce746b
     }));
   }
 
