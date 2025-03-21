@@ -24,14 +24,15 @@ public class ElevatorSubsystem extends SubsystemBase {
   public DigitalInput topLimitSwitch = new DigitalInput(6);
 
   public PIDController elevatorPID = new PIDController(0.006, 0.001, 0);
-  public double maxElevatorSpeed = 0.5;
+  public double maxElevatorSpeed = 0.85;
   public static ElevatorPosition elevatorPosition = ElevatorPosition.L0;
 
   public boolean manualMode = true;
 
   public Trigger elevatorPositionReached = new Trigger(()-> Math.abs(getEncoderValue() - elevatorPosition.aim) < 25);
-  public Trigger elevatorTopLimitReached = new Trigger(() -> getEncoderValue() > 10200);
+  public Trigger elevatorTopLimitReached = new Trigger(() -> getEncoderValue() > 9000);
   public Trigger elevatorNearBottom = new Trigger(()-> getEncoderValue() < 500);
+  public Trigger elevatorNearTrigger = new Trigger(()-> Math.abs(getEncoderValue() - elevatorPosition.aim) < 500);
   public Trigger limitReached = new Trigger(limitSwitch::get).negate();
   //RYLAN CHANGED
   public Trigger hitTop = new Trigger(topLimitSwitch::get).negate();
@@ -43,14 +44,9 @@ public class ElevatorSubsystem extends SubsystemBase {
     elevatorAtL4 = new Trigger(()-> elevatorPosition == ElevatorPosition.L4 || getEncoderValue() > 9800);
 
     setDefaultCommand(run(() -> {
-      if(elevatorNearBottom.getAsBoolean() || manualMode == true){
-        rightElevatorMotor.set(0); 
+        rightElevatorMotor.set(0);
         leftElevatorMotor.set(0);
-      }
-      else{
-        rightElevatorMotor.set(getMotorOutput()); 
-        leftElevatorMotor.set(-getMotorOutput()); 
-      }
+        //System.out.println("encoder: " + getEncoderValue());
       //System.out.println("bottom limit: " + limitSwitch.get() + " Trigger Value: " + limitReached.getAsBoolean());
       //System.out.println("top limit: " + topLimitSwitch.get() + " Trigger Value: " + hitTop.getAsBoolean());
 
@@ -76,7 +72,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   }
   public double getEncoderValue(){
     double encoderValue = shaftEncoder.get();
-    return encoderValue; 
+    return encoderValue;
   }
 
   public double getMotorOutput(){
@@ -93,8 +89,8 @@ public class ElevatorSubsystem extends SubsystemBase {
   public Command elevatorL4AutoCommand(){
     return new RunCommand(()->{
       if (!hitTop.getAsBoolean()){
-        rightElevatorMotor.set(maxElevatorSpeed * 0.6);
-        leftElevatorMotor.set(-maxElevatorSpeed * 0.6);
+        rightElevatorMotor.set(maxElevatorSpeed * 0.4);
+        leftElevatorMotor.set(-maxElevatorSpeed * 0.4);
       }
     }).until(hitTop.or(elevatorTopLimitReached)).andThen(runOnce(()->{ //TODO: check elevator top limit trigger
         rightElevatorMotor.set(0);
@@ -105,8 +101,8 @@ public class ElevatorSubsystem extends SubsystemBase {
   public Command elevatorDownAutoCommand(){
     return new RunCommand(()->{
       if (!limitReached.getAsBoolean()){
-        rightElevatorMotor.set(-maxElevatorSpeed * 0.6);
-        leftElevatorMotor.set(maxElevatorSpeed * 0.6);
+        rightElevatorMotor.set(-maxElevatorSpeed * 0.4);
+        leftElevatorMotor.set(maxElevatorSpeed * 0.4);
       }
     }).until(limitReached).andThen(runOnce(()-> {
         rightElevatorMotor.set(0);
@@ -130,6 +126,34 @@ public class ElevatorSubsystem extends SubsystemBase {
       rightElevatorMotor.set(0);
       leftElevatorMotor.set(0);}))
       .withName("Position Elevator");
+  }
+
+  public Command slowDownElevatorCommand(ElevatorPosition position){
+    return new RunCommand(()->{
+      manualMode = false;
+      elevatorPosition = position;
+      rightElevatorMotor.set(getMotorOutput()); 
+      leftElevatorMotor.set(-getMotorOutput());
+      System.out.println("encoder changing: " + getEncoderValue());
+    })
+    .until(elevatorNearTrigger).andThen(new RunCommand(()->
+    {
+      System.out.println("slowDown");
+      if (getEncoderValue() < elevatorPosition.aim){
+        rightElevatorMotor.set(0.1);
+        leftElevatorMotor.set(-0.1);
+      } else{
+        if(getEncoderValue() > elevatorPosition.aim){
+          rightElevatorMotor.set(-0.1);
+          leftElevatorMotor.set(0.1);
+        }
+      }
+    })).until(elevatorPositionReached)
+    .andThen(runOnce(() -> 
+    {
+      System.out.println("end slowdown");
+      rightElevatorMotor.set(0);
+      leftElevatorMotor.set(0);}));
   }
 
   public Command elevatorL0Command(){
@@ -157,8 +181,8 @@ public class ElevatorSubsystem extends SubsystemBase {
       manualMode = true;
 
       if (!hitTop.getAsBoolean()){
-        rightElevatorMotor.set(maxElevatorSpeed * 0.8);
-        leftElevatorMotor.set(-maxElevatorSpeed * 0.8);
+        rightElevatorMotor.set(0.07);
+        leftElevatorMotor.set(-0.07);
       }
       
       //System.out.println(getEncoderValue());
@@ -172,8 +196,8 @@ public class ElevatorSubsystem extends SubsystemBase {
 
       //RYLAN CHANGED
       if (!limitReached.getAsBoolean()){
-        rightElevatorMotor.set(-maxElevatorSpeed * 0.8);
-        leftElevatorMotor.set(maxElevatorSpeed * 0.8);
+        rightElevatorMotor.set(-0.07);
+        leftElevatorMotor.set(0.07);
       //System.out.println(getEncoderValue());
       }
       })

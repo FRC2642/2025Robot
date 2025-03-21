@@ -57,7 +57,7 @@ public class CoralArmSubsystem extends SubsystemBase {
         shootMotor.set(0);
       }
       //System.out.println("Arm Safty: " + IsSafeFromElevator.getAsBoolean());
-      //System.out.println("default arm" + getEncoderValue());
+      System.out.println("Coral arm" + getEncoderValue());
       //System.out.println(intakeToggle);
       //System.out.println(beamBreak.getDistance().getValueAsDouble());
       //System.out.println(IsSafeFromElevator.getAsBoolean());
@@ -118,15 +118,15 @@ public class CoralArmSubsystem extends SubsystemBase {
     }));
   }
   public Command shootL4AutoCommand(){
-    return runOnce(() ->{shootMotor.set(-1);});
+    return runOnce(() ->{shootMotor.set(1);});
   }
   public Command stopShooterAutoCommand(){
     return runOnce(() ->{shootMotor.set(0);});
   }
   public Command intakeCoralAutoCommand(){
-    return new RunCommand(() ->{shootMotor.set(0.3);
+    return new RunCommand(() ->{shootMotor.set(-0.3);
     }).until(hasCoral).andThen(()->{
-      shootMotor.set(-0.25);
+      shootMotor.set(0.25);
     }).until(hasCoral.negate()).andThen(runOnce(()-> {
       shootMotor.set(0);
     }));
@@ -143,14 +143,14 @@ public class CoralArmSubsystem extends SubsystemBase {
 
   public Command manualShootOutCommand(){
     return run(()->{
-      shootMotor.set(0.8);
+      shootMotor.set(-0.8);
     }).andThen(runOnce(()->shootMotor.set(0))
     );
   }
 
   public Command manualShootInCommand(){
     return run(()->{
-      shootMotor.set(-0.4);
+      shootMotor.set(0.4);
     }).andThen(runOnce(()->shootMotor.set(0))
     );
   }
@@ -161,9 +161,9 @@ public class CoralArmSubsystem extends SubsystemBase {
       //intakeToggle = false;
       if (ElevatorSubsystem.elevatorPosition == ElevatorPosition.L4 || ElevatorSubsystem.elevatorPosition == ElevatorPosition.algae){
         shootSpeed = ShootSpeed.intake;
-        shootMotor.set(shootSpeed.speed * maxShootOutput * 3);
+        shootMotor.set(-shootSpeed.speed * maxShootOutput * 3);
       }else{
-      shootMotor.set(speed.speed * maxShootOutput);}})
+      shootMotor.set(-speed.speed * maxShootOutput);}})
     .withName("Shoot Coral").onlyWhile(holdingAlgae.negate());
   }
   public Command toggleAlgaeIntake(){
@@ -173,11 +173,11 @@ public class CoralArmSubsystem extends SubsystemBase {
       if (intakeToggle == true){
         System.out.println("should be moving");
         shootSpeed = ShootSpeed.shoot;
-        shootMotor.set(shootSpeed.speed * maxShootOutput * 0.7);
+        shootMotor.set(-shootSpeed.speed * maxShootOutput * 0.7);
       }
       else{
         shootSpeed = ShootSpeed.stop;
-        shootMotor.set(shootSpeed.speed * maxShootOutput);
+        shootMotor.set(-shootSpeed.speed * maxShootOutput);
       }
     });
   }

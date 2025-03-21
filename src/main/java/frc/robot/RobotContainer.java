@@ -60,7 +60,7 @@ public class RobotContainer {
     private final XboxController control = new XboxController(Constants.OperatorConstants.DRIVE_CONTROLLER_PORT);
     //RYLAN CHANGED
     private final CommandXboxController auxXboxController = new CommandXboxController(Constants.OperatorConstants.AUX_XBOX_CONTROLLER_PORT);
-    //private final CommandJoystick auxController = new CommandJoystick(Constants.OperatorConstants.AUX_BUTTON_BOARD_PORT); //make variable
+    private final CommandJoystick auxController = new CommandJoystick(Constants.OperatorConstants.AUX_BUTTON_BOARD_PORT); //make variable
     //Subsystems
         public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain(); //drive
         private final CoralArmSubsystem coralArmSubsystem = new CoralArmSubsystem(); //CoralArm
@@ -90,22 +90,25 @@ public class RobotContainer {
         drivetrain.seedFieldCentric();
         elevatorSubsystem.resetEncoder();
         configureBindings();
-        NamedCommands.registerCommand("Coral Arm Out", coralArmSubsystem.armOutAutoCommand());
+        NamedCommands.registerCommand("Coral Arm Out", coralArmSubsystem.armOutAutoCommand()); //Coral Arm Out
         NamedCommands.registerCommand("Elevator L4", elevatorSubsystem.elevatorL4AutoCommand());
         NamedCommands.registerCommand("Coral Arm Score", coralArmSubsystem.armScoreAutoCommand());
         NamedCommands.registerCommand("Shoot L4", coralArmSubsystem.shootL4AutoCommand());
+        NamedCommands.registerCommand("End Shoot L4", coralArmSubsystem.stopShooterAutoCommand());
         NamedCommands.registerCommand("Elevator Down", elevatorSubsystem.elevatorDownAutoCommand());
-        NamedCommands.registerCommand("Coral Arm Default", coralArmSubsystem.armInAutoCommand());
+        NamedCommands.registerCommand("Coral Arm Default", coralArmSubsystem.armInAutoCommand()); //Coral Arm Default
         /* PathPlanner */
         autoChooser = AutoBuilder.buildAutoChooser();
         autoChooser.setDefaultOption("NO AUTO SELECTED", new WaitCommand(15));
         autoChooser.addOption("Taxi", new PathPlannerAuto("Taxi Auto"));
         autoChooser.addOption("Align", new PathPlannerAuto("Align Auto"));
         autoChooser.addOption("1 Piece", new PathPlannerAuto("1 Piece Auto"));
+        autoChooser.addOption("Arm Auto", new PathPlannerAuto("Arm Auto"));
+        autoChooser.addOption("just move", new PathPlannerAuto("Move Auto"));
 
         autoChooser.addOption("1 Piece (path test)", new PathPlannerAuto("1 Piece (path)"));
         autoChooser.addOption("1 Piece (arm test)", new PathPlannerAuto("1 Piece (arm)"));
-        autoChooser.addOption("1 Piece (elevator test)", new PathPlannerAuto("1 Piece (elevator)"));
+        autoChooser.addOption("Reverse Align", new PathPlannerAuto("Reverse Align Auto"));
         SmartDashboard.putData("Auto Chooser", autoChooser);
 
         // To add an auto to the autoChooser use addppAutoOption()
@@ -132,8 +135,7 @@ public class RobotContainer {
         //driver algae intake
         driveController.rightBumper().onTrue(coralArmSubsystem.toggleAlgaeIntake());
         //driver coral intake
-        driveController.leftBumper().whileTrue(coralArmSubsystem.shootCommand(ShootSpeed.intake).onlyWhile(coralArmSubsystem.hasCoral.negate())
-        .andThen(coralArmSubsystem.shootCommand(ShootSpeed.superSlow).until(coralArmSubsystem.hasCoral.negate())));
+        driveController.leftBumper().whileTrue(coralArmSubsystem.shootCommand(ShootSpeed.intake).until(coralArmSubsystem.hasCoral).andThen(coralArmSubsystem.shootCommand(ShootSpeed.intake).until(coralArmSubsystem.hasCoral.negate())).andThen(coralArmSubsystem.shootCommand(ShootSpeed.shoot).until(coralArmSubsystem.hasCoral)));
         //aux shoot coral or algae (L4 and Algae are included, shoot is reversed)
         //RYLAN CHANGED
         //auxController.button(4).whileTrue(coralArmSubsystem.shootCommand(ShootSpeed.shoot));
@@ -145,40 +147,17 @@ public class RobotContainer {
         
         auxXboxController.a().onTrue(elevatorSubsystem.elevatorL0Command().onlyWhile(coralArmSubsystem.IsSafeFromElevator));
         //RYLAN CHANGED
-        /*
-        auxController.button(4).onFalse(
-            new ParallelCommandGroup(
-            coralArmSubsystem.shootCommand(ShootSpeed.stop),
-            elevatorSubsystem.elevatorL0Command(), 
-            coralArmSubsystem.rotateCommand(ArmRotation.Safe)
-            /**drivetrain.applyRequest(()->
-            drive.withVelocityX(limeLightSubsystem.getRangeOutput()/2)
-                 .withVelocityY(-SwerveModifications.modifyAxialInput(driveController.getLeftX(), driveController.getRightTriggerAxis(), swerveModifications.movementPercentModifier) * Speed)
-                 .withRotationalRate(0))
-            
-        ).until(elevatorSubsystem.elevatorPositionReached)
-        .andThen(coralArmSubsystem.rotateCommand(ArmRotation.Default)));
-
+        
         //L1
-        auxController.button(12).onTrue(coralArmSubsystem.quickGetTheArmToSafty()
-        .andThen(new ParallelCommandGroup(elevatorSubsystem.elevatorCommand(ElevatorPosition.L1).onlyWhile(coralArmSubsystem.IsSafeFromElevator), 
-        coralArmSubsystem.rotateCommand(ArmRotation.Bottom))));
-        //L2
-        auxController.button(11).onTrue(coralArmSubsystem.quickGetTheArmToSafty()
-        .andThen(new ParallelCommandGroup(elevatorSubsystem.elevatorCommand(ElevatorPosition.L2).onlyWhile(coralArmSubsystem.IsSafeFromElevator), 
-        coralArmSubsystem.rotateCommand(ArmRotation.Bottom))));
-        //L3
-        auxController.button(9).onTrue(coralArmSubsystem.quickGetTheArmToSafty()
-        .andThen(new ParallelCommandGroup(elevatorSubsystem.elevatorCommand(ElevatorPosition.L3).onlyWhile(coralArmSubsystem.IsSafeFromElevator), 
-        coralArmSubsystem.rotateCommand(ArmRotation.Bottom))));
-        //L4
-        auxController.button(10).onTrue(coralArmSubsystem.quickGetTheArmToSafty()
-        .andThen(new ParallelCommandGroup(elevatorSubsystem.elevatorCommand(ElevatorPosition.L4).onlyWhile(coralArmSubsystem.IsSafeFromElevator), 
-        coralArmSubsystem.rotateCommand(ArmRotation.Safe)).until(elevatorSubsystem.elevatorPositionReached))
-        .andThen(coralArmSubsystem.rotateCommand(ArmRotation.Score))
-        //.onlyIf(coralArmSubsystem.holdingAlgae.negate())
-        );
-        //Algae
+        auxController.button(6).onTrue(elevatorSubsystem.resetEncoder());
+        auxController.button(4).onTrue(elevatorSubsystem.elevatorL0Command().onlyWhile(coralArmSubsystem.IsSafeFromElevator));
+        
+        auxController.button(12).onTrue(elevatorSubsystem.slowDownElevatorCommand(ElevatorPosition.L1).onlyWhile(coralArmSubsystem.IsSafeFromElevator));
+        auxController.button(11).onTrue(elevatorSubsystem.slowDownElevatorCommand(ElevatorPosition.L2).onlyWhile(coralArmSubsystem.IsSafeFromElevator));
+        auxController.button(9).onTrue(elevatorSubsystem.slowDownElevatorCommand(ElevatorPosition.L3).onlyWhile(coralArmSubsystem.IsSafeFromElevator));
+        auxController.button(10).onTrue(elevatorSubsystem.slowDownElevatorCommand(ElevatorPosition.L4).onlyWhile(coralArmSubsystem.IsSafeFromElevator));
+        
+
         /**
         auxController.button(12).onTrue(coralArmSubsystem.quickGetTheArmToSafty()
         .andThen(new ParallelCommandGroup(elevatorSubsystem.elevatorCommand(ElevatorPosition.algae).onlyWhile(coralArmSubsystem.IsSafeFromElevator),
@@ -193,9 +172,9 @@ public class RobotContainer {
             .until(driveController.povLeft().or(driveController.povUp())));
         driveController.povUp().onTrue(new RunCommand(() -> limeLightSubsystem.alignment = ReefAlignment.center)
             .until(driveController.povLeft().or(driveController.povRight())));
-        //auxXboxController.povLeft().onTrue(new RunCommand(() -> limeLightSubsystem.alignment = ReefAlignment.right));
+        
         driveController.povDown().whileTrue(drivetrain.applyRequest(() -> 
-        drive.withVelocityX(0)
+            drive.withVelocityX(0)
             .withVelocityY(0)
             .withRotationalRate(-swerveModifications.recieveTurnRate(-Math.cos(limeLightSubsystem.getRotationOutput()), -Math.sin(limeLightSubsystem.getRotationOutput())) * AngularRate)));      
         driveController.x().whileTrue(drivetrain.applyRequest(() -> 
@@ -215,6 +194,8 @@ public class RobotContainer {
 
             )
         );
+
+        
 
     //MANUALS (default arm, safe arm, manual elevator, reset elevator encoder)
         //move coral arm to default

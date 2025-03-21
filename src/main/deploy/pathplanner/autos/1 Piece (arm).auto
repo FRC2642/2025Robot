@@ -5,9 +5,21 @@
     "data": {
       "commands": [
         {
+          "type": "path",
+          "data": {
+            "pathName": "Stay Still Path"
+          }
+        },
+        {
           "type": "named",
           "data": {
             "name": "Coral Arm Out"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.5
           }
         },
         {
@@ -17,15 +29,39 @@
           }
         },
         {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.5
+          }
+        },
+        {
           "type": "named",
           "data": {
             "name": "Shoot L4"
           }
         },
         {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.5
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "End Shoot L4"
+          }
+        },
+        {
           "type": "named",
           "data": {
             "name": "Coral Arm Out"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.5
           }
         },
         {
