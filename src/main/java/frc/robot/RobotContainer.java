@@ -55,7 +55,7 @@ public class RobotContainer {
     private final SendableChooser<Command> autoChooser;
     
     // Custom Swerve Modifications
-    private final SwerveModifications swerveModifications = new SwerveModifications(drivetrain, control); // Have to create a new instance due to the usage of changing values within the subsystem.
+    private final SwerveModifications swerveModifications = new SwerveModifications(drivetrain, control, 0.12); // Have to create a new instance due to the usage of changing values within the subsystem.
 
     // Component Subsystems
     //private final ElevatorArmSubsystem elevatorArmSubsystem = new ElevatorArmSubsystem();
@@ -83,7 +83,7 @@ public class RobotContainer {
     private void configureBindings() {
         //elevatorSubsystem.setDefaultCommand(new ElevatorCommand(elevatorSubsystem, control, auxButtonBoard));
         //elevatorArmSubsystem.setDefaultCommand(new ElevatorArmCommand(elevatorArmSubsystem, control));
-        jojoSubsystem.setDefaultCommand(new JojoCommand(jojoSubsystem, control));
+        //jojoSubsystem.setDefaultCommand(new JojoCommand(jojoSubsystem, control));
 
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.

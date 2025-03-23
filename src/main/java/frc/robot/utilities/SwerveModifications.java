@@ -6,6 +6,8 @@ package frc.robot.utilities;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -19,18 +21,20 @@ public class SwerveModifications {
   public boolean turnDebug = SwerveModificationConstants.TURN_DEBUG;
   public double rotationOffset;
 
-  public DynamicController rotationController = new DynamicController(20, .033333333333333333, true);
+  public DynamicController rotationController = new DynamicController(20, 1/30, true);
   public double movementPercentModifier = SwerveModificationConstants.MOVEMENT_PERCENT_MODIFIER;
 
   private CommandSwerveDrivetrain drivetrain;
   XboxController control;
 
   public double calculatedAngleDiff;
+  public double joystickDeadzone;
 
-  public SwerveModifications(CommandSwerveDrivetrain drivetrainIN, XboxController controller) { // In the future, include a way to input an offset to prevent odd orientating after running an auto
+  public SwerveModifications(CommandSwerveDrivetrain drivetrainIN, XboxController controller, double deadzone) { // In the future, include a way to input an offset to prevent odd orientating after running an auto
     this.drivetrain = drivetrainIN;
     this.control = controller;
     this.rotationOffset = this.getRotationOffset();
+    this.joystickDeadzone = deadzone;
 
     if (turnDebug) {
       SmartDashboard.putNumber("Swerve Rotation Calculated Angle Diff", calculatedAngleDiff);
@@ -38,39 +42,39 @@ public class SwerveModifications {
   }
 
   public double recieveTurnRate() {
-
     // Reset rotation offset 
-    if (control.getRightBumperButtonPressed()) { rotationOffset = getRotationOffset(); }
+    //if (control.getLeftBumperButtonPressed()) rotationOffset = getRotationOffset();
 
     /* Convert controller left stick x and y to degrees (0 - 360) */
     double angle = Math.atan2(control.getRightY(), control.getRightX());
     angle *= 180/Math.PI;
     angle += 90;
-    if (angle > 180) angle -= 360;
+    angle = SectorLimit(angle, RotationSector.normal);
 
     double currentAngle = drivetrain.getPigeon2().getRotation2d().getDegrees();
     currentAngle = currentAngle % 360;
-    if (currentAngle > 180) currentAngle -= 360;
-    else if (currentAngle < -180) currentAngle += 360;
+    angle = SectorLimit(angle, RotationSector.normal);
     currentAngle *= -1;
     currentAngle += rotationOffset;
-    if (currentAngle > 180) currentAngle -= 360;
+    angle = SectorLimit(angle, RotationSector.normal);
 
-    if (absDiff(angle, currentAngle) > 180) { if (angle < 0) angle += 360; else if (angle > 0) angle -= 360; }
+    if (absDiff(angle, currentAngle) > 180) angle = SectorLimit(angle, RotationSector.forwardBased);
 
     if (absDiff(angle, currentAngle) > 180) System.out.println("WARNING: HIGH CALCULATED ANGLE");
 
-    double outputPower = rotationController.calculateOutput(currentAngle, angle);
-
-    double joystickMag = Math.sqrt(Math.pow(control.getRightX(), 2) + Math.pow(control.getRightY(), 2)); // Joystick magnitude for deadzones on friction joysticks
-    if (joystickMag >= 0.12) return outputPower; else return 0;
+    if (new Translation2d(control.getRightX(), control.getRightY()).getNorm() >= joystickDeadzone) return rotationController.calculateOutput(currentAngle, angle); // Joystick mag >= joystic deadzone
+    else {
+      rotationController.updateOutputs(0); // Should fix sudden movements due to 
+      return 0;
+    }
   }
 
   public double getRotationOffset() {
     double stateRotation = drivetrain.getState().Pose.getRotation().getDegrees();
     double gyroRotation = drivetrain.getPigeon2().getRotation2d().getDegrees();
     gyroRotation %= 360;
-    if (gyroRotation > 180) { gyroRotation -= 360; }
+    if (gyroRotation > 180) gyroRotation -= 360;
+    if (gyroRotation < -180) gyroRotation += 360;
     return stateRotation - gyroRotation;
   }
 
@@ -89,5 +93,24 @@ public class SwerveModifications {
     modifierInput = MathUtil.clamp(modifierInput, 0, 1);
     double output = input * (modifierInput * modifyPercent + (1 - modifyPercent));
     return output;
+  }
+
+  public enum RotationSector {
+    normal(0, 360),
+    forwardBased(-180, 180);
+
+    public final double lowerLimit;
+    public final double upperLimit;
+
+    RotationSector(double lower, double upper) {
+      this.lowerLimit = lower;
+      this.upperLimit = upper;
+    }
+  }
+
+  public double SectorLimit(double value, RotationSector sector) {
+    if (value < sector.lowerLimit) value += 360;
+    else if (value > sector.upperLimit) value -= 360;
+    return value;
   }
 }

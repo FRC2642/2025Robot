@@ -107,6 +107,6 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    System.out.println(shaftEncoder.get());
+    //System.out.println(shaftEncoder.get());
   }
 }
