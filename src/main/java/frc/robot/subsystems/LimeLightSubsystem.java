@@ -33,6 +33,8 @@ public class LimeLightSubsystem extends SubsystemBase {
   private final SendableChooser<Field> fieldChooser = new SendableChooser<>();
   public Field selectedField = Field.redAlliance;
 
+  public int alignAngle; //for shuffleboard
+
   public LimeLightSubsystem() {
     LimelightHelper.setPipelineIndex("limelight", 0);
     //redAlliance
@@ -52,7 +54,7 @@ public class LimeLightSubsystem extends SubsystemBase {
       blueAllianceAprilTagIDs.add(5, 18);
   
     //shop
-      shopAllianceAprilTagIDs.add(0, 15);
+      shopAllianceAprilTagIDs.add(0, 6);
       shopAllianceAprilTagIDs.add(1, 9);
       shopAllianceAprilTagIDs.add(2, 11);
       shopAllianceAprilTagIDs.add(3, 12);
@@ -62,14 +64,25 @@ public class LimeLightSubsystem extends SubsystemBase {
     fieldChooser.addOption("blue aliiance", Field.blueAlliance);
     fieldChooser.addOption("red aliiance", Field.redAlliance);
     SmartDashboard.putData("Field Chooser", fieldChooser);
-    Shuffleboard.getTab("LiveWindow").add("align", 0).withWidget(BuiltInWidgets.kDial);
+    //Shuffleboard.getTab("LiveWindow").add("align", 0).withWidget(BuiltInWidgets.kDial);
     //putData("Alignnent", alignment);
     selectedField = fieldChooser.getSelected();
 
     setDefaultCommand(run(()-> {
       //System.out.println(alignment);
       SmartDashboard.putString("Alignment", alignment.toString());
+      if(alignment == ReefAlignment.center){
+        alignAngle = 0;
+      }
+      if(alignment == ReefAlignment.right){
+          alignAngle = 45;
+      }
+      if(alignment == ReefAlignment.left){
+          alignAngle = 315;
+      }
+      SmartDashboard.putNumber("Align", alignAngle);
       Shuffleboard.update();
+      
     }));
   }
 
@@ -95,12 +108,15 @@ public class LimeLightSubsystem extends SubsystemBase {
   }
 
   public double getHorizontalOffset(){
-    double horizontalOffset = LimelightHelper.getTX("limelight");
-    return horizontalOffset -alignment.alignment; //returns degrees; 31 to -31 (right is positive)
+    double horizontalOffset = LimelightHelper.getTX("limelight"); //returns degrees; 31 to -31 (right is positive)
+    //System.out.println("Horizontal"+horizontalOffset);
+    return horizontalOffset -alignment.alignment;
                               
   }
   public double getVerticalOffset(){
     double verticalOffset = LimelightHelper.getTY("limelight");
+    //System.out.println("vertical"+verticalOffset);
+
     return verticalOffset - 9.41;
   }
 

@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+
 import com.ctre.phoenix6.hardware.CANrange;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -32,10 +33,12 @@ public class CoralArmSubsystem extends SubsystemBase {
   public ShootSpeed shootSpeed = ShootSpeed.stop;
   public boolean intakeToggle = false;
 
+  public int georgiePooGoofCounter = 0;
+
   public Trigger RotationStateReached = new Trigger(() -> Math.abs(getEncoderValue() - armRot.rot) < 0.01);
-  public Trigger IsSafeFromElevator = new Trigger(() -> getEncoderValue() > 0.35);
-  public Trigger IsScorePosition = new Trigger(()-> getEncoderValue() < 0.25);
-  public Trigger IsDefaultPosition = new Trigger(()-> getEncoderValue() < 0.084);
+  public Trigger IsSafeFromElevator = new Trigger(() -> getEncoderValue() > 0.70);
+  public Trigger IsScorePosition = new Trigger(()-> getEncoderValue() < 0.59);
+  public Trigger IsDefaultPosition = new Trigger(()-> getEncoderValue() < 0.41);
   public Trigger hasCoral = new Trigger(() -> beamBreak.getDistance().getValueAsDouble() < 0.08);
   public Trigger holdingAlgae = new Trigger(()-> intakeToggle == true);
   
@@ -57,7 +60,7 @@ public class CoralArmSubsystem extends SubsystemBase {
         shootMotor.set(0);
       }
       //System.out.println("Arm Safty: " + IsSafeFromElevator.getAsBoolean());
-      System.out.println("Coral arm" + getEncoderValue());
+      //System.out.println("Coral arm" + getEncoderValue());
       //System.out.println(intakeToggle);
       //System.out.println(beamBreak.getDistance().getValueAsDouble());
       //System.out.println(IsSafeFromElevator.getAsBoolean());
@@ -68,10 +71,10 @@ public class CoralArmSubsystem extends SubsystemBase {
   public enum ArmRotation{
     in(1),
     out(-1),
-    Score(0.25),
-    Default(0.085),
-    Bottom(0.55),
-    Safe(0.37);
+    Score(0.59),
+    Default(0.40),
+    Bottom(0.87),
+    Safe(0.70);
       public final double rot;
       ArmRotation(double rotation) {
         this.rot = rotation;}
@@ -118,7 +121,7 @@ public class CoralArmSubsystem extends SubsystemBase {
     }));
   }
   public Command shootL4AutoCommand(){
-    return runOnce(() ->{shootMotor.set(1);});
+    return runOnce(() ->{shootMotor.set(-1);});
   }
   public Command stopShooterAutoCommand(){
     return runOnce(() ->{shootMotor.set(0);});
@@ -151,7 +154,11 @@ public class CoralArmSubsystem extends SubsystemBase {
   public Command manualShootInCommand(){
     return run(()->{
       shootMotor.set(0.4);
-    }).andThen(runOnce(()->shootMotor.set(0))
+    }).andThen(runOnce(()->{shootMotor.set(0);
+      georgiePooGoofCounter =+ 1;
+      System.out.println("GEORGE ISTG. ur using the WRONG BUMPER.");
+      System.out.println("Georgie Poo goof counter: "+ georgiePooGoofCounter);
+    })
     );
   }
 
@@ -169,9 +176,9 @@ public class CoralArmSubsystem extends SubsystemBase {
   public Command toggleAlgaeIntake(){
     return runOnce(()-> {
       intakeToggle = !intakeToggle;
-      System.out.println(("toggle: " + intakeToggle));
+      //System.out.println(("toggle: " + intakeToggle));
       if (intakeToggle == true){
-        System.out.println("should be moving");
+        //System.out.println("should be moving");
         shootSpeed = ShootSpeed.shoot;
         shootMotor.set(-shootSpeed.speed * maxShootOutput * 0.7);
       }

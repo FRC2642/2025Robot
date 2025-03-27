@@ -30,7 +30,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   public boolean manualMode = true;
 
   public Trigger elevatorPositionReached = new Trigger(()-> Math.abs(getEncoderValue() - elevatorPosition.aim) < 25);
-  public Trigger elevatorTopLimitReached = new Trigger(() -> getEncoderValue() > 9000);
+  public Trigger elevatorTopLimitReached = new Trigger(() -> getEncoderValue() > 10175);
   public Trigger elevatorNearBottom = new Trigger(()-> getEncoderValue() < 500);
   public Trigger elevatorNearTrigger = new Trigger(()-> Math.abs(getEncoderValue() - elevatorPosition.aim) < 500);
   public Trigger limitReached = new Trigger(limitSwitch::get).negate();
@@ -46,7 +46,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     setDefaultCommand(run(() -> {
         rightElevatorMotor.set(0);
         leftElevatorMotor.set(0);
-        //System.out.println("encoder: " + getEncoderValue());
+      //System.out.println("encoder: " + getEncoderValue());
       //System.out.println("bottom limit: " + limitSwitch.get() + " Trigger Value: " + limitReached.getAsBoolean());
       //System.out.println("top limit: " + topLimitSwitch.get() + " Trigger Value: " + hitTop.getAsBoolean());
 
@@ -116,13 +116,13 @@ public class ElevatorSubsystem extends SubsystemBase {
       elevatorPosition = position;
       rightElevatorMotor.set(getMotorOutput()); 
       leftElevatorMotor.set(-getMotorOutput());
-      System.out.println(position);
-      System.out.println("Output: " + getMotorOutput() + " Encoder: " + getEncoderValue());
+      //System.out.println(position);
+      //System.out.println("Output: " + getMotorOutput() + " Encoder: " + getEncoderValue());
     })
       .until(elevatorPositionReached)
       .andThen(runOnce(() -> {
-      System.out.println("targetReached");
-      System.out.println("encoder " + getEncoderValue());
+      //System.out.println("targetReached");
+      //System.out.println("encoder " + getEncoderValue());
       rightElevatorMotor.set(0);
       leftElevatorMotor.set(0);}))
       .withName("Position Elevator");
@@ -134,11 +134,11 @@ public class ElevatorSubsystem extends SubsystemBase {
       elevatorPosition = position;
       rightElevatorMotor.set(getMotorOutput()); 
       leftElevatorMotor.set(-getMotorOutput());
-      System.out.println("encoder changing: " + getEncoderValue());
+      //System.out.println("encoder changing: " + getEncoderValue());
     })
     .until(elevatorNearTrigger).andThen(new RunCommand(()->
     {
-      System.out.println("slowDown");
+      //System.out.println("slowDown");
       if (getEncoderValue() < elevatorPosition.aim){
         rightElevatorMotor.set(0.1);
         leftElevatorMotor.set(-0.1);
@@ -151,7 +151,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     })).until(elevatorPositionReached)
     .andThen(runOnce(() -> 
     {
-      System.out.println("end slowdown");
+      //System.out.println("end slowdown");
       rightElevatorMotor.set(0);
       leftElevatorMotor.set(0);}));
   }
@@ -163,11 +163,11 @@ public class ElevatorSubsystem extends SubsystemBase {
       leftElevatorMotor.set(-getMotorOutput());
       //System.out.println("encoder " + getEncoderValue());
     }).until(elevatorNearBottom).andThen(new RunCommand(() -> {
-        System.out.println("slowDown");
+        //System.out.println("slowDown");
         rightElevatorMotor.set(-0.05);
         leftElevatorMotor.set(0.05);}).until(elevatorPositionReached)
         .andThen(runOnce(() -> {shaftEncoder.reset();
-                              System.out.println("end slowdown");
+                              //System.out.println("end slowdown");
                               rightElevatorMotor.set(0);
                               leftElevatorMotor.set(0);})))
     .andThen(runOnce(() ->{
@@ -181,8 +181,8 @@ public class ElevatorSubsystem extends SubsystemBase {
       manualMode = true;
 
       if (!hitTop.getAsBoolean()){
-        rightElevatorMotor.set(0.07);
-        leftElevatorMotor.set(-0.07);
+        rightElevatorMotor.set(0.44);
+        leftElevatorMotor.set(-0.44);
       }
       
       //System.out.println(getEncoderValue());
@@ -196,8 +196,8 @@ public class ElevatorSubsystem extends SubsystemBase {
 
       //RYLAN CHANGED
       if (!limitReached.getAsBoolean()){
-        rightElevatorMotor.set(-0.07);
-        leftElevatorMotor.set(0.07);
+        rightElevatorMotor.set(-0.44);
+        leftElevatorMotor.set(0.44);
       //System.out.println(getEncoderValue());
       }
       })

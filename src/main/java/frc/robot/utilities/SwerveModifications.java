@@ -16,7 +16,7 @@ public class SwerveModifications {
   public boolean turnDebug = SwerveModificationConstants.TURN_DEBUG;
   public double rotationOffset;
 
-  public DynamicController rotationController = new DynamicController(20, .033333333333333333, true);
+  public DynamicController rotationController;
   public double movementPercentModifier = SwerveModificationConstants.MOVEMENT_PERCENT_MODIFIER;
 
   private CommandSwerveDrivetrain drivetrain;
@@ -27,6 +27,8 @@ public class SwerveModifications {
   public SwerveModifications(CommandSwerveDrivetrain drivetrainIN, XboxController controller) { // In the future, include a way to input an offset to prevent odd orientating after running an auto
     this.drivetrain = drivetrainIN;
     this.control = controller;
+
+    this.rotationController = new DynamicController(20, .033333333333333333, true);
     this.rotationOffset = this.getRotationOffset();
 
     if (turnDebug) {
