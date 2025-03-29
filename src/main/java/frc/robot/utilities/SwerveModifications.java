@@ -41,12 +41,12 @@ public class SwerveModifications {
     }
   }
 
-  public double recieveTurnRate() {
+  public double recieveTurnRate(Translation2d inputPos) {
     // Reset rotation offset 
     //if (control.getLeftBumperButtonPressed()) rotationOffset = getRotationOffset();
 
     /* Convert controller left stick x and y to degrees (0 - 360) */
-    double angle = Math.atan2(control.getRightY(), control.getRightX());
+    double angle = Math.atan2(inputPos.getY(), inputPos.getX());
     angle *= 180/Math.PI;
     angle += 90;
     angle = SectorLimit(angle, RotationSector.normal);

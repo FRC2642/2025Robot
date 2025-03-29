@@ -11,6 +11,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
@@ -92,7 +93,7 @@ public class RobotContainer {
             drivetrain.applyRequest(() ->
                 drive.withVelocityX(-SwerveModifications.modifyAxialInput(joystick.getLeftY(), joystick.getRightTriggerAxis(), swerveModifications.movementPercentModifier) * MaxSpeed) // Drive forward with negative Y (forward)
                     .withVelocityY(-SwerveModifications.modifyAxialInput(joystick.getLeftX(), joystick.getRightTriggerAxis(), swerveModifications.movementPercentModifier) * MaxSpeed) // Drive left with negative X (left)
-                    .withRotationalRate(-swerveModifications.recieveTurnRate() * MaxAngularRate) // Drive counterclockwise with negative X (left)
+                    .withRotationalRate(-swerveModifications.recieveTurnRate(new Translation2d(joystick.getLeftX(), joystick.getLeftY())) * MaxAngularRate) // Drive counterclockwise with negative X (left)
             )
         );
 
