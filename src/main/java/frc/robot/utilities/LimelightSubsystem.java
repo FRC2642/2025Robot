@@ -5,6 +5,7 @@
 package frc.robot.utilities;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -15,10 +16,10 @@ public class LimelightSubsystem extends SubsystemBase {
     int logDelayIterator;
     boolean allowLogging;
 
-    public LimelightSubsystem() {
+    public LimelightSubsystem(String limelightName) {
         logDelayIterator = 0;
         allowLogging = false;
-        initialize();
+        initialize(limelightName);
     }
 
     
@@ -78,8 +79,10 @@ public class LimelightSubsystem extends SubsystemBase {
 
     // Measurements and diagnostics data
     public double[] targetSpace; // double[] that stores [tx, ty, tz, pitch, yaw, roll]
+    public Translation3d relativePosition; // relative position
+    public double relativeRotation; // relative rotation on the 2D plane, aka yaw
     public boolean detectTag; // Whether a tag is detected
-    public double distance; // Distance to the target
+    public double distance; // 3D Distance to the target
 
     // Camera and target parameters
     //public final double targetHeight = 95;
@@ -93,8 +96,8 @@ public class LimelightSubsystem extends SubsystemBase {
     /**
      * Initializes the Limelight NetworkTable.
      */
-    private void initialize() {
-        final String NetworkTableName = "limelight";
+    private void initialize(String limelightName) {
+        final String NetworkTableName = limelightName;
 
         limelightTable = NetworkTableInstance.getDefault().getTable(NetworkTableName);
     }
@@ -176,15 +179,17 @@ public class LimelightSubsystem extends SubsystemBase {
         if(seeTag != (0)) detectTag=true;
         // Target detection status
 
-        // Calculate distance using geometry
-        distance = Math.sqrt(Math.pow(targetSpace[0], 2) + Math.pow(targetSpace[1], 2) + Math.pow(targetSpace[2], 2));
+        // Convert to properly-useable variables
+        relativePosition = new Translation3d(targetSpace[0], targetSpace[1], targetSpace[2]);
+        relativeRotation = targetSpace[4];
 
         if (allowLogging) { // Prevent spamming of data to log
-        // Publish detection status to Log
-        if (!detectTag) System.out.println("No tag");
+            // Log detection status
+            if (detectTag) System.out.println("Tag found!");
+            else System.out.println("No tag found");
 
-        // Publish measurements to Log
-        System.out.println("X:" + targetSpace[0] + "\nY:"+ targetSpace[1] + "\nZ:"+ targetSpace[2] + "\nDistance:"+ distance);
+            // Log measurements
+            System.out.println("X:" + targetSpace[0] + "\nY:"+ targetSpace[1] + "\nZ:"+ targetSpace[2] + "\nDistance:"+ distance);
         }
 
         return DetectionError.SUCCESS;
@@ -201,6 +206,6 @@ public class LimelightSubsystem extends SubsystemBase {
         limelightDiagnostic();
         updateMeasurements();
 
-        UpdateLogIterator(); // Commenting out will disable logging
+        //UpdateLogIterator(); // Commenting out will disable binded logging
     }
 }

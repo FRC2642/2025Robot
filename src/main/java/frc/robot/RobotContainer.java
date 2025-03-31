@@ -31,6 +31,7 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.ElevatorArmSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.JojoSubsystem;
+import frc.robot.utilities.LimelightSubsystem;
 import frc.robot.utilities.SwerveModifications;
 
 public class RobotContainer {
@@ -59,9 +60,10 @@ public class RobotContainer {
     private final SwerveModifications swerveModifications = new SwerveModifications(drivetrain, control, 0.12); // Have to create a new instance due to the usage of changing values within the subsystem.
 
     // Component Subsystems
+    private final LimelightSubsystem frontLimelight = new LimelightSubsystem("limelight-front");
     //private final ElevatorArmSubsystem elevatorArmSubsystem = new ElevatorArmSubsystem();
     //private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem(control, elevatorArmSubsystem);
-    private final JojoSubsystem jojoSubsystem = new JojoSubsystem();
+    //private final JojoSubsystem jojoSubsystem = new JojoSubsystem();
 
     ShuffleboardTab tab;
 
@@ -110,7 +112,8 @@ public class RobotContainer {
         joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
         // reset the field-centric heading on left bumper press
-        joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+        joystick.button(7).onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+        if (control.getRawButtonPressed(7)) swerveModifications.resetRotationOffset();
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }

@@ -96,11 +96,19 @@ public class DynamicController {
     }
 
     /**
-     * Calcuates and returns 
+     * Calculates the output given the current value and desired value
+     * @param currentValue
      * @param desiredValue
+     * @return
      */
-    public double calculateOutput(double currentValue, double desiredValue) {
-        double output = (desiredValue - currentValue) * modifier;
+    public double calculateOutput(double currentValue, double desiredValue) { return calculateOutput(desiredValue - currentValue); }
+    /**
+     * Calculates the output given the difference
+     * @param diff
+     * @return
+     */
+    public double calculateOutput(double diff) {
+        double output = diff * modifier;
         if (cutValue) output = MathUtil.clamp(output, outputMin, outputMax);
         updateOutputs(output);
         
