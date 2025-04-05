@@ -29,13 +29,15 @@ public class JojoArmSubsystem extends SubsystemBase {
   public Trigger RotationStateReached = new Trigger(() -> Math.abs(getEncoderValue() - jojoRotation.rot) < 0.01);
   public Trigger RotationStateNear = new Trigger(() -> Math.abs(getEncoderValue() - jojoRotation.rot) < 0.1);
   public Trigger CurrentSpike = new Trigger(() -> Math.abs(rotateJojoMotor.getStatorCurrent().getValue().magnitude()) > 10);
-
+  public Trigger nearRotationState = new Trigger(() -> Math.abs(getEncoderValue() - jojoRotation.rot) < 0.1);
   public JojoArmSubsystem() {
-    rotateJojoMotor.setNeutralMode(NeutralModeValue.Brake);
-    intakeJojoMotor.setNeutralMode(NeutralModeValue.Brake);
+    //rotateJojoMotor.setNeutralMode(NeutralModeValue.Brake);
+    //intakeJojoMotor.setNeutralMode(NeutralModeValue.Brake);
 
     setDefaultCommand(runOnce(()-> {intakeMode = JojoIntake.stop; intakeJojoMotor.set(0); rotateJojoMotor.set(0);})
-    .andThen(run(() -> {}))
+    .andThen(run(() -> {
+      //System.out.println("jojo encoder: "+ getEncoderValue());
+    }))
     .withName("Idle"));
   }
 
@@ -138,6 +140,23 @@ public class JojoArmSubsystem extends SubsystemBase {
     return new RunCommand(()-> {jojoRotation = JojoRotation.Default;
     intakeMode = JojoIntake.stop; intakeJojoMotor.set(0); rotateJojoMotor.set(getrotateOutput() * 5);}).until(RotationStateReached)
     .andThen(runOnce(() -> rotateJojoMotor.set(0)));
+  }
+
+  public Command rotateArmCommand(JojoRotation rotationState){
+    return new RunCommand(()->{
+      jojoRotation = rotationState;
+      rotateJojoMotor.set(getrotateOutput());
+    }).until(nearRotationState).andThen(new RunCommand(()->{
+      if(getEncoderValue() > jojoRotation.rot){ //rotate in
+        rotateJojoMotor.set(-0.1);
+      }else{
+        if(getEncoderValue() < jojoRotation.rot){ //rotate out
+          rotateJojoMotor.set(0.1);
+        }
+      }
+    }).until(RotationStateReached).andThen(runOnce(()->{
+      rotateJojoMotor.set(0);
+    })));
   }
 
 

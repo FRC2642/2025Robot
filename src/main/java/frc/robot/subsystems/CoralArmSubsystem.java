@@ -16,7 +16,6 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
-import frc.robot.subsystems.ElevatorSubsystem.ElevatorPosition;
 
 public class CoralArmSubsystem extends SubsystemBase {
   public TalonFX shootMotor = new TalonFX(Constants.ElevatorArm.SHOOT_MOTOR);
@@ -27,8 +26,8 @@ public class CoralArmSubsystem extends SubsystemBase {
 
   private PIDController rotatePID = new PIDController(0.4, 0.2, 0);
 
-  public double maxShootOutput= 0.25;
-  public double maxRotateSpeed = 1;
+  public double maxShootOutput= 1;
+  public double maxRotateSpeed = 5;
   public ArmRotation armRot = ArmRotation.Default;
   public ShootSpeed shootSpeed = ShootSpeed.stop;
   public boolean intakeToggle = false;
@@ -41,11 +40,11 @@ public class CoralArmSubsystem extends SubsystemBase {
   public Trigger IsDefaultPosition = new Trigger(()-> getEncoderValue() < 0.41);
   public Trigger hasCoral = new Trigger(() -> beamBreak.getDistance().getValueAsDouble() < 0.08);
   public Trigger holdingAlgae = new Trigger(()-> intakeToggle == true);
+  public Trigger nearRotationState = new Trigger(() -> Math.abs(getEncoderValue() - armRot.rot) < 0.05);
   
   public CoralArmSubsystem() {
-    rotateMotor.setNeutralMode(NeutralModeValue.Brake); 
+    //rotateMotor.setNeutralMode(NeutralModeValue.Brake); 
     shootMotor.setNeutralMode(NeutralModeValue.Brake);
-    
     setDefaultCommand(run(() -> {
       rotateMotor.set(0);
       /*
@@ -59,30 +58,29 @@ public class CoralArmSubsystem extends SubsystemBase {
         shootSpeed = ShootSpeed.stop;
         shootMotor.set(0);
       }
-      //System.out.println("Arm Safty: " + IsSafeFromElevator.getAsBoolean());
-      //System.out.println("Coral arm" + getEncoderValue());
-      //System.out.println(intakeToggle);
-      //System.out.println(beamBreak.getDistance().getValueAsDouble());
-      //System.out.println(IsSafeFromElevator.getAsBoolean());
+      //System.out.println(hasCoral.getAsBoolean());
+
+      //System.out.println("coral arm Encoder: " + getEncoderValue());
+      
     })
     .withName("Idle"));
   }
 
   public enum ArmRotation{
-    in(1),
-    out(-1),
-    Score(0.59),
+    out(1),
+    in(-1),
+    ScoreL4(0.59),
+    ScoreLowerReef(0.90),
     Default(0.40),
-    Bottom(0.87),
-    Safe(0.70);
+    Bottom(0.90),
+    Safe(0.75);
       public final double rot;
       ArmRotation(double rotation) {
         this.rot = rotation;}
   }
   public enum ShootSpeed{
-    superSlow(-0.25),
-    intake(1), //1.25
-    shoot(-1), //use only this
+    in(1), //1.25
+    out(-1), //use only this
     stop(0);
       public final double speed;
       ShootSpeed(double speed){
@@ -135,23 +133,17 @@ public class CoralArmSubsystem extends SubsystemBase {
     }));
   }
 
-
-
-
   public Command manualRotateCommand(ArmRotation position){
     double output = position.rot / 5;
     return run(()->{rotateMotor.set(output);});
-
   }
-
-  public Command manualShootOutCommand(){
+  public Command shootOutCommand(){
     return run(()->{
       shootMotor.set(-0.8);
     }).andThen(runOnce(()->shootMotor.set(0))
     );
   }
-
-  public Command manualShootInCommand(){
+  public Command shootInCommand(){
     return run(()->{
       shootMotor.set(0.4);
     }).andThen(runOnce(()->{shootMotor.set(0);
@@ -161,25 +153,62 @@ public class CoralArmSubsystem extends SubsystemBase {
     })
     );
   }
-
-  public Command shootCommand(ShootSpeed speed){
-    return new RunCommand(()-> {
-      //System.out.println("shoot Running");
-      //intakeToggle = false;
-      if (ElevatorSubsystem.elevatorPosition == ElevatorPosition.L4 || ElevatorSubsystem.elevatorPosition == ElevatorPosition.algae){
-        shootSpeed = ShootSpeed.intake;
-        shootMotor.set(-shootSpeed.speed * maxShootOutput * 3);
-      }else{
-      shootMotor.set(-speed.speed * maxShootOutput);}})
-    .withName("Shoot Coral").onlyWhile(holdingAlgae.negate());
+  public Command rotateArmCommand(ArmRotation rotationState){
+    return new RunCommand(()->{
+      armRot = rotationState;
+      System.out.println("rotating");
+      System.out.println("with power output: " + getrotateOutput() * 6);
+      rotateMotor.set(getrotateOutput() * 6);
+      System.out.println("rotating");
+      
+    }).until(nearRotationState).andThen(new RunCommand(()->{
+      if(getEncoderValue() < armRot.rot){
+        rotateMotor.set(0.1);
+        //System.out.println("slowdown");
+      }
+      else{
+        if(getEncoderValue() > armRot.rot){
+          rotateMotor.set(-0.1);
+          //System.out.println("slowdown");
+        }
+      }
+    }).until(RotationStateReached).andThen(runOnce(()->{
+      rotateMotor.set(0);
+    })));
   }
+  public Command intakeCommand(){
+    return new RunCommand(()->{
+      shootMotor.set(-1);
+    }).until(hasCoral);
+
+  }
+
+  /*public Command intakeCommand(){
+    return run(()->{
+      shootMotor.set(0.75);
+      System.out.println("part 1");
+      System.out.println(hasCoral.getAsBoolean());
+    }).until(hasCoral).andThen(run(()->{
+      shootMotor.set(0.25);
+      System.out.println("part 2");
+      System.out.println(hasCoral.getAsBoolean());
+    })).until(hasCoral.negate()).andThen(run(()->{
+      shootMotor.set(-0.25);
+      System.out.println("part 3");
+      System.out.println(hasCoral.getAsBoolean());
+    })).until(hasCoral).andThen(runOnce(()->{
+      shootMotor.set(0);
+      System.out.println("part 4");
+      System.out.println(hasCoral.getAsBoolean());
+    }));
+  }*/
   public Command toggleAlgaeIntake(){
     return runOnce(()-> {
       intakeToggle = !intakeToggle;
       //System.out.println(("toggle: " + intakeToggle));
       if (intakeToggle == true){
         //System.out.println("should be moving");
-        shootSpeed = ShootSpeed.shoot;
+        shootSpeed = ShootSpeed.out;
         shootMotor.set(-shootSpeed.speed * maxShootOutput * 0.7);
       }
       else{
@@ -187,25 +216,17 @@ public class CoralArmSubsystem extends SubsystemBase {
         shootMotor.set(-shootSpeed.speed * maxShootOutput);
       }
     });
-  }
-  public Command rotateCommand(ArmRotation armRotMode){
+   }
+
+   /*public Command shootCommand(ShootSpeed speed){
     return new RunCommand(()-> {
-      //System.out.println("Rotating: " + getEncoderValue()); 
-      armRot = armRotMode; rotateMotor.set(getrotateOutput() * 4);
-      //System.out.println(IsSafeFromElevator.getAsBoolean());
-    }).until(RotationStateReached)
-    .andThen(runOnce(() -> rotateMotor.set(0)))
-    .withName("Rotate Coral Arm");
-  }
-
-  public Command quickGetTheArmToSafty(){
-    return new RunCommand(()->{
-      armRot = ArmRotation.Bottom;
-      rotateMotor.set(getrotateOutput() * 4);
-    }).until(IsSafeFromElevator);
-  }
-
-
+      if (ElevatorSubsystem.elevatorPosition == ElevatorPosition.L4 || ElevatorSubsystem.elevatorPosition == ElevatorPosition.algae){
+        shootSpeed = ShootSpeed.in;
+        shootMotor.set(-shootSpeed.speed * maxShootOutput * 3);
+      }else{
+      shootMotor.set(-speed.speed * maxShootOutput);}})
+    .withName("Shoot Coral").onlyWhile(holdingAlgae.negate());
+  } */
   @Override
   public void periodic() {
   }
