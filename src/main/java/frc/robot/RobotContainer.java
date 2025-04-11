@@ -34,6 +34,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.CoralArmSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
@@ -44,6 +45,7 @@ import frc.robot.subsystems.CoralArmSubsystem.ShootSpeed;
 import frc.robot.subsystems.ElevatorSubsystem.ElevatorPosition;
 import frc.robot.subsystems.JojoArmSubsystem.JojoRotation;
 import frc.robot.subsystems.LimeLightSubsystem.reefPipes;
+import frc.robot.utilities.DynamicController;
 import frc.robot.utilities.SwerveModifications;
 
 
@@ -74,7 +76,7 @@ public class RobotContainer {
         private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem(); //Elevator
         private final LimeLightSubsystem leftLimelightSubsystem = new LimeLightSubsystem("fleft"); //vision
         private final LimeLightSubsystem rightLimelightSubsystem = new LimeLightSubsystem("fright"); //vision
-
+        private final ClimberSubsystem climberSubsystem = new ClimberSubsystem();
     //Swerve drive commands
         private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric() //drive
                 .withDeadband(Speed * 0.1).withRotationalDeadband(AngularRate * 0.1)
@@ -93,7 +95,7 @@ public class RobotContainer {
         debug,
         competition;
     }
-    public ControlScheme controlScheme;
+    public ControlScheme controlScheme = ControlScheme.debug;
     private final SendableChooser<ControlScheme> controlsChooser= new SendableChooser<>();
     
 
@@ -123,7 +125,7 @@ public class RobotContainer {
 
         SmartDashboard.putData("Auto Chooser", autoChooser);
         SmartDashboard.putData("ControlsChooser", controlsChooser);
-        controlScheme = controlsChooser.getSelected();
+        //controlScheme = controlsChooser.getSelected();
         configureBindings();
     }
     private void configureBindings() {
@@ -132,8 +134,10 @@ public class RobotContainer {
         //Pure Manuals
         controller1.button(8).onTrue(leftLimelightSubsystem.prints().andThen(rightLimelightSubsystem.prints()));
             //ELEVATOR
-            controller1.leftTrigger().whileTrue(elevatorSubsystem.manualElevatorUpCommand(controller1));
-            controller1.rightTrigger().whileTrue(elevatorSubsystem.manualElevatorDownCommand(controller1));
+            // controller1.leftTrigger().whileTrue(elevatorSubsystem.manualElevatorUpCommand(controller1));
+            // controller1.rightTrigger().whileTrue(elevatorSubsystem.manualElevatorDownCommand(controller1));
+            controller1.leftTrigger().whileTrue(climberSubsystem.extend());
+            controller1.rightTrigger().whileTrue(climberSubsystem.retract());
             //CORAL ARM
             controller1.leftBumper().whileTrue(coralArmSubsystem.manualRotateCommand(ArmRotation.out));
             controller1.rightBumper().whileTrue(coralArmSubsystem.manualRotateCommand(ArmRotation.in));
@@ -171,12 +175,18 @@ public class RobotContainer {
             buttonBoard2.button(7).onTrue(jojoArmSubsystem.rotateArmCommand(JojoRotation.Default));
             buttonBoard2.button(8).onTrue(jojoArmSubsystem.rotateArmCommand(JojoRotation.Intake));
             
-            //VISION
+            //VISION 
+            /* 
             controller1.x().whileTrue(drivetrain.applyRequest(() ->
-            robotDrive.withVelocityX(leftLimelightSubsystem.getOutputX()) // Drive forward with negative Y (forward)
-                .withVelocityY(leftLimelightSubsystem.getOutputY()) // Drive left with negative X (left)
-                .withRotationalRate(leftLimelightSubsystem.getOutputRot())
-        ));
+            robotDrive.withVelocityX((DynamicController.avg(leftLimelightSubsystem.getOutputX(), rightLimelightSubsystem.getOutputX()))) // Drive forward with negative Y (forward)
+                .withVelocityY(DynamicController.avg(leftLimelightSubsystem.getOutputY(), rightLimelightSubsystem.getOutputY())) // Drive left with negative X (left)
+                .withRotationalRate(DynamicController.avg(leftLimelightSubsystem.getOutputRot(), rightLimelightSubsystem.getOutputRot()))
+            )); */
+            controller1.x().whileTrue(drivetrain.applyRequest(() ->
+                robotDrive.withVelocityX(leftLimelightSubsystem.getOutputX())
+                    .withVelocityY(leftLimelightSubsystem.getOutputY())
+                    .withRotationalRate(leftLimelightSubsystem.getOutputRot())
+                ));
             //ELEVATOR
             
             buttonBoard1.button(7).onTrue(coralArmSubsystem.rotateArmCommand(ArmRotation.Safe)
@@ -197,11 +207,11 @@ public class RobotContainer {
         //Other
             //GYRO
             controller1.button(7).onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
-            //ALIGNMENT
-            buttonBoard2.button(1).onTrue(new ParallelCommandGroup(
+            //VISION ALIGNMENT
+            buttonBoard2.button(2).onTrue(new ParallelCommandGroup(
                 rightLimelightSubsystem.selectPoleCommand(reefPipes.left), 
                 leftLimelightSubsystem.selectPoleCommand(reefPipes.left)));
-            buttonBoard2.button(2).onTrue(new ParallelCommandGroup(
+            buttonBoard2.button(1).onTrue(new ParallelCommandGroup(
                 rightLimelightSubsystem.selectPoleCommand(reefPipes.right), 
                 leftLimelightSubsystem.selectPoleCommand(reefPipes.right)));
             buttonBoard2.button(1).onFalse(new ParallelCommandGroup(
