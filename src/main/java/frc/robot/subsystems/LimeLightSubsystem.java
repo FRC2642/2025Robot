@@ -7,6 +7,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.utilities.LimelightHelper;
 
 public class LimeLightSubsystem extends SubsystemBase {
@@ -16,13 +17,14 @@ public class LimeLightSubsystem extends SubsystemBase {
   public double xSetpoint;
   public double ySetpoint;
   public double rotSetpoint;
+  public double maxSpeed = 1;
 
 
 
-  public PIDController xPidController = new PIDController(1.5, 1, 0);
-  public PIDController yPidController = new PIDController(1.5, 1, 0);
+  public PIDController xPidController = new PIDController(3, 0, 0);
+  public PIDController yPidController = new PIDController(4, 0, 0);
   public PIDController rotPidController = new PIDController(0.1, 0, 0);
-
+  public Trigger isAligned = new Trigger(()-> Math.abs(getOutputX()) < 0.1 && Math.abs(getOutputY()) < 0.15 && Math.abs(getOutputRot()) < 0.1);
   
   public LimeLightSubsystem(String limelightName) {
     this.limelightName = "limelight-" + limelightName;
@@ -49,6 +51,8 @@ public class LimeLightSubsystem extends SubsystemBase {
     return runOnce(()->{
       selectedPole = pole;
       ySetpoint = selectedPole.horizontalOffset;
+      System.out.println("pole: "+pole);
+      System.err.println("setpoint: "+pole.horizontalOffset);
     });
   }
   public void updateMeasurments(){
@@ -58,20 +62,31 @@ public class LimeLightSubsystem extends SubsystemBase {
   public double getOutputX(){
     updateMeasurments();
     double output = xPidController.calculate(measuments[2], xSetpoint);
+    if (output > maxSpeed){
+      output = maxSpeed;
+    }
+    if (output < -maxSpeed){
+      output = -maxSpeed;
+    }
+    System.out.println("x: " + output);
     return output;
   }
   public double getOutputY(){
     updateMeasurments();
-    System.out.println("setpoint: " + ySetpoint);
-    System.out.println("current y: " + measuments[0]);
-    System.out.println("distance to setpoint: " + Math.abs(ySetpoint - measuments[0]));
-
     double output = -yPidController.calculate(measuments[0], ySetpoint);
+    if (output > maxSpeed){
+      output = maxSpeed;
+    }
+    if (output < -maxSpeed){
+      output = -maxSpeed;
+    }
+    System.out.println("y: " + output);
     return output;
   }
   public double getOutputRot(){
     updateMeasurments();
     double output = rotPidController.calculate(measuments[4], rotSetpoint);
+    System.out.println("rot: " + output);
     return output;
   }
   public Command prints(){

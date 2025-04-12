@@ -4,11 +4,9 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.*;
-
-import java.util.ResourceBundle.Control;
-
-import org.ejml.simple.AutomaticSimpleMatrixConvert;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
@@ -16,12 +14,8 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.PS4Controller.Button;
-import edu.wpi.first.wpilibj.event.BooleanEvent;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -30,22 +24,19 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.CoralArmSubsystem;
-import frc.robot.subsystems.ElevatorSubsystem;
-import frc.robot.subsystems.JojoArmSubsystem;
-import frc.robot.subsystems.LimeLightSubsystem;
 import frc.robot.subsystems.CoralArmSubsystem.ArmRotation;
-import frc.robot.subsystems.CoralArmSubsystem.ShootSpeed;
+import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem.ElevatorPosition;
+import frc.robot.subsystems.JojoArmSubsystem;
 import frc.robot.subsystems.JojoArmSubsystem.JojoRotation;
+import frc.robot.subsystems.LimeLightSubsystem;
 import frc.robot.subsystems.LimeLightSubsystem.reefPipes;
-import frc.robot.utilities.DynamicController;
 import frc.robot.utilities.SwerveModifications;
 
 
@@ -95,7 +86,7 @@ public class RobotContainer {
         debug,
         competition;
     }
-    public ControlScheme controlScheme = ControlScheme.debug;
+    public ControlScheme controlScheme = ControlScheme.competition;
     private final SendableChooser<ControlScheme> controlsChooser= new SendableChooser<>();
     
 
@@ -109,6 +100,16 @@ public class RobotContainer {
         NamedCommands.registerCommand("Coral Arm Default", coralArmSubsystem.armInAutoCommand()); //rotate Coral Arm in
         NamedCommands.registerCommand("Reset Gyro", drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
         //NamedCommands.registerCommand("Autonomous Vision", autonomousVision());
+        NamedCommands.registerCommand("align", visionAlignAutoCommand(reefPipes.right));
+        NamedCommands.registerCommand("Foward", fowardAutoCommand());
+        NamedCommands.registerCommand("L4 Preset", coralArmSubsystem.rotateArmCommand(ArmRotation.Safe)
+                                                            .andThen(elevatorSubsystem.superFancyElevatorCommand(ElevatorPosition.L4).onlyWhile(coralArmSubsystem.IsSafeFromElevator))
+                                                            .andThen(coralArmSubsystem.rotateArmCommand(ArmRotation.ScoreL4)));
+        
+        NamedCommands.registerCommand("L0 Preset", coralArmSubsystem.rotateArmCommand(ArmRotation.Safe)
+        .andThen(elevatorSubsystem.superFancyElevatorCommand(ElevatorPosition.L0).onlyWhile(coralArmSubsystem.IsSafeFromElevator))
+        .andThen(coralArmSubsystem.rotateArmCommand(ArmRotation.Default)));
+        NamedCommands.registerCommand("wait", new RunCommand(()->{}).withTimeout(1));
         }        
         { //autoChooser options
         autoChooser = AutoBuilder.buildAutoChooser();
@@ -116,6 +117,7 @@ public class RobotContainer {
         autoChooser.addOption("Taxi", new PathPlannerAuto("Taxi Auto"));
         autoChooser.addOption("1 Piece", new PathPlannerAuto("1 Piece Auto"));
         autoChooser.addOption("Move", new PathPlannerAuto("Move Auto"));
+        autoChooser.addOption("3 piece", new PathPlannerAuto("3 piece auto"));
         // To add an auto to the autoChooser use addppAutoOption()
         }
         { //controlsChooser options
@@ -141,8 +143,8 @@ public class RobotContainer {
             //CORAL ARM
             controller1.leftBumper().whileTrue(coralArmSubsystem.manualRotateCommand(ArmRotation.out));
             controller1.rightBumper().whileTrue(coralArmSubsystem.manualRotateCommand(ArmRotation.in));
-            controller1.povUp().whileTrue(coralArmSubsystem.shootOutCommand());
-            controller1.povDown().whileTrue(coralArmSubsystem.shootInCommand());            
+            controller2.povUp().whileTrue(coralArmSubsystem.shootOutCommand());
+            controller2.povDown().whileTrue(coralArmSubsystem.shootInCommand());            
             //JOJO ARM
             controller2.b().whileTrue(jojoArmSubsystem.manualRotateOut(0.5));
             controller2.x().whileTrue(jojoArmSubsystem.manualRotateIn(0.5));
@@ -181,12 +183,20 @@ public class RobotContainer {
             robotDrive.withVelocityX((DynamicController.avg(leftLimelightSubsystem.getOutputX(), rightLimelightSubsystem.getOutputX()))) // Drive forward with negative Y (forward)
                 .withVelocityY(DynamicController.avg(leftLimelightSubsystem.getOutputY(), rightLimelightSubsystem.getOutputY())) // Drive left with negative X (left)
                 .withRotationalRate(DynamicController.avg(leftLimelightSubsystem.getOutputRot(), rightLimelightSubsystem.getOutputRot()))
-            )); */
+            )); 
+            */
             controller1.x().whileTrue(drivetrain.applyRequest(() ->
                 robotDrive.withVelocityX(leftLimelightSubsystem.getOutputX())
                     .withVelocityY(leftLimelightSubsystem.getOutputY())
                     .withRotationalRate(leftLimelightSubsystem.getOutputRot())
                 ));
+            controller1.povUp().onTrue(fowardAutoCommand());
+            /*controller1.povUp().whileTrue(drivetrain.applyRequest(() ->
+                robotDrive.withVelocityX(0.4)
+                    .withVelocityY(0)
+                    .withRotationalRate(0)
+            )); 
+            */
             //ELEVATOR
             
             buttonBoard1.button(7).onTrue(coralArmSubsystem.rotateArmCommand(ArmRotation.Safe)
@@ -313,6 +323,25 @@ public class RobotContainer {
 }
     
 
+    public Command visionAlignAutoCommand(reefPipes pipe){
+        return new RunCommand(()->{
+            leftLimelightSubsystem.selectedPole = pipe;
+            rightLimelightSubsystem.selectedPole = pipe;})
+            .until(new Trigger(()-> leftLimelightSubsystem.selectedPole == pipe && rightLimelightSubsystem.selectedPole == pipe))
+        .andThen(drivetrain.applyRequest(() ->
+        robotDrive.withVelocityX(leftLimelightSubsystem.getOutputX())
+            .withVelocityY(leftLimelightSubsystem.getOutputY())
+            .withRotationalRate(leftLimelightSubsystem.getOutputRot())
+        ).until(leftLimelightSubsystem.isAligned));
+    }
+
+    public Command fowardAutoCommand(){
+        return drivetrain.applyRequest(() ->
+                robotDrive.withVelocityX(0.4)
+                    .withVelocityY(0)
+                    .withRotationalRate(0)
+            ).withTimeout(1);
+    }
 
     public Command getAutonomousCommand() {
         return autoChooser.getSelected();

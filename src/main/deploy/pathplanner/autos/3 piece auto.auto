@@ -1,0 +1,61 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "3p part 1"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "align"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "L4 Preset"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Foward"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot L4"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "End Shoot L4"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "3p part 2"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": "3 piece",
+  "choreoAuto": false
+}
