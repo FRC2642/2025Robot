@@ -56,7 +56,7 @@ public class SwerveModifications {
     if (currentAngle > 180) currentAngle -= 360;
     if (absDiff(angle, currentAngle) > 180) { if (angle < 0) angle += 360; else if (angle > 0) angle -= 360; }
 
-    if (absDiff(angle, currentAngle) > 180) System.out.println("WARNING: HIGH CALCULATED ANGLE");
+    //if (absDiff(angle, currentAngle) > 180) System.out.println("WARNING: HIGH CALCULATED ANGLE");
 
     double outputPower = rotationController.calculateOutput(currentAngle, angle);
 

@@ -7,6 +7,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.utilities.LimelightHelper;
 
 public class LimeLightSubsystem extends SubsystemBase {
@@ -16,44 +17,42 @@ public class LimeLightSubsystem extends SubsystemBase {
   public double xSetpoint;
   public double ySetpoint;
   public double rotSetpoint;
+  public double maxSpeed = 1;
 
 
 
-  public PIDController xPidController = new PIDController(0.6, 0, 0);
-  public PIDController yPidController = new PIDController(0.8, 0, 0);
+  public PIDController xPidController = new PIDController(3, 0, 0);
+  public PIDController yPidController = new PIDController(4, 0, 0);
   public PIDController rotPidController = new PIDController(0.1, 0, 0);
-
+  public Trigger isAligned = new Trigger(()-> Math.abs(getOutputX()) < 0.1 && Math.abs(getOutputY()) < 0.15 && Math.abs(getOutputRot()) < 0.1);
   
   public LimeLightSubsystem(String limelightName) {
     this.limelightName = "limelight-" + limelightName;
-    xSetpoint = -0.79;
+    xSetpoint = -0.88;
     rotSetpoint = 0;
     
     setDefaultCommand(run(()->{
       
-      // System.out.println("x: " + measuments[2]);
+      // System.out.println(limelightName+ ": " + selectedPole);
       // System.out.println("y: " + measuments[0]);
       // System.out.println("rot: "+ measuments[4]);
     }));
   }
   public enum reefPipes{
-    left(-0.099), //1.25
-    center(0.031),
-    right(0.16);
+    left(-0.17), //1.25
+    center(0),
+    right(0.17);
       public final double horizontalOffset;
       reefPipes(double horizontalOffset){
         this.horizontalOffset = horizontalOffset;
       }
   }
-  public Command selectPoleCommand(reefPipes selectedPole){
+  public Command selectPoleCommand(reefPipes pole){
     return runOnce(()->{
-      this.selectedPole = selectedPole;
-      if(limelightName == "fleft"){
-        ySetpoint = this.selectedPole.horizontalOffset;
-      }
-      if(limelightName == "fright"){
-        ySetpoint = this.selectedPole.horizontalOffset + 0.015;
-      }
+      selectedPole = pole;
+      ySetpoint = selectedPole.horizontalOffset;
+      System.out.println("pole: "+pole);
+      System.err.println("setpoint: "+pole.horizontalOffset);
     });
   }
   public void updateMeasurments(){
@@ -61,22 +60,38 @@ public class LimeLightSubsystem extends SubsystemBase {
     //[tx, ty, tz, pitch, yaw, roll]
   }
   public double getOutputX(){
+    updateMeasurments();
     double output = xPidController.calculate(measuments[2], xSetpoint);
-    System.out.println(limelightName + " x output: " + output);
+    if (output > maxSpeed){
+      output = maxSpeed;
+    }
+    if (output < -maxSpeed){
+      output = -maxSpeed;
+    }
+    System.out.println("x: " + output);
     return output;
   }
   public double getOutputY(){
+    updateMeasurments();
     double output = -yPidController.calculate(measuments[0], ySetpoint);
-    System.out.println(limelightName + " y output: " + output);
+    if (output > maxSpeed){
+      output = maxSpeed;
+    }
+    if (output < -maxSpeed){
+      output = -maxSpeed;
+    }
+    System.out.println("y: " + output);
     return output;
   }
   public double getOutputRot(){
-    double output = -rotPidController.calculate(measuments[4], rotSetpoint);
-    System.out.println(limelightName + " rot output: " + output);
+    updateMeasurments();
+    double output = rotPidController.calculate(measuments[4], rotSetpoint);
+    System.out.println("rot: " + output);
     return output;
   }
   public Command prints(){
     return runOnce(()->{
+      updateMeasurments();
       System.out.println(limelightName);
       System.out.println("X: " + measuments[2]);
       System.out.println("Y: " + measuments[0]);
@@ -86,6 +101,5 @@ public class LimeLightSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    updateMeasurments();
   }
 }

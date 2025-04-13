@@ -17,7 +17,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 public class JojoArmSubsystem extends SubsystemBase {
   public TalonFX rotateJojoMotor = new TalonFX(21);
   public TalonFX intakeJojoMotor = new TalonFX(20);
-  private DutyCycleEncoder shaftEncoder = new DutyCycleEncoder(2);
+  //private DutyCycleEncoder shaftEncoder = new DutyCycleEncoder(2);
 
   private PIDController rotatePID = new PIDController(0.4, 0, 0);
 
@@ -62,8 +62,8 @@ public class JojoArmSubsystem extends SubsystemBase {
   }
 
   public double getEncoderValue() {
-    double encoderValue = shaftEncoder.get();
-    return encoderValue;
+    //double encoderValue = shaftEncoder.get();
+    return 0;
   }
 
   public double getrotateOutput() {

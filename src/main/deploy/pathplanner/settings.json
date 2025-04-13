@@ -5,8 +5,12 @@
   "pathFolders": [
     "1 Piece Middle",
     "Testing"
+  
+    "3 Piece"
   ],
-  "autoFolders": [],
+  "autoFolders": [
+    "3 piece"
+  ],
   "defaultMaxVel": 3.0,
   "defaultMaxAccel": 3.0,
   "defaultMaxAngVel": 540.0,
