@@ -69,7 +69,7 @@ public class CoralArmSubsystem extends SubsystemBase {
   public enum ArmRotation{
     out(1),
     in(-1),
-    ScoreL4(0.59),
+    ScoreL4(0.575),
     ScoreLowerReef(0.90),
     Default(0.40),
     Bottom(0.90),

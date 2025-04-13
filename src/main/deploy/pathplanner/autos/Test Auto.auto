@@ -5,51 +5,33 @@
     "data": {
       "commands": [
         {
+          "type": "named",
+          "data": {
+            "name": "Reset Gyro"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.01
+          }
+        },
+        {
           "type": "path",
           "data": {
-            "pathName": "1 Piece Part 1"
+            "pathName": "Middle Spin"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "Coral Arm Out"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.2
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Elevator L4"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.2
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Coral Arm Score"
+            "name": "L4 Preset"
           }
         },
         {
           "type": "path",
           "data": {
             "pathName": "1 Piece Part 2"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.3
           }
         },
         {
@@ -68,18 +50,6 @@
           "type": "named",
           "data": {
             "name": "End Shoot L4"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 1.0
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "1 Piece Part 3"
           }
         }
       ]

@@ -106,6 +106,9 @@ public class RobotContainer {
         NamedCommands.registerCommand("Elevator Down", elevatorSubsystem.elevatorDownAutoCommand()); //lower elevator to L0
         NamedCommands.registerCommand("Coral Arm Default", coralArmSubsystem.armInAutoCommand()); //rotate Coral Arm in
         NamedCommands.registerCommand("Reset Gyro", drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+        NamedCommands.registerCommand("L4 Preset", coralArmSubsystem.rotateArmCommand(ArmRotation.Safe)
+                                                        .andThen(elevatorSubsystem.superFancyElevatorCommand(ElevatorPosition.L4).onlyWhile(coralArmSubsystem.IsSafeFromElevator))
+                                                        .andThen(coralArmSubsystem.rotateArmCommand(ArmRotation.ScoreL4)));
         //NamedCommands.registerCommand("Autonomous Vision", autonomousVision());
         }        
         { //autoChooser options
@@ -114,11 +117,12 @@ public class RobotContainer {
         autoChooser.addOption("Taxi", new PathPlannerAuto("Taxi Auto"));
         autoChooser.addOption("1 Piece", new PathPlannerAuto("1 Piece Auto"));
         autoChooser.addOption("Move", new PathPlannerAuto("Move Auto"));
+        autoChooser.addOption("Testing Better 1 piece", new PathPlannerAuto("Test Auto"));
         // To add an auto to the autoChooser use addppAutoOption()
         }
         { //controlsChooser options
-        controlsChooser.addOption("Competition Controls", ControlScheme.competition);
-        controlsChooser.setDefaultOption("Debug controls !!ONLY USE AT THE SHOP!!", ControlScheme.debug);
+        controlsChooser.setDefaultOption("Competition Controls", ControlScheme.competition);
+        controlsChooser.addOption("Debug controls !!ONLY USE AT THE SHOP!!", ControlScheme.debug);
         }
 
         SmartDashboard.putData("Auto Chooser", autoChooser);
@@ -130,7 +134,6 @@ public class RobotContainer {
         System.out.println("Control Scheme: " + controlScheme);
         if(controlScheme == ControlScheme.debug){
         //Pure Manuals
-        controller1.button(8).onTrue(leftLimelightSubsystem.prints().andThen(rightLimelightSubsystem.prints()));
             //ELEVATOR
             controller1.leftTrigger().whileTrue(elevatorSubsystem.manualElevatorUpCommand(controller1));
             controller1.rightTrigger().whileTrue(elevatorSubsystem.manualElevatorDownCommand(controller1));
@@ -160,7 +163,7 @@ public class RobotContainer {
                 .until(coralArmSubsystem.hasCoral).andThen(coralArmSubsystem.shootCommand(ShootSpeed.out)
                 .until(coralArmSubsystem.hasCoral.negate())).andThen(coralArmSubsystem.shootCommand(ShootSpeed.in)
                 .until(coralArmSubsystem.hasCoral))); 
-            */
+            */ 
             buttonBoard2.button(6).onTrue(coralArmSubsystem.rotateArmCommand(ArmRotation.Default));
             buttonBoard2.button(4).onTrue(coralArmSubsystem.rotateArmCommand(ArmRotation.ScoreL4));
             buttonBoard2.button(12).onTrue(coralArmSubsystem.rotateArmCommand(ArmRotation.Safe));
@@ -214,17 +217,20 @@ public class RobotContainer {
             //ELEVATOR
             buttonBoard1.button(8).onTrue(elevatorSubsystem.resetEncoder());
             //PRINTS
+            controller1.button(8).onTrue(leftLimelightSubsystem.prints().andThen(rightLimelightSubsystem.prints()));
         }
 
         if(controlScheme==ControlScheme.competition){
         
-        
+            controller1.button(8).onTrue(leftLimelightSubsystem.prints().andThen(rightLimelightSubsystem.prints()));
+
         //CORAL ARM
             controller2.leftBumper().whileTrue(coralArmSubsystem.shootOutCommand());
             controller2.rightBumper().whileTrue(coralArmSubsystem.shootInCommand());
 
             controller2.b().whileTrue(coralArmSubsystem.manualRotateCommand(ArmRotation.out));
             controller2.a().whileTrue(coralArmSubsystem.manualRotateCommand(ArmRotation.in));
+            controller2.y().onTrue(coralArmSubsystem.rotateArmCommand(ArmRotation.Default));
             
             //algea intake toggle
             controller1.rightBumper().onTrue(coralArmSubsystem.toggleAlgaeIntake());
