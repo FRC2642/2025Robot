@@ -91,7 +91,6 @@ public class RobotContainer {
     
 
     public RobotContainer() {
-<<<<<<< HEAD
         drivetrain.seedFieldCentric();
         elevatorSubsystem.resetEncoder();
         configureBindings();
@@ -102,7 +101,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("Elevator Down", elevatorSubsystem.elevatorDownAutoCommand());
         NamedCommands.registerCommand("Coral Arm Default", coralArmSubsystem.armInAutoCommand());  
         /* PathPlanner */
-=======
+        
         { //declare commands            
         NamedCommands.registerCommand("Coral Arm Out", coralArmSubsystem.armOutAutoCommand()); //rotate Coral Arm Out
         NamedCommands.registerCommand("Elevator L4", elevatorSubsystem.elevatorL4AutoCommand()); //lift elevator to L4
@@ -127,7 +126,6 @@ public class RobotContainer {
         NamedCommands.registerCommand("wait", new RunCommand(()->{}).withTimeout(1));
         }        
         { //autoChooser options
->>>>>>> 9e66607fdb149333914fb4f1544a82fc893c3d27
         autoChooser = AutoBuilder.buildAutoChooser();
         autoChooser.setDefaultOption("NO AUTO SELECTED", new WaitCommand(15));
         autoChooser.addOption("Taxi", new PathPlannerAuto("Taxi Auto"));
