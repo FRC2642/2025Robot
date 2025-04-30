@@ -3,54 +3,35 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.166700819672132,
-        "y": 5.517469262295082
+        "x": 5.274590163934427,
+        "y": 5.097899590163934
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.96455310830025,
-        "y": 5.198971312123642
+        "x": 5.508614972010629,
+        "y": 5.597552603444025
       },
       "isLocked": false,
-      "linkedName": "Reef Align"
+      "linkedName": null
     },
     {
       "anchor": {
-        "x": 5.00175,
-        "y": 5.273
+        "x": 5.478381147540984,
+        "y": 5.5414446721311466
       },
       "prevControl": {
-        "x": 5.108935551682816,
-        "y": 5.4988567189845154
+        "x": 5.305442792902273,
+        "y": 5.180160437310343
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "At Reef"
+      "linkedName": "away 1"
     }
   ],
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "Elevator L4",
-      "waypointRelativePos": 0,
-      "endWaypointRelativePos": null,
-      "command": null
-    },
-    {
-      "name": "Coral Arm Score",
-      "waypointRelativePos": 1.0,
-      "endWaypointRelativePos": null,
-      "command": null
-    },
-    {
-      "name": "Shoot L4",
-      "waypointRelativePos": 1.0,
-      "endWaypointRelativePos": null,
-      "command": null
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,
@@ -64,7 +45,7 @@
     "rotation": -119.99999999999999
   },
   "reversed": false,
-  "folder": null,
+  "folder": "3 Piece",
   "idealStartingState": {
     "velocity": 0,
     "rotation": -119.99999999999999

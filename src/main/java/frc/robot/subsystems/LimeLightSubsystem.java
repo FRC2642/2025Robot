@@ -4,155 +4,102 @@
 
 package frc.robot.subsystems;
 
-import static edu.wpi.first.units.Units.MetersPerSecond;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.util.sendable.Sendable;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.generated.TunerConstants;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.utilities.LimelightHelper;
-import frc.robot.utilities.LimelightHelper.RawFiducial;
 
 public class LimeLightSubsystem extends SubsystemBase {
-  /** Creates a new LimeLightSubsystem. */
-  int id;
-  double speed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) / 2;
-  public ReefAlignment alignment = ReefAlignment.center;
-  public PIDController strafePID = new PIDController(0.01, 0, 0);
-  public static List<Integer> redAllianceAprilTagIDs = new ArrayList<Integer>();
-  public static List<Integer> blueAllianceAprilTagIDs = new ArrayList<Integer>();
-  public static List<Integer> shopAllianceAprilTagIDs = new ArrayList<Integer>();
-  private final SendableChooser<Field> fieldChooser = new SendableChooser<>();
-  public Field selectedField = Field.redAlliance;
+  public String limelightName;
+  public double[] measuments;
+  public reefPipes selectedPole;
+  public double xSetpoint;
+  public double ySetpoint;
+  public double rotSetpoint;
+  public double maxSpeed = 1;
 
-  public LimeLightSubsystem() {
-    LimelightHelper.setPipelineIndex("limelight", 0);
-    //redAlliance
-      redAllianceAprilTagIDs.add(0, 7);
-      redAllianceAprilTagIDs.add(1, 8);
-      redAllianceAprilTagIDs.add(2, 9);
-      redAllianceAprilTagIDs.add(3, 10);
-      redAllianceAprilTagIDs.add(4, 11);
-      redAllianceAprilTagIDs.add(5, 6);
 
-    //blueAlliance
-      blueAllianceAprilTagIDs.add(0, 17);
-      blueAllianceAprilTagIDs.add(1, 22);
-      blueAllianceAprilTagIDs.add(2, 21);
-      blueAllianceAprilTagIDs.add(3, 20);
-      blueAllianceAprilTagIDs.add(4, 19);
-      blueAllianceAprilTagIDs.add(5, 18);
+
+  public PIDController xPidController = new PIDController(3, 0, 0);
+  public PIDController yPidController = new PIDController(4, 0, 0);
+  public PIDController rotPidController = new PIDController(0.1, 0, 0);
+  public Trigger isAligned = new Trigger(()-> Math.abs(getOutputX()) < 0.1 && Math.abs(getOutputY()) < 0.15 && Math.abs(getOutputRot()) < 0.1);
   
-    //shop
-      shopAllianceAprilTagIDs.add(0, 6);
-      shopAllianceAprilTagIDs.add(1, 9);
-      shopAllianceAprilTagIDs.add(2, 11);
-      shopAllianceAprilTagIDs.add(3, 12);
-      shopAllianceAprilTagIDs.add(4, 16);
-      shopAllianceAprilTagIDs.add(5, 19);
-    fieldChooser.setDefaultOption("shop field", Field.shop);
-    fieldChooser.addOption("blue aliiance", Field.blueAlliance);
-    fieldChooser.addOption("red aliiance", Field.redAlliance);
-    SmartDashboard.putData("Field Chooser", fieldChooser);
-    Shuffleboard.getTab("LiveWindow").add("align", 0).withWidget(BuiltInWidgets.kDial);
-    //putData("Alignnent", alignment);
-    selectedField = fieldChooser.getSelected();
-
-    setDefaultCommand(run(()-> {
-      System.out.println(alignment);
-      SmartDashboard.putString("Alignment", alignment.toString());
+  public LimeLightSubsystem(String limelightName) {
+    this.limelightName = "limelight-" + limelightName;
+    xSetpoint = -0.88;
+    rotSetpoint = 0;
+    
+    setDefaultCommand(run(()->{
+      
+      // System.out.println(limelightName+ ": " + selectedPole);
+      // System.out.println("y: " + measuments[0]);
+      // System.out.println("rot: "+ measuments[4]);
     }));
   }
-
-  public enum Field {
-    redAlliance(redAllianceAprilTagIDs),
-    blueAlliance(blueAllianceAprilTagIDs),
-    shop(shopAllianceAprilTagIDs);
-
-    public final List<Integer> tagIDs;
-    Field(List<Integer> IDs) {
-      this.tagIDs = IDs;
+  public enum reefPipes{
+    left(-0.17), //1.25
+    center(0),
+    right(0.17);
+      public final double horizontalOffset;
+      reefPipes(double horizontalOffset){
+        this.horizontalOffset = horizontalOffset;
+      }
+  }
+  public Command selectPoleCommand(reefPipes pole){
+    return runOnce(()->{
+      selectedPole = pole;
+      ySetpoint = selectedPole.horizontalOffset;
+      System.out.println("pole: "+pole);
+      System.err.println("setpoint: "+pole.horizontalOffset);
+    });
+  }
+  public void updateMeasurments(){
+    measuments = LimelightHelper.getBotPose_TargetSpace(limelightName);
+    //[tx, ty, tz, pitch, yaw, roll]
+  }
+  public double getOutputX(){
+    updateMeasurments();
+    double output = xPidController.calculate(measuments[2], xSetpoint);
+    if (output > maxSpeed){
+      output = maxSpeed;
     }
-  }
-  public enum ReefAlignment {
-    right(-20.43),
-    left(10.2),
-    center(0);
-
-    public final double alignment;
-    ReefAlignment(double align) {
-      this.alignment = align;
+    if (output < -maxSpeed){
+      output = -maxSpeed;
     }
-  }
-
-  public double getHorizontalOffset(){
-    double horizontalOffset = LimelightHelper.getTX("limelight");
-    return horizontalOffset -alignment.alignment; //returns degrees; 31 to -31 (right is positive)
-                              
-  }
-  public double getVerticalOffset(){
-    double verticalOffset = LimelightHelper.getTY("limelight");
-    return verticalOffset - 9.41;
-  }
-
-  public double getStrafeOutput(){
-    double output = getHorizontalOffset() / 15;
+    System.out.println("x: " + output);
     return output;
   }
-
-  public double getRangeOutput(){
-    double output = getVerticalOffset() / 15;
-    //System.out.println(output);
+  public double getOutputY(){
+    updateMeasurments();
+    double output = -yPidController.calculate(measuments[0], ySetpoint);
+    if (output > maxSpeed){
+      output = maxSpeed;
+    }
+    if (output < -maxSpeed){
+      output = -maxSpeed;
+    }
+    System.out.println("y: " + output);
     return output;
   }
-
-  public double getAprilTagIDIndex(){
-    List<Integer> IDs = selectedField.tagIDs;
-    RawFiducial[] fiducials = LimelightHelper.getRawFiducials("limelight");
-    for (RawFiducial fiducial : fiducials){
-      id = fiducial.id;
-    }
-    return IDs.indexOf(id);
+  public double getOutputRot(){
+    updateMeasurments();
+    double output = rotPidController.calculate(measuments[4], rotSetpoint);
+    System.out.println("rot: " + output);
+    return output;
   }
-
-  public double getRotationOutput(){
-    System.out.println("field: " + selectedField);
-    System.out.println("tag ID: " + id);
-    System.out.println("tag ID index: " + getAprilTagIDIndex());
-    double toRotate = 0;
-    if(getAprilTagIDIndex() == 0){
-      toRotate = -90;
-    }
-    if(getAprilTagIDIndex() == 1){
-      toRotate = -150;
-    }
-    if(getAprilTagIDIndex() == 2){
-      toRotate = 150;
-    }
-    if(getAprilTagIDIndex() == 3){
-      toRotate = 90; //180
-    }
-    if(getAprilTagIDIndex() == 4){
-      toRotate = 30; 
-    }
-    if(getAprilTagIDIndex() == 5){
-      toRotate = -30;
-    }
-    System.out.println("angle: " + toRotate);
-    
-    return toRotate * Math.PI / 180;
+  public Command prints(){
+    return runOnce(()->{
+      updateMeasurments();
+      System.out.println(limelightName);
+      System.out.println("X: " + measuments[2]);
+      System.out.println("Y: " + measuments[0]);
+      System.out.println("Rot: " + measuments[4]);
+    });
   }
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
   }
 }

@@ -7,13 +7,31 @@
         {
           "type": "named",
           "data": {
-            "name": "Coral Arm Out"
+            "name": "Reset Gyro"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.01
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Middle Spin"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "Coral Arm Score"
+            "name": "L4 Preset"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "1 Piece Part 2"
           }
         },
         {
@@ -23,15 +41,15 @@
           }
         },
         {
-          "type": "named",
+          "type": "wait",
           "data": {
-            "name": "Coral Arm Out"
+            "waitTime": 0.4
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "Coral Arm Default"
+            "name": "End Shoot L4"
           }
         }
       ]

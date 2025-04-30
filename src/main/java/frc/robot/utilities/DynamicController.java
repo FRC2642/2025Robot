@@ -64,8 +64,8 @@ public class DynamicController {
      * @throws IllegalArgumentException if percentModifier <= 0 or >= 1.
      */
     public void setModifiers(int maxIteratons, double percentModifier) {
-        if (maxIteratons <= 1) throw new IllegalArgumentException();
-        if (percentModifier <= 0 || percentModifier >= 1) throw new IllegalArgumentException();
+        if (maxIteratons <= 1) throw new IllegalArgumentException(String.format("InvalidmaxIterations: %d", maxIteratons));
+        if (percentModifier <= 0 || percentModifier >= 1) throw new IllegalArgumentException(String.format("Invalid percentModifier: %.2f", percentModifier));
 
         this.listMax = maxIteratons;
         this.modifier = percentModifier;
@@ -110,5 +110,9 @@ public class DynamicController {
         output *= prevOutputAvg; // The average is essentially a percent since power ranges from (abs) 0 to 1 so multiplying reduces power and creates acceleration
 
         return output;
+    }
+
+    public static double avg(double input1, double input2){
+        return (input1 + input2)/2;
     }
 }

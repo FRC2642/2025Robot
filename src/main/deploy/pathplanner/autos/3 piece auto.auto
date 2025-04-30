@@ -7,49 +7,25 @@
         {
           "type": "path",
           "data": {
-            "pathName": "1 Piece Part 1"
+            "pathName": "3p part 1"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "Coral Arm Out"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.2
+            "name": "align"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "Elevator L4"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.2
+            "name": "L4 Preset"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "Coral Arm Score"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "1 Piece Part 2"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.3
+            "name": "Foward"
           }
         },
         {
@@ -61,7 +37,7 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 0.4
+            "waitTime": 1.0
           }
         },
         {
@@ -71,21 +47,15 @@
           }
         },
         {
-          "type": "wait",
-          "data": {
-            "waitTime": 1.0
-          }
-        },
-        {
           "type": "path",
           "data": {
-            "pathName": "1 Piece Part 3"
+            "pathName": "3p part 2"
           }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": null,
+  "folder": "3 piece",
   "choreoAuto": false
 }

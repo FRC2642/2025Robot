@@ -16,7 +16,7 @@ public class SwerveModifications {
   public boolean turnDebug = SwerveModificationConstants.TURN_DEBUG;
   public double rotationOffset;
 
-  public DynamicController rotationController = new DynamicController(20, .033333333333333333, true);
+  public DynamicController rotationController;
   public double movementPercentModifier = SwerveModificationConstants.MOVEMENT_PERCENT_MODIFIER;
 
   private CommandSwerveDrivetrain drivetrain;
@@ -27,6 +27,8 @@ public class SwerveModifications {
   public SwerveModifications(CommandSwerveDrivetrain drivetrainIN, XboxController controller) { // In the future, include a way to input an offset to prevent odd orientating after running an auto
     this.drivetrain = drivetrainIN;
     this.control = controller;
+
+    this.rotationController = new DynamicController(20, .033333333333333333, true);
     this.rotationOffset = this.getRotationOffset();
 
     if (turnDebug) {
@@ -54,7 +56,7 @@ public class SwerveModifications {
     if (currentAngle > 180) currentAngle -= 360;
     if (absDiff(angle, currentAngle) > 180) { if (angle < 0) angle += 360; else if (angle > 0) angle -= 360; }
 
-    if (absDiff(angle, currentAngle) > 180) System.out.println("WARNING: HIGH CALCULATED ANGLE");
+    //if (absDiff(angle, currentAngle) > 180) System.out.println("WARNING: HIGH CALCULATED ANGLE");
 
     double outputPower = rotationController.calculateOutput(currentAngle, angle);
 

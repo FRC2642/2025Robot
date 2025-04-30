@@ -1,9 +1,16 @@
 {
-  "robotWidth": 0.9017,
+  "robotWidth": 0.902,
   "robotLength": 0.902,
   "holonomicMode": true,
-  "pathFolders": [],
-  "autoFolders": [],
+  "pathFolders": [
+    "1 Piece Middle",
+    "Testing"
+  
+    "3 Piece"
+  ],
+  "autoFolders": [
+    "3 piece"
+  ],
   "defaultMaxVel": 3.0,
   "defaultMaxAccel": 3.0,
   "defaultMaxAngVel": 540.0,
