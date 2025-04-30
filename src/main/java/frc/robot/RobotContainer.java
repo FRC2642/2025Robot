@@ -95,7 +95,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("Coral Arm Score", coralArmSubsystem.armScoreAutoCommand());
         NamedCommands.registerCommand("Shoot L4", coralArmSubsystem.shootL4AutoCommand());
         NamedCommands.registerCommand("Elevator Down", elevatorSubsystem.elevatorDownAutoCommand());
-        NamedCommands.registerCommand("Coral Arm Default", coralArmSubsystem.armInAutoCommand());
+        NamedCommands.registerCommand("Coral Arm Default", coralArmSubsystem.armInAutoCommand());  
         /* PathPlanner */
         autoChooser = AutoBuilder.buildAutoChooser();
         autoChooser.setDefaultOption("NO AUTO SELECTED", new WaitCommand(15));
