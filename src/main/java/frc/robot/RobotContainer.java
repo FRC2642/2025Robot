@@ -97,6 +97,17 @@ public class RobotContainer {
     public Trigger tempStateChangeTrigger = new Trigger(()-> tempState != perciseDriving);
 
     public RobotContainer() {
+        drivetrain.seedFieldCentric();
+        elevatorSubsystem.resetEncoder();
+        configureBindings();
+        NamedCommands.registerCommand("Coral Arm Out", coralArmSubsystem.armOutAutoCommand());
+        NamedCommands.registerCommand("Elevator L4", elevatorSubsystem.elevatorL4AutoCommand());
+        NamedCommands.registerCommand("Coral Arm Score", coralArmSubsystem.armScoreAutoCommand());
+        NamedCommands.registerCommand("Shoot L4", coralArmSubsystem.shootL4AutoCommand());
+        NamedCommands.registerCommand("Elevator Down", elevatorSubsystem.elevatorDownAutoCommand());
+        NamedCommands.registerCommand("Coral Arm Default", coralArmSubsystem.armInAutoCommand());  
+        /* PathPlanner */
+        
         { //declare commands            
         NamedCommands.registerCommand("Coral Arm Out", coralArmSubsystem.armOutAutoCommand()); //rotate Coral Arm Out
         NamedCommands.registerCommand("Elevator L4", elevatorSubsystem.elevatorL4AutoCommand()); //lift elevator to L4
@@ -105,6 +116,9 @@ public class RobotContainer {
         NamedCommands.registerCommand("Elevator Down", elevatorSubsystem.elevatorDownAutoCommand()); //lower elevator to L0
         NamedCommands.registerCommand("Coral Arm Default", coralArmSubsystem.armInAutoCommand()); //rotate Coral Arm in
         NamedCommands.registerCommand("Reset Gyro", drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+        NamedCommands.registerCommand("L4 Preset", coralArmSubsystem.rotateArmCommand(ArmRotation.Safe)
+                                                        .andThen(elevatorSubsystem.superFancyElevatorCommand(ElevatorPosition.L4).onlyWhile(coralArmSubsystem.IsSafeFromElevator))
+                                                        .andThen(coralArmSubsystem.rotateArmCommand(ArmRotation.ScoreL4)));
         //NamedCommands.registerCommand("Autonomous Vision", autonomousVision());
         NamedCommands.registerCommand("align", visionAlignAutoCommand(reefPipes.right));
         NamedCommands.registerCommand("Foward", fowardAutoCommand());
@@ -124,6 +138,7 @@ public class RobotContainer {
         autoChooser.addOption("1 Piece", new PathPlannerAuto("1 Piece Auto"));
         autoChooser.addOption("Move", new PathPlannerAuto("Move Auto"));
         autoChooser.addOption("3 piece", new PathPlannerAuto("3 piece auto"));
+        autoChooser.addOption("Testing Better 1 piece", new PathPlannerAuto("Test Auto"));
         // To add an auto to the autoChooser use addppAutoOption()
         }
         { //controlsChooser options 
@@ -140,7 +155,6 @@ public class RobotContainer {
         System.out.println("Control Scheme: " + controlScheme);
         if(controlScheme == ControlScheme.debug){
         //Pure Manuals
-        controller1.button(8).onTrue(leftLimelightSubsystem.prints().andThen(rightLimelightSubsystem.prints()));
             //ELEVATOR
             // controller1.leftTrigger().whileTrue(elevatorSubsystem.manualElevatorUpCommand(controller1));
             // controller1.rightTrigger().whileTrue(elevatorSubsystem.manualElevatorDownCommand(controller1));
@@ -172,7 +186,7 @@ public class RobotContainer {
                 .until(coralArmSubsystem.hasCoral).andThen(coralArmSubsystem.shootCommand(ShootSpeed.out)
                 .until(coralArmSubsystem.hasCoral.negate())).andThen(coralArmSubsystem.shootCommand(ShootSpeed.in)
                 .until(coralArmSubsystem.hasCoral))); 
-            */
+            */ 
             buttonBoard2.button(6).onTrue(coralArmSubsystem.rotateArmCommand(ArmRotation.Default));
             buttonBoard2.button(4).onTrue(coralArmSubsystem.rotateArmCommand(ArmRotation.ScoreL4));
             buttonBoard2.button(12).onTrue(coralArmSubsystem.rotateArmCommand(ArmRotation.Safe));
@@ -240,19 +254,19 @@ public class RobotContainer {
             //ELEVATOR
             buttonBoard1.button(8).onTrue(elevatorSubsystem.resetEncoder());
             //PRINTS
+            controller1.button(8).onTrue(leftLimelightSubsystem.prints().andThen(rightLimelightSubsystem.prints()));
         }
 
         if(controlScheme==ControlScheme.competition){
         
-        
+            controller1.button(8).onTrue(leftLimelightSubsystem.prints().andThen(rightLimelightSubsystem.prints()));
+
         //CORAL ARM
             controller2.leftBumper().whileTrue(coralArmSubsystem.shootOutCommand());
             controller2.rightBumper().whileTrue(coralArmSubsystem.shootInCommand());
 
             controller2.b().whileTrue(coralArmSubsystem.manualRotateCommand(ArmRotation.out));
             controller2.a().whileTrue(coralArmSubsystem.manualRotateCommand(ArmRotation.in));
-
-            buttonBoard1.button(4).onTrue(coralArmSubsystem.rotateArmCommand(ArmRotation.Safe));
             
             //algea intake toggle
             controller1.rightBumper().onTrue(coralArmSubsystem.toggleAlgaeIntake());
