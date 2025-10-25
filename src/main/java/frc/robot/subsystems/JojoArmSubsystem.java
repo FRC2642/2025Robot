@@ -161,6 +161,16 @@ public class JojoArmSubsystem extends SubsystemBase {
 
 
 
+  //USEING FOR SWERVE DONT QUESTION IT
+  public boolean precisionDriving = false;
+  
+  public Command precisionCommand(){
+    return runOnce(()->{
+      precisionDriving = !precisionDriving;
+      System.out.println("precision driving state: " + precisionDriving);
+    });
+  }
+  
   @Override
   public void periodic() {
   }

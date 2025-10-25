@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -44,7 +45,8 @@ import frc.robot.utilities.SwerveModifications;
 public class RobotContainer {
     
     private PathPlannerAuto auto;
-    private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
+    private double PermMaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
+    private double MaxSpeed = PermMaxSpeed; // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond) /2;
     
     private double Speed = MaxSpeed / 2;
@@ -70,7 +72,7 @@ public class RobotContainer {
         private final ClimberSubsystem climberSubsystem = new ClimberSubsystem();
     //Swerve drive commands
         private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric() //drive
-                .withDeadband(Speed * 0.1).withRotationalDeadband(AngularRate * 0.1)
+                .withDeadband(0.15).withRotationalDeadband(0.15)
                 .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
         private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake(); // brake
         private final SwerveRequest.RobotCentric robotDrive = new SwerveRequest.RobotCentric()
@@ -86,9 +88,13 @@ public class RobotContainer {
         debug,
         competition;
     }
+
+    public boolean perciseDriving = false;
+    public boolean tempState = perciseDriving;
     public ControlScheme controlScheme = ControlScheme.competition;
     private final SendableChooser<ControlScheme> controlsChooser= new SendableChooser<>();
     
+    public Trigger tempStateChangeTrigger = new Trigger(()-> tempState != perciseDriving);
 
     public RobotContainer() {
         { //declare commands            
@@ -120,9 +126,9 @@ public class RobotContainer {
         autoChooser.addOption("3 piece", new PathPlannerAuto("3 piece auto"));
         // To add an auto to the autoChooser use addppAutoOption()
         }
-        { //controlsChooser options
-        controlsChooser.addOption("Competition Controls", ControlScheme.competition);
-        controlsChooser.setDefaultOption("Debug controls !!ONLY USE AT THE SHOP!!", ControlScheme.debug);
+        { //controlsChooser options 
+        controlsChooser.addOption("Debug controls !!ONLY USE AT THE SHOP!!", ControlScheme.debug);
+        controlsChooser.setDefaultOption("Competition Controls", ControlScheme.competition);
         }
 
         SmartDashboard.putData("Auto Chooser", autoChooser);
@@ -245,13 +251,15 @@ public class RobotContainer {
 
             controller2.b().whileTrue(coralArmSubsystem.manualRotateCommand(ArmRotation.out));
             controller2.a().whileTrue(coralArmSubsystem.manualRotateCommand(ArmRotation.in));
+
+            buttonBoard1.button(4).onTrue(coralArmSubsystem.rotateArmCommand(ArmRotation.Safe));
             
             //algea intake toggle
             controller1.rightBumper().onTrue(coralArmSubsystem.toggleAlgaeIntake());
             //coral intake with sensor
             controller1.leftBumper().whileTrue(coralArmSubsystem.intakeCommand());
         
-
+        
         //ELEVATOR
         buttonBoard1.button(7).onTrue(coralArmSubsystem.rotateArmCommand(ArmRotation.Safe)
             .andThen(elevatorSubsystem.superFancyElevatorCommand(ElevatorPosition.L0).onlyWhile(coralArmSubsystem.IsSafeFromElevator))
@@ -271,19 +279,26 @@ public class RobotContainer {
         
         controller2.povUp().whileTrue(elevatorSubsystem.manualElevatorUpCommand(controller2));
         controller2.povDown().whileTrue(elevatorSubsystem.manualElevatorDownCommand(controller2));
+        buttonBoard1.button(8).onTrue(elevatorSubsystem.resetEncoder());
         
         //VISION
-        /*
+
+
+        
             //set reef alignment left
-            controller1.povLeft().onTrue(new RunCommand(() -> limeLightSubsystem.alignment = ReefAlignment.left)
-                .until(controller1.povUp().or(controller1.povRight())));
+            buttonBoard2.button(1).onTrue(new RunCommand(() -> {
+                leftLimelightSubsystem.selectPoleCommand(reefPipes.left);
+                rightLimelightSubsystem.selectPoleCommand(reefPipes.left);
+                System.out.println("left");})
+                .until(buttonBoard2.button(2)));
             //set reef alignment right
-            controller1.povRight().onTrue(new RunCommand(() -> limeLightSubsystem.alignment = ReefAlignment.right)
-                .until(controller1.povLeft().or(controller1.povUp())));
+            buttonBoard2.button(2).onTrue(new RunCommand(() -> {
+                leftLimelightSubsystem.selectPoleCommand(reefPipes.right);
+                rightLimelightSubsystem.selectPoleCommand(reefPipes.right);
+                System.out.println("right");})
+                .until(buttonBoard2.button(1)));
             //set reef alignment center
-            controller1.povUp().onTrue(new RunCommand(() -> limeLightSubsystem.alignment = ReefAlignment.center)
-                .until(controller1.povLeft().or(controller1.povRight())));
-            
+        /*   
             //rotate to align with the reef
             controller1.x().whileTrue(drivetrain.applyRequest(() -> 
                 drive.withVelocityX(0)
@@ -299,13 +314,23 @@ public class RobotContainer {
                 .withRotationalRate(0)));
         */
         //DRIVE
+        controller1.x().onTrue(jojoArmSubsystem.precisionCommand());
+
         drivetrain.setDefaultCommand(
-            drivetrain.applyRequest(() ->
+                 // Drivetrain will execute this command periodically
+                drivetrain.applyRequest(() ->
+                drive.withVelocityX(-controller1.getLeftY() * MaxSpeed * ((controller1.getLeftTriggerAxis() > 0.5) ? controller1.getLeftTriggerAxis(): 0.5) / ((jojoArmSubsystem.precisionDriving == true) ? 3:1)) // Drive forward with negative Y (forward)
+                    .withVelocityY(-controller1.getLeftX() * MaxSpeed * ((controller1.getLeftTriggerAxis() > 0.5) ? controller1.getLeftTriggerAxis(): 0.5) / ((jojoArmSubsystem.precisionDriving == true) ? 3:1)) // Drive left with negative X (left)
+                    .withRotationalRate(-controller1.getRightX() * MaxAngularRate + ((-controller1.getRightX() > 0.2) ? 1: 0) + ((-controller1.getRightX() < -0.2) ? -1: 0) / ((jojoArmSubsystem.precisionDriving == true) ? 2:1))) // Drive counterclockwise with negative X (left)
+                    //.withRotationalRate(swerveModifications.turingCalculation(controller1.getRightX(), controller1.getRightY()))) // Drive counterclockwise with negative X (left)
+
+            /*drivetrain.applyRequest(() ->
                 drive.withVelocityX(-SwerveModifications.modifyAxialInput(controller1.getLeftY(), controller1.getLeftTriggerAxis(), swerveModifications.movementPercentModifier) * Speed) // Drive forward with negative Y (forward)
                     .withVelocityY(-SwerveModifications.modifyAxialInput(controller1.getLeftX(), controller1.getLeftTriggerAxis(), swerveModifications.movementPercentModifier) * Speed) // Drive left with negative X (left)
                     .withRotationalRate(-swerveModifications.recieveTurnRate(controller1.getRightX(), controller1.getRightY()) * AngularRate)
-            )
+            ) */
         );
+
 
         //GYRO
         controller1.button(7).onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
@@ -321,7 +346,6 @@ public class RobotContainer {
         drivetrain.registerTelemetry(logger::telemeterize);
     }
 }
-    
 
     public Command visionAlignAutoCommand(reefPipes pipe){
         return new RunCommand(()->{

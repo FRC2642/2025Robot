@@ -118,13 +118,13 @@ public class ElevatorSubsystem extends SubsystemBase {
     }).andThen(new RunCommand(()->{
         rightElevatorMotor.set(getMotorOutput() * ((Math.abs(startPosition - getEncoderValue()) + 20) / 500));
         leftElevatorMotor.set(-getMotorOutput() * ((Math.abs(startPosition - getEncoderValue()) + 20) / 500));
-        System.out.println("ramp up power output: " + getMotorOutput() * ((Math.abs(startPosition - getEncoderValue()) + 20) / 500));
+        //System.out.println("ramp up power output: " + getMotorOutput() * ((Math.abs(startPosition - getEncoderValue()) + 20) / 500));
 
     }).until(startingTrigger)).andThen(new RunCommand(()->{
         rightElevatorMotor.set(getMotorOutput()); 
         leftElevatorMotor.set(-getMotorOutput());
-        System.out.println("elevator moving with power output: " + getMotorOutput());
-        System.out.println("currectly at: " + getEncoderValue());
+        //System.out.println("elevator moving with power output: " + getMotorOutput());
+        //System.out.println("currectly at: " + getEncoderValue());
 
     })).until(elevatorNearTrigger).andThen(new RunCommand(()->{
         if (getEncoderValue() < elevatorPosition.aim){
@@ -138,7 +138,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         }
 
     })).until(elevatorPositionReached).andThen(runOnce(()->{
-        System.out.println("end");
+        //System.out.println("end");
         rightElevatorMotor  .set(0);
         leftElevatorMotor.set(0);
         
@@ -151,7 +151,7 @@ public class ElevatorSubsystem extends SubsystemBase {
       if (!hitTop.getAsBoolean()){
         rightElevatorMotor.set(0.25);
         leftElevatorMotor.set(-0.25);
-        System.out.println("elevator encoder"+ getEncoderValue());
+        //System.out.println("elevator encoder"+ getEncoderValue());
       }
       
     })

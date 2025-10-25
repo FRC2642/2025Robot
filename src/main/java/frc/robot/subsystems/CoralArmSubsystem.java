@@ -32,6 +32,8 @@ public class CoralArmSubsystem extends SubsystemBase {
   public ShootSpeed shootSpeed = ShootSpeed.stop;
   public boolean intakeToggle = false;
 
+  public boolean manualOveride = false;
+
   public int georgiePooGoofCounter = 0;
 
   public Trigger RotationStateReached = new Trigger(() -> Math.abs(getEncoderValue() - armRot.rot) < 0.01);
@@ -46,22 +48,14 @@ public class CoralArmSubsystem extends SubsystemBase {
     //rotateMotor.setNeutralMode(NeutralModeValue.Brake); 
     shootMotor.setNeutralMode(NeutralModeValue.Brake);
     setDefaultCommand(run(() -> {
-      rotateMotor.set(0);
-      /*
-      if(getEncoderValue() < 0.086){
+      shootMotor.set(0);
+      if (getEncoderValue() < 0.45 || manualOveride){
         rotateMotor.set(0);
-      }else{
-        rotateMotor.set(getrotateOutput());
+        //System.out.println(getEncoderValue());
       }
-        */
-      if (intakeToggle == false){
-        shootSpeed = ShootSpeed.stop;
-        shootMotor.set(0);
-      }
-      //System.out.println(hasCoral.getAsBoolean());
-
-      //System.out.println("coral arm Encoder: " + getEncoderValue());
-      
+      else{
+        rotateMotor.set(getrotateOutput() * 6);
+      }      
     })
     .withName("Idle"));
   }
@@ -69,7 +63,7 @@ public class CoralArmSubsystem extends SubsystemBase {
   public enum ArmRotation{
     out(1),
     in(-1),
-    ScoreL4(0.59),
+    ScoreL4(0.54),
     ScoreLowerReef(0.90),
     Default(0.40),
     Bottom(0.90),
@@ -134,6 +128,7 @@ public class CoralArmSubsystem extends SubsystemBase {
   }
 
   public Command manualRotateCommand(ArmRotation position){
+    manualOveride = true;
     double output = position.rot / 5;
     return run(()->{rotateMotor.set(output);});
   }
@@ -148,18 +143,19 @@ public class CoralArmSubsystem extends SubsystemBase {
       shootMotor.set(0.4);
     }).andThen(runOnce(()->{shootMotor.set(0);
       georgiePooGoofCounter =+ 1;
-      System.out.println("GEORGE ISTG. ur using the WRONG BUMPER.");
-      System.out.println("Georgie Poo goof counter: "+ georgiePooGoofCounter);
+      //System.out.println("GEORGE ISTG. ur using the WRONG BUMPER.");
+      //System.out.println("Georgie Poo goof counter: "+ georgiePooGoofCounter);
     })
     );
   }
   public Command rotateArmCommand(ArmRotation rotationState){
     return new RunCommand(()->{
+      manualOveride = false;
       armRot = rotationState;
-      System.out.println("rotating");
-      System.out.println("with power output: " + getrotateOutput() * 6);
+      //System.out.println("rotating");
+      //System.out.println("with power output: " + getrotateOutput() * 6);
       rotateMotor.set(getrotateOutput() * 6);
-      System.out.println("rotating");
+      //System.out.println("rotating");
       
     }).until(nearRotationState).andThen(new RunCommand(()->{
       if(getEncoderValue() < armRot.rot){

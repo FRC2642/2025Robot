@@ -5,14 +5,17 @@
 package frc.robot.utilities;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.SwerveModificationConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 /**
  * Enlists rotational improvements to CTRE Swerve.
  */
-public class SwerveModifications {
+public class SwerveModifications extends SubsystemBase{
   public boolean turnDebug = SwerveModificationConstants.TURN_DEBUG;
   public double rotationOffset;
 
@@ -34,6 +37,15 @@ public class SwerveModifications {
     if (turnDebug) {
       
     }
+  }
+
+  public double turingCalculation(double x, double y){
+      PIDController turnPID = new PIDController(0.01,0.2,0);
+      double angle = Math.atan2(y, x);
+      angle *= 180/Math.PI;
+      double output = turnPID.calculate(drivetrain.getPigeon2().getRotation2d().getDegrees(), angle);
+    return output;
+
   }
 
   public double recieveTurnRate(double xAim, double yAim) {
