@@ -89,6 +89,36 @@ public class LimeLightSubsystem extends SubsystemBase {
     System.out.println("rot: " + output);
     return output;
   }
+   public double getClimbOutputX(){
+    updateMeasurments();
+    double output = xPidController.calculate(measuments[2], xSetpoint);
+    if (output > maxSpeed){
+      output = maxSpeed;
+    }
+    if (output < -maxSpeed){
+      output = -maxSpeed;
+    }
+    System.out.println("x: " + output);
+    return output;
+  }
+  public double getClimbOutputY(){
+    updateMeasurments();
+    double output = -yPidController.calculate(measuments[0], ySetpoint);
+    if (output > maxSpeed){
+      output = maxSpeed;
+    }
+    if (output < -maxSpeed){
+      output = -maxSpeed;
+    }
+    System.out.println("y: " + output);
+    return output;
+  }
+  public double getOutputRot(){
+    updateMeasurments();
+    double output = rotPidController.calculate(measuments[4], rotSetpoint);
+    System.out.println("rot: " + output);
+    return output;
+  }
   public Command prints(){
     return runOnce(()->{
       updateMeasurments();
